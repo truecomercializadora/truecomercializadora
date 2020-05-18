@@ -1,0 +1,26 @@
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+.eggs*
+
+# Cache
+.cache
+
+# Notebooks
+.jupyter*
+
+# Cache
+/*.ipynb_checkpoints/
+truecomercializadora/__pycache__
+truecomercializadora/tests/__pycache__
+
+#VS CODE
+.vscode
+
+#pyenv
+.python-version

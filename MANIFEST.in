@@ -1,0 +1,2 @@
+include truecomercializadora/data/patamares.csv
+include truecomercializadora/credentials.json
