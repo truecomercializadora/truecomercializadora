@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='truecomercializadora',
-    version='0.1.15',
+    version='0.1.16',
     description='A comprehensive library to centralize the main functions used across applications and services',
     url='https://github.com/truecomercializadora/truecomercializadora.git',
     author='Ettore Aquino',
