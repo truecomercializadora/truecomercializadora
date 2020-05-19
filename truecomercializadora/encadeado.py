@@ -7,7 +7,7 @@ import os
 import zipfile as zp
 
 
-def get_decks_estudo(estudo_zip):
+def get_decks_estudo(estudo_zip: zp.ZipFile) -> dict:
 	"""
 	Um estudo pode ser composto por um ou mais decks. Estudos prospectivos sao
 	em geral, compostos por pares mensais de decks. Um NEWAVE outro DECOMP. A
@@ -16,8 +16,8 @@ def get_decks_estudo(estudo_zip):
 	"""
 
 	if type(estudo_zip) != zp.ZipFile:
-		raise Exception("'get_estudo_files' should be a valid zipfile.ZipFile \
-		Class. Input has type {}".format(type(estudo_zip)))
+		raise Exception("'get_estudo_files' should be a valid zipfile.ZipFile Class. "
+                    "Input has type {}".format(type(estudo_zip)))
 
 	return {
 		'decomp': list({os.path.split(file)[0] for file in estudo_zip.namelist()
@@ -26,7 +26,7 @@ def get_decks_estudo(estudo_zip):
 						if 'NW' in file})
 	}
 
-def get_decks_por_data(estudo_zip):
+def get_decks_por_data(estudo_zip: zp.ZipFile) -> dict:
     """
     Um estudo pode ser composto por um ou mais decks. Estudos prospectivos sao
       em geral, compostos por pares mensais de decks. Um NEWAVE outro DECOMP. A
@@ -35,8 +35,8 @@ def get_decks_por_data(estudo_zip):
     """
     
     if type(estudo_zip) != zp.ZipFile:
-        raise Exception("'get_decks_por_data' should be a valid zipfile.ZipFile \
-        Class. Input has type {}".format(type(estudo_zip)))
+        raise Exception("'get_decks_por_data' should be a valid zipfile.ZipFile "
+                        "Class. Input has type {}".format(type(estudo_zip)))
 
     datas = list(set([os.path.split(file)[0].split('-')[0][2:] for file in estudo_zip.namelist()]))
     D = {}
@@ -50,7 +50,7 @@ def get_decks_por_data(estudo_zip):
             D[data].update({"DC": list(deck_dc)[0]})
     return D
 
-def get_estudo_files(estudo_zip):
+def get_estudo_files(estudo_zip: zp.ZipFile) -> dict:
   """
   E muito comum que seja necessario alterar ou acessar multiplos arquivos do
     mesmo tipo dentro de estudos, por exemplo para atualizar todos os arquivos
@@ -61,11 +61,11 @@ def get_estudo_files(estudo_zip):
   """
   
   if type(estudo_zip) != zp.ZipFile:
-    raise Exception("'get_estudo_files' should be a valid zipfile.ZipFile \
-    Class. Input has type {}".format(type(estudo_zip)))
+    raise Exception("'get_estudo_files' should be a valid zipfile.ZipFile Class. "
+                    "Input has type {}".format(type(estudo_zip)))
   
-  # Inicializando um mapa de decks.     
   D = {os.path.split(file_path)[0]: {} for file_path in estudo_zip.namelist()}
+  # Inicializando um mapa de decks.     
   
   # Atualizando o mapeamento dos arquivos
   for file_path in estudo_zip.namelist():
