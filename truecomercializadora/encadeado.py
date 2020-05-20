@@ -73,5 +73,5 @@ def get_estudo_files(estudo_zip: zp.ZipFile) -> dict:
     file_name = file_content[1].split('.')[0]
     deck_name = file_content[0]
 
-    D[deck_name].update({file_name: file_path})
+    D[deck_name].update({file_name.lower(): file_path})
   return D
