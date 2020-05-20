@@ -1,12 +1,13 @@
+import io
+import json
 import numpy as np
+import pandas as pd
 
 from . import utils_files
 
 def get_data(pmo_str):
   """
-  # ========================================================================================= #
-  #  Retorna uma string %Y-%m-%d representando a data do deck em estudo a partir do pmo.dat   #
-  # ========================================================================================= #
+  Retorna uma string %Y-%m-%d representando a data do deck em estudo a partir do pmo.dat
   """
   if type(pmo_str) != str:
     raise Exception("'get_data_deck' can only receive a pmo.dat string.")
@@ -44,9 +45,7 @@ def get_usina_modif(modif_str: str, id_usina: int) -> str:
 
 def get_enas(pmo_str):
   """
-  # ========================================================================================= #
-  #  Retorna um dicionario contendo as enas (mes a mes) a partir da string de um pmo.dat      #
-  # ========================================================================================= #
+  Retorna um dicionario contendo as enas (mes a mes) a partir da string de um pmo.dat
   """
   if type(pmo_str) != str:
     raise Exception("'get_enas' can only receive a pmo.dat string.")
@@ -66,9 +65,7 @@ def get_enas(pmo_str):
 
 def get_enas_submercados(pmo_str):
   """
-  # ========================================================================================= #
-  #  Retorna um dicionario contendo as enas (mes a mes) a partir da string de um pmo.dat      #
-  # ========================================================================================= #
+  Retorna um dicionario contendo as enas (mes a mes) a partir da string de um pmo.dat
   """
   if type(pmo_str) != str:
     raise Exception("'get_enas_submercados' can only receive a pmo.dat string.")
@@ -87,11 +84,9 @@ def get_enas_submercados(pmo_str):
 
 def get_enas_percentuais_fechamento(pmo_str, mlts):
   """
-  # ========================================================================================= #
-  #  Retorna um dicionario contendo as enas de fechamento (em percentual da mlt), a partir    #
-  #   do pmo.dat (em string) e do dicionário contendo as mlts. O dicionario de mlts por sub-  #
-  #   mercado deve ser obtido atraves da funcao 'get_mlts()', disponivel no modulo 'ons'      #
-  # ========================================================================================= #
+  Retorna um dicionario contendo as enas de fechamento (em percentual da mlt), a partir  
+   do pmo.dat (em string) e do dicionário contendo as mlts. O dicionario de mlts por sub-
+   mercado deve ser obtido atraves da funcao 'get_mlts()', disponivel no modulo 'ons'    
   """
   if type(pmo_str) != str:
     raise Exception("'get_enas_percentuais_fechamento' can only receive a pmo.dat string.")
@@ -115,11 +110,9 @@ def get_enas_percentuais_fechamento(pmo_str, mlts):
 
 def get_ear_inicial(pmo_str):
   """
-  # ========================================================================================= #
-  #  Retorna um dicionario de dicionarios contendo as energias armazenadas iniciais de cada   #
-  #   subsistema. Cada dicionario contem a energia em MWmes, o percentual da Energia Armaze-  #
-  #   nada maxima e a Energia Maxima armezanavel do subsistema.                               #
-  # ========================================================================================= #
+  Retorna um dicionario de dicionarios contendo as energias armazenadas iniciais de cada 
+   subsistema. Cada dicionario contem a energia em MWmes, o percentual da Energia Armaze-
+   nada maxima e a Energia Maxima armezanavel do subsistema.                             
   """
   
   if type(pmo_str) != str:
@@ -150,11 +143,10 @@ def get_ear_inicial(pmo_str):
 
 def get_ear_inicial_percentual_por_submercado(pmo_str):
   """
-  # ========================================================================================= #
-  #  Retorna um dicionario contendo os percentuais (em relacao ao maximo) de Energia Armaze-  #
-  #   nada Inicial em cada submercado. O dicionario eh montado a partir do dicionario de dici-#
-  #   onarios obtido atraves da funcao 'get_ear_inicial' deste mesmo modulo.                  #
-  # ========================================================================================= #
+  Retorna um dicionario contendo os percentuais (em relacao ao maximo) de Energia
+   Armazenada Inicial em cada submercado. O dicionario eh montado a partir do
+   dicionario de dicionarios obtido atraves da funcao 'get_ear_inicial' deste
+   mesmo modulo.
   """
   
   if type(pmo_str) != str:
@@ -177,3 +169,26 @@ def get_ear_inicial_percentual_por_submercado(pmo_str):
     'NE': round((ear_inicial['NE']['mw_mes'])/ear_max_ne,3),
     'N': round((ear_inicial['N']['mw_mes'] + ear_inicial['BMONTE']['mw_mes'] + ear_inicial['MAN-AP']['mw_mes']) /ear_max_n,3)
   }
+
+def write_expt_file(expt_df: pd.DataFrame) -> bytes:
+	"""
+	Retorna os bytes correspondentes a um arquivo expt.dat, escrito a partir do
+	  dataframe de entrada.
+	"""
+	if type(expt_df) != pd.DataFrame:
+		raise Exception("'write_expt_file' can only receive a pandas DataFrame")
+
+	master_io = io.BytesIO()
+	master_io.write('NUM   TIPO   MODIF  MI ANOI MF ANOF\r\n'.encode('latin-1'))
+	master_io.write('XXXX XXXXX XXXXXXXX XX XXXX XX XXXX\r\n'.encode('latin-1'))
+	for line in json.loads(expt_df.reset_index().to_json(orient='records')):
+		master_io.write("{:>4d} {:>5} {:>8.2f} {:>2d} {:>4d} {:>2d} {:>4d}\r\n".format(
+			int(line['numeroUsina']),
+			line['tipoModificacao'],
+			line['novoValor'],
+			int(line['mesInicio']),
+			int(line['anoInicio']),
+			int(line['mesFim']),
+			int(line['anoFim'])
+		).encode())
+	return master_io.getvalue()
