@@ -73,13 +73,16 @@ def test_add_one_monthB():
 
     assert dt1 == dt_teste
 
+# =============================================================================#
+#    diff_month                                                                #
+# =============================================================================#
 def test_diff_monthA():
-    dt0 = datetime.date(2020,3,13)
-    dt1 = datetime.date(2020,4,13)
+    dt0 = datetime.date(2024,4,1)
+    dt1 = datetime.date(2023,11,1)
 
     dt_teste = utils_datetime.diff_month(dt0, dt1)
 
-    assert dt_teste == 1
+    assert dt_teste == 5
 
 def test_diff_monthB():
     dt0 = datetime.date(2020,4,13)

@@ -153,11 +153,4 @@ def diff_month(dt0: datetime.datetime, dt1: datetime.datetime) -> int:
         raise TypeError('Invalid input type for d1. Only datetime.date or date'
                         'datetime.datetime types are allowed')
 
-    if (dt0.year >= dt1.year) and (dt0.month >= dt1.month):
-        return (dt0.year - dt1.year) * 12 + dt0.month - dt1.month
-    elif (dt0.year >= dt1.year) and (dt0.month < dt1.month):
-        return (dt1.year - dt0.year) * 12 + dt1.month - dt0.month
-    elif (dt0.year < dt1.year):
-        return (dt1.year - dt0.year) * 12 + dt1.month - dt0.month
-    else:
-        return (dt0.year - dt1.year) * 12 + dt0.month - dt1.month
+    return abs((dt0.year - dt1.year) * 12 + dt0.month - dt1.month)
