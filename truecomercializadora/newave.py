@@ -215,6 +215,6 @@ def write_expt_file(expt_df: pd.DataFrame) -> bytes:
 			int(line['anoInicio']),
 			int(line['mesFim']),
 			int(line['anoFim'])
-		).encode())
+		).encode('latin-1'))
 	return master_io.getvalue()
 
