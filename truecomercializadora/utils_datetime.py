@@ -144,3 +144,20 @@ def get_br_abreviated_month(month_number):
         12: 'dez'
     }
     return switcher.get(month_number, '{} is not a valid month'.format(month_number))
+
+def diff_month(dt0: datetime.datetime, dt1: datetime.datetime) -> int:
+    if (type(dt0) != datetime.datetime) and (type(dt0) != datetime.date):
+        raise TypeError('Invalid input type for d1. Only datetime.date or date'
+                        'datetime.datetime types are allowed')
+    if (type(dt1) != datetime.datetime) and (type(dt1) != datetime.date):
+        raise TypeError('Invalid input type for d1. Only datetime.date or date'
+                        'datetime.datetime types are allowed')
+
+    if (dt0.year >= dt1.year) and (dt0.month >= dt1.month):
+        return (dt0.year - dt1.year) * 12 + dt0.month - dt1.month
+    elif (dt0.year >= dt1.year) and (dt0.month < dt1.month):
+        return (dt1.year - dt0.year) * 12 + dt1.month - dt0.month
+    elif (dt0.year < dt1.year):
+        return (dt1.year - dt0.year) * 12 + dt1.month - dt0.month
+    else:
+        return (dt0.year - dt1.year) * 12 + dt0.month - dt1.month

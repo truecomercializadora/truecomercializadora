@@ -73,6 +73,38 @@ def test_add_one_monthB():
 
     assert dt1 == dt_teste
 
+def test_diff_monthA():
+    dt0 = datetime.date(2020,3,13)
+    dt1 = datetime.date(2020,4,13)
+
+    dt_teste = utils_datetime.diff_month(dt0, dt1)
+
+    assert dt_teste == 1
+
+def test_diff_monthB():
+    dt0 = datetime.date(2020,4,13)
+    dt1 = datetime.date(2020,3,13)
+
+    dt_teste = utils_datetime.diff_month(dt0, dt1)
+
+    assert dt_teste == 1
+
+def test_diff_monthC():
+    dt0 = datetime.date(2020,3,13)
+    dt1 = datetime.date(2020,3,30)
+
+    dt_teste = utils_datetime.diff_month(dt0, dt1)
+
+    assert dt_teste == 0
+
+def test_diff_monthD():
+    dt0 = datetime.date(2020,3,13)
+    dt1 = datetime.date(2021,3,13)
+
+    dt_teste = utils_datetime.diff_month(dt0, dt1)
+
+    assert dt_teste == 12
+
 # ============================================================================================ #
 #    get_br_abreviated_month                                                                   #
 # ============================================================================================ #
