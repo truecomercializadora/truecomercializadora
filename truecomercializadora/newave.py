@@ -170,6 +170,31 @@ def get_ear_inicial_percentual_por_submercado(pmo_str):
     'N': round((ear_inicial['N']['mw_mes'] + ear_inicial['BMONTE']['mw_mes'] + ear_inicial['MAN-AP']['mw_mes']) /ear_max_n,3)
   }
 
+def get_expt_list(expt_str: str, ano_deck: int) -> list:
+	"""
+	Retorna uma lista de dicionarios representando cada uma das linhas do arquivo
+	  expt.dat
+	"""
+	if type(expt_str) != str:
+		raise TypeError("'get_expt_list' can only receive a expt.dat string.")
+
+	if ('NUM   TIPO   MODIF  MI ANOI MF ANOF' not in expt_str):
+		raise Exception("'get_expt_list' input str does not seem to represent a "
+	                    "expt.dat file. Verify the input content.")
+
+	if type(ano_deck) != int:
+		raise TypeError("'get_expt_list' can only receive an integer for 'ano_deck'")
+
+	return [{
+		'numeroUsina': line[:5].strip(),
+		'tipoModificacao': line[5:10].strip(),
+		'novoValor': round(float(line[11:19].strip()),2),
+		'mesInicio': int(line[20:22].strip()),
+		'anoInicio': int(line[23:27].strip()),
+		'mesFim': int(line[28:30].strip()) if line[28:30].strip() != '' else 12 ,
+		'anoFim': int(line[31:35].strip()) if line[31:35].strip() != '' else int(ano_deck) + 4
+	} for line in expt_str.splitlines()[2:]]
+
 def write_expt_file(expt_df: pd.DataFrame) -> bytes:
 	"""
 	Retorna os bytes correspondentes a um arquivo expt.dat, escrito a partir do
@@ -192,3 +217,4 @@ def write_expt_file(expt_df: pd.DataFrame) -> bytes:
 			int(line['anoFim'])
 		).encode())
 	return master_io.getvalue()
+
