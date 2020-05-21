@@ -264,3 +264,45 @@ def write_expt_file(expt_df: pd.DataFrame) -> bytes:
 		).encode('latin-1'))
 	return master_io.getvalue()
 
+def write_term_file(term_df: pd.DataFrame) -> bytes:
+	"""
+	Retorna os bytes correspondentes a um arquivo term.dat, escrito a partir do
+	  dataframe de entrada.
+	"""
+	if type(term_df) != pd.DataFrame:
+		raise Exception("'write_term_file' can only receive a pandas DataFrame")
+
+	master_io = io.BytesIO()
+	master_io.write(' NUM NOME          POT  FCMX    TEIF   IP    <-------------------- GTMIN PARA O PRIMEIRO ANO DE ESTUDO ------------------------|D+ ANOS\r\n'.encode('latin-1'))
+	master_io.write(' XXX XXXXXXXXXXXX  XXXX. XXX.  XXX.XX XXX.XX JAN.XX FEV.XX MAR.XX ABR.XX MAI.XX JUN.XX JUL.XX AGO.XX SET.XX OUT.XX NOV.XX DEZ.XX XXX.XX\r\n'.encode('latin-1'))
+
+	format_A = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f}\r\n"
+	format_ANGRA2 = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f}\r\n"
+	for line in json.loads(term_df.reset_index().to_json(orient='records')):
+		if int(line['numeroUsina']) == 13:
+			str_format = format_ANGRA2
+		else:
+			str_format = format_A
+		
+		master_io.write(str_format.format(
+		int(line['numeroUsina']),
+		line['nome'],
+		float(line['capInstalada']),
+		float(line['fatorCapacidadeMax']),
+		float(line['teif']),
+		float(line['indispProgramada']),
+		float(line['jan']),
+		float(line['fev']),
+		float(line['mar']),
+		float(line['abr']),
+		float(line['mai']),
+		float(line['jun']),
+		float(line['jul']),
+		float(line['ago']),
+		float(line['set']),
+		float(line['out']),
+		float(line['nov']),
+		float(line['dez']),
+		float(line['futuro'])
+		).encode())
+	return master_io.getvalue()
