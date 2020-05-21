@@ -70,7 +70,7 @@ def get_estudo_files(estudo_zip: zp.ZipFile) -> dict:
   # Atualizando o mapeamento dos arquivos
   for file_path in estudo_zip.namelist():
     file_content = os.path.split(file_path)
-    file_name = file_content[1].split('.')[0]
+    file_name = file_content[1].split('.')[0].lower()
     deck_name = file_content[0]
 
     D[deck_name].update({file_name.lower(): file_path})
