@@ -1,2 +1,4 @@
-include truecomercializadora/data/patamares.csv
-include truecomercializadora/credentials.json
+include LICENSE README.md
+recursive-exclude * __pycache__
+exclude tests
+exclude data

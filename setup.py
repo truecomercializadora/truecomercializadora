@@ -1,20 +1,16 @@
-from setuptools import setup
+from setuptools import (
+    setup,
+    find_packages)
 
 setup(
     name='truecomercializadora',
-    version='0.1.18',
+    version='0.2.0',
     description='A comprehensive library to centralize the main functions used across applications and services',
     url='https://github.com/truecomercializadora/truecomercializadora.git',
     author='Ettore Aquino',
     author_email='ettore.aquino@truecomercializadora.com',
     license='GNU AGPLv3',
-    packages=['truecomercializadora'],
-    install_requires=[
-        'gspread',
-        'oauth2client',
-        'numpy',
-        'pandas'
-    ],
+    packages=find_packages(exclude=("tests","data",)),
     classifiers=[
         'Development Status :: 0 - Beta',
         'Programming Language :: Python :: 3.7',

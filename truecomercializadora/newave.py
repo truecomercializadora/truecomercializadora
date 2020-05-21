@@ -170,6 +170,52 @@ def get_ear_inicial_percentual_por_submercado(pmo_str):
     'N': round((ear_inicial['N']['mw_mes'] + ear_inicial['BMONTE']['mw_mes'] + ear_inicial['MAN-AP']['mw_mes']) /ear_max_n,3)
   }
 
+def get_term_list(term_str: str) -> list:
+	"""
+	Retorna uma lista de dicionarios representando cada uma das linhas do arquivo
+	  term.dat
+	"""
+	if type(term_str) != str:
+		raise TypeError("'get_term_list' can only receive a term.dat string.")
+
+	if ('NUM NOME          POT  FCMX    TEIF   IP' not in term_str):
+		raise Exception("'get_term_list' input str does not seem to represent a "
+	                    "term.dat file. Verify the input content.")
+
+	keys = [
+		"numeroUsina",
+		"nome",
+		"capInstalada",
+		"fatorCapacidadeMax",
+		"teif",
+		"indispProgramada",
+		"jan",
+		"fev",
+		"mar",
+		"abr",
+		"mai",
+		"jun",
+		"jul",
+		"ago",
+		"set",
+		"out",
+		"nov",
+		"dez",
+		"futuro"]
+
+	return [
+		dict(
+			zip(
+				keys,
+				[
+					int(line[:5].strip()),
+					line[5:19].strip(),
+					*[float(value) for value in line[19:].split()]
+				]
+			)
+		) for line in term_str.splitlines()[2:]
+	]
+
 def get_expt_list(expt_str: str, ano_deck: int) -> list:
 	"""
 	Retorna uma lista de dicionarios representando cada uma das linhas do arquivo
