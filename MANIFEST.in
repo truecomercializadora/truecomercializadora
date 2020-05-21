@@ -1,4 +1,4 @@
 include LICENSE README.md
 recursive-exclude * __pycache__
-exclude tests
-exclude data
+recursive-exclude * tests
+recursive-exclude * data
