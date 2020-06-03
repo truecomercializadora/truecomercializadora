@@ -5,6 +5,7 @@ A module designed to keep functions regarding all sorts of files, from a -
  in order to understand any of the functions defined here.
 """
 import base64
+import csv
 import io
 import os
 import re
@@ -268,8 +269,29 @@ def decode_b64_str_to_bytes(b64_str: str) -> bytes:
     bytes array
     '''
     if type(b64_str) != str:
-        raise Exception("'decode_b64_str_to_bytes' can only receive a str."\
+        raise Exception("'decode_b64_str_to_bytes' can only receive a str."
                         "{} is not a valid type.".format(type(b64_str)))
         
     b64_bytes = b64_str.encode('latin-1')
     return base64.b64decode(b64_bytes)
+
+def write_list2_csv_bytes(list_of_dictionaries: list) -> bytes:
+    '''
+    Return the bytes array of a cvs file corresponding to a list of dictionaries.
+    '''
+    if type(list_of_dictionaries) != list:
+        raise Exception("'write_list2_csv_bytes' can only receive a list."
+                        "{} is not a valid type.".format(type(list_of_dictionaries)))
+
+    if type(list_of_dictionaries[0]) != dict:
+        raise Exception("'write_list2_csv_bytes' can only receive a list of dictionaries. "
+                        "Input list does not seem to have dictionaries inside.")                
+
+    output = io.StringIO()
+
+    keys = list_of_dictionaries[0].keys()
+    writer = csv.DictWriter(output, keys)
+    writer.writeheader()
+    writer.writerows(list_of_dictionaries)
+
+    return output.getvalue().encode()
