@@ -1,6 +1,5 @@
 """
-Modulo desenhado para conter as classes e funcoes relacionadas aos estudos de 
- decks encadeados.
+Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo dadger
 """
 
 from . import utils_files
