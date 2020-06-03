@@ -367,3 +367,4 @@ def get_enas_pre_estudo_subsitema(relato_str):
         submercado.split()[0]: list(map(lambda x: float(x),submercado.split()[3:]))
             for submercado in relatorio_ena.splitlines()[5:-3]
     }
+
