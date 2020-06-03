@@ -9,7 +9,7 @@ from . import utils_files
 from . import ccee
 from . import ons
 
-def get_estagios(ano, mes):
+def get_estagios(ano: int, mes: int) -> list:
     """
     Retorna uma lista de dicionarios contendo as informacoes de cada estagio do modelo a
       partir do ano e mes do estudo de interesse
