@@ -33,7 +33,7 @@ def write_registro_dp(
     mes_deck: int,
     cargas_mes_atual: list,
     cargas_mes_seguinte: list,
-    patamares_table: list) -> str:
+    patamares_table: dict) -> str:
 
     """
     Retorna o Registro DP a partir da tabela de cargas do mes atual e do mes se
@@ -52,8 +52,8 @@ def write_registro_dp(
     if type(cargas_mes_seguinte) != list:
         raise Exception("'write_registro_dp' can only receive cargas_mes_seguinte as list."
                         "{} is not a valid input type".format(type(cargas_mes_seguinte)))
-    if type(patamares_table) != list:
-        raise Exception("'write_registro_dp' can only receive patamares_table as list."
+    if type(patamares_table) != dict:
+        raise Exception("'write_registro_dp' can only receive patamares_table as dict."
                         "{} is not a valid input type".format(type(patamares_table)))
 
     # Obtendo os estagios do DECOMP
