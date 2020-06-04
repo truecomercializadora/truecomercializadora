@@ -56,6 +56,46 @@ def update_zipfile(original_zip: zp.ZipFile, update_path: str, content_bytes: by
     # Return a bytes array (which could be )
     return buff.getvalue()
 
+def update_zipfiles(original_zip: zp.ZipFile, update_dict: dict) -> bytes:
+    """
+    Returns an updated zipfile archive represented by its bytes array. The 
+     function actually rebuilds the entire zip archive, leaving untouched every
+     file except the ones explicitly said to be edited.
+    The function should receive a zipfile.ZipFile object, and a dict mapping the
+     file_path to its corresponding bytes.
+    """
+
+    if type(original_zip) != zp.ZipFile:
+        raise Exception("'update_zipfile' should receive a zipfile.Zipfile as\
+            primary input. {} is not a valid input type.".format(original_zip))
+
+    for update_path in update_dict:
+        if update_path not in original_zip.namelist():
+            raise Exception("{} could not be found inside the zipfile."
+                            "Check update_dict content".format(update_path))
+
+    for update_path in update_dict:
+        if type(update_dict[update_path]) != bytes:
+            raise Exception("'update_zipfile' should receive a dict containing "
+                            "files to be updated and their corresponding bytes")
+
+    # Initialize a buffer for the new zipfile
+    buff = io.BytesIO()
+    with zp.ZipFile(buff, mode="w",compression=zp.ZIP_DEFLATED) as zipwrite:
+        
+        # Iterate over all files within the original zipfile
+        for file_name in original_zip.namelist():
+            file_bytes = original_zip.read(file_name)
+
+            # Update only the files within update_dict
+            if update_dict.get(file_name):
+                zipwrite.writestr(file_name, update_dict.get(file_name))
+            else:
+                zipwrite.writestr(file_name, file_bytes)
+
+    # Return a bytes array (which could be )
+    return buff.getvalue()
+
 
 def save_bytes2zipfile(output_path: str, zipfile_bytes: bytes) -> str:
     """
