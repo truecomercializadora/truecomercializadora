@@ -123,3 +123,11 @@ def test_get_br_abreviated_month_number():
     abreviated_month_number = utils_datetime.get_br_abreviated_month_number('abr')
 
     assert abreviated_month_number == 4
+
+# ============================================================================================ #
+#    get_br_month                                                                   #
+# ============================================================================================ #
+def test_get_br_month():
+    month = utils_datetime.get_br_month(3)
+
+    assert month == 'marco'

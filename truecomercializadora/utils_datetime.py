@@ -145,6 +145,33 @@ def get_br_abreviated_month(month_number):
     }
     return switcher.get(month_number, '{} is not a valid month'.format(month_number))
 
+def get_br_month(month_number):
+    """
+    # ============================================================================================ #
+    #  Return the month string based on the month number.                               #
+    # ============================================================================================ #
+    """
+    if type(month_number) != int:
+        raise Exception("'get_br_month' can only receive an int variable. '{}' is not a valid integer.".format(month_number))
+        
+    if month_number not in list(range(1,13)):
+        raise Exception("'get_br_month' can only receive an integer within the 1,...,12. '{}' is not number.".format(month_number))
+    switcher = {
+        1: 'janeiro',
+        2: 'fevereiro',
+        3: 'marco',
+        4: 'abril',
+        5: 'maio',
+        6: 'junho',
+        7: 'julho',
+        8: 'agosto',
+        9: 'setembro',
+        10: 'outubro',
+        11: 'novembro',
+        12: 'dezembro'
+    }
+    return switcher.get(month_number, '{} is not a valid month'.format(month_number))
+
 def diff_month(dt0: datetime.datetime, dt1: datetime.datetime) -> int:
     if (type(dt0) != datetime.datetime) and (type(dt0) != datetime.date):
         raise TypeError('Invalid input type for d1. Only datetime.date or date'
