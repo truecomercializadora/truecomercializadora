@@ -28,6 +28,28 @@ def get_registro_dp(dadger_str: str) -> str:
 
     return registro_dp
 
+def get_registro_ct(dadger_str: str) -> str:
+    """
+    Retorna a substring correspondente ao REGISTRO CT (Bloco 4) de um dadger dado
+     na forma de uma string
+    """
+    if type(dadger_str) != str:
+        raise Exception("'get_registro_ct' can only receive a string."
+                        "{} is not a valid input type".format(type(dadger_str)))
+
+    if 'BLOCO 4  ***  CADASTRO UTE  ***' not in dadger_str:
+        raise Exception("Input string does not seem to represent a dadger.rv# "
+                        "string. Check the input")
+
+    begin = "BLOCO 4"
+    end = "BLOCO 5"
+    registro_ct = utils_files.select_document_part(dadger_str, begin, end)
+    
+    # eliminando as linhas antes e depois dos dados     
+    registro_ct = '\r\n'.join(registro_ct.splitlines()[2:-2])
+
+    return registro_ct
+
 def write_registro_dp(
     ano_deck: int,
     mes_deck: int,
