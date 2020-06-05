@@ -160,3 +160,46 @@ def get_df_from_registro_ct(registro_ct_str: str) -> pd.DataFrame:
     
     # Retornando a lista de dicionarios como um pd.DataFrame     
     return pd.DataFrame(L)
+
+def write_registro_ct_from_df(
+    registro_ct_df: pd.DataFrame) -> str:
+
+    """
+    Retorna o Registro DP a partir da tabela de cargas do mes atual e do mes se
+    guinte, juntamente com a lista de patamares oficiais de carga.
+    """
+    if type(registro_ct_df) != pd.DataFrame:
+        raise Exception("'write_registro_ct_from_df' can only receive values as a pd.DataFrame"
+                        " {} is not a valid input type".format(type(registro_ct_df)))
+
+    # Escrevendo o cabecalho padrao
+    master_io = io.BytesIO()
+    master_io.write("&----------------------------------------------------------------------------------------\r\n".encode("latin-1"))
+    master_io.write("&___________________________|______________________PATAMAR DE CARGA_____________________|\r\n".encode("latin-1"))
+    master_io.write("&_______USINA_____________| |_____PESADA________|_______MEDIA_______|_______LEVE________|\r\n".encode("latin-1"))
+    master_io.write("&X  COD  SU   NOMEDAUSINES| |INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|\r\n".encode("latin-1"))
+    master_io.write("&|____|___|____________|__| |____|____|_________|____|____|_________|____|____|_________|\r\n".encode("latin-1"))
+    master_io.write("&CT\r\n".encode("latin-1"))
+    
+    # Escrevendo as linhas do DataFrame
+    line_format = "CT  {:>3}   {:>1d}   {:<10} {:>1d}   {:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}\r\n"
+    for i, row in registro_ct_df.iterrows():
+        master_io.write(
+            line_format.format(
+                row['COD'],
+                row['SUBM'],
+                row['NOME'],
+                row['ESTAGIO'],
+                row['INFL_P'],    
+                row['DISP_P'],
+                row['CVU_P'],
+                row['INFL_M'],    
+                row['DISP_M'],
+                row['CVU_M'],
+                row['INFL_L'],
+                row['DISP_L'],
+                row['CVU_L'],
+            ).encode('latin-1')
+        )
+
+    return "\r\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
