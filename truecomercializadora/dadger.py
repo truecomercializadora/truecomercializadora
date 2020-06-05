@@ -2,6 +2,7 @@
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo dadger
 """
 import io
+import pandas as pd
 
 from . import utils_files
 from . import decomp
@@ -123,3 +124,39 @@ def write_registro_dp(
 
     # Retornando o buffer decoded e eliminando as linhas vazias
     return "\r\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
+
+def get_df_from_registro_ct(registro_ct_str: str) -> pd.DataFrame:
+    """
+    Retorna o pd.DataFrame correspondente ao Registro CT informado.
+     A funcao devera receber o Registro CT ja no formato string
+    """
+    if type(registro_ct_str) != str:
+        raise Exception("'get_df_from_registro_ct' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_ct_str)))
+
+    if 'X  COD  SU   NOMEDAUSINES' not in registro_ct_str:
+        raise Exception("Input string does not seem to represent a Registro CT"
+                        "string. Check the input")
+
+    # Interando pelas linhas do registro e estruturando elas como dicionarios     
+    L = []
+    for line in registro_ct_str.splitlines()[6:]:
+        L.append({
+            'X': line[:2],
+            'COD': line[2:7].strip(),
+            'SUBM': line[7:12].strip(),
+            'NOME': line[12:25].strip(),
+            'ESTAGIO': line[25:29].strip(),
+            'INFL_P': line[29:34].strip(),
+            'DISP_P': line[34:39].strip(),
+            'CVU_P': line[39:49].strip(),
+            'INFL_M': line[49:54].strip(),
+            'DISP_M': line[54:59].strip(),
+            'CVU_M': line[59:69].strip(),
+            'INFL_L': line[69:74].strip(),
+            'DISP_L': line[74:79].strip(),
+            'CVU_L': line[79:].strip()
+        })
+    
+    # Retornando a lista de dicionarios como um pd.DataFrame     
+    return pd.DataFrame(L)
