@@ -145,7 +145,7 @@ def get_br_abreviated_month(month_number):
     }
     return switcher.get(month_number, '{} is not a valid month'.format(month_number))
 
-def get_br_month(month_number):
+def get_br_month(month_number: int) -> str:
     """
     # ============================================================================================ #
     #  Return the month string based on the month number.                               #
@@ -154,7 +154,7 @@ def get_br_month(month_number):
     if type(month_number) != int:
         raise Exception("'get_br_month' can only receive an int variable. '{}' is not a valid integer.".format(month_number))
         
-    if month_number not in list(range(1,13)):
+    if int(month_number) not in list(range(1,13)):
         raise Exception("'get_br_month' can only receive an integer within the 1,...,12. '{}' is not number.".format(month_number))
     switcher = {
         1: 'janeiro',
@@ -171,6 +171,31 @@ def get_br_month(month_number):
         12: 'dezembro'
     }
     return switcher.get(month_number, '{} is not a valid month'.format(month_number))
+
+def get_br_month_number(month: str) -> int:
+    """
+    Return the integer representing the month. A common necessity when reading rows
+     out of spreadsheets where months are represented in an extended way
+    """
+    if type(month) != str:
+        raise Exception("'get_br_month_number' can only receive str variable. {} is not a valid string.".format(month))
+    
+    month = month.lower()
+    switcher = {
+        'janeiro': 1,
+        'fevereiro': 2,
+        'marco': 3,
+        'abril': 4,
+        'maio': 5,
+        'junho': 6,
+        'julho': 7,
+        'agosto': 8,
+        'setembro': 9,
+        'outubro': 10,
+        'novembro': 11,
+        'dezembro': 12
+    }
+    return switcher.get(month, '{} is not a valid month'.format(month))
 
 def diff_month(dt0: datetime.datetime, dt1: datetime.datetime) -> int:
     if (type(dt0) != datetime.datetime) and (type(dt0) != datetime.date):
