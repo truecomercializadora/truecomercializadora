@@ -6,13 +6,13 @@ A lot of the company services share common functions and datasets. It is also us
 
 ## INSTALLATION
 
-``` pip install git+https://bitbucket_username@bitbucket.org/truecomercializadora/truecomercializadora.git ```
+``` pip install git+https://github.com/truecomercializadora/truecomercializadora.git ```
 
 Where `bitbucket_username` should be your username in bitbucket with access to the **truecomercializadora** library.
 
 Keep in mind that this library grows fast, so make sure your application points to the proper version, otherwise you are risking failure. Example:
 
-```pip install git+https://bitbucket_username@bitbucket.org/truecomercializadora/truecomercializadora.git@v0.1.0```
+```pip install git+https://github.com/truecomercializadora/truecomercializadora.git@v0.2.2```
 
 It is extremely important to **ALWAYS** deploy the package in a version, as the _master_ branch will always be pointing to the latest version. This way, the library user could choose to install the default version (latest) or a specific version.
 
@@ -20,7 +20,7 @@ It is extremely important to **ALWAYS** deploy the package in a version, as the 
 
 In order to upgrade the installed library to the latest version:
 
-```pip install git+https://bitbucket_username@bitbucket.org/truecomercializadora/truecomercializadora.git --upgrade```
+```pip install git+https://github.com/truecomercializadora/truecomercializadora.git --upgrade```
 
 
 ## CONSIDERATIONS AND LIBRARY STRUCTURE
@@ -59,6 +59,12 @@ ___
 [`decomp`](truecomercializadora/decomp.py)
 
 [`encadeado`](truecomercializadora/encadeado.py)
+
+[`prevs`](truecomercializadora/prevs.py)
+
+[`dadger`](truecomercializadora/dadger.py)
+
+[`ccee`](truecomercializadora/ccee.py)
 
 ### TYPES!
 Whenever possible, avoid using Python specific data types in function returns. Imagine a context where this library might be in use in a serverless application, publish and request operations can only use strings, `datatetime.date`, `datetime.dateime`, `numpy.ndarray` etc, cannot be parsed to `str` using `json.dumps()` or other typical method so, avoid returning theses types in a context where such functions might be used to publish a message or post to a REST API.
