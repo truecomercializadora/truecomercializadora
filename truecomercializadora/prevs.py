@@ -373,7 +373,7 @@ def _get_vazoes_artificiais(
             id_posto=id_posto,
             prevs=prevs_obj,
             postos_vazao=D)
-        D.update(vazoes_posto)
+        D.update({id_posto:vazoes_posto})
 
     return D
 
