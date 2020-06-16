@@ -256,9 +256,9 @@ def _calculate_vazao_artificial(id_posto: int, prevs: dict, postos_vazao: dict) 
             vaz_referencia = prevs[125][i]
             vaz_referencia_reduzida = vaz_referencia - 90
             if vaz_referencia <= 190 : vazoes.append((vaz_referencia * 119)/190)
-            if 190 < vaz_referencia <= 209 : vazoes.append(119)
-            if 209 <= vaz_referencia <= 250 :  vazoes.append(vaz_referencia_reduzida)
-            if vaz_referencia > 250: vazoes.append(160)
+            elif 190 < vaz_referencia <= 209 : vazoes.append(119)
+            elif 209 < vaz_referencia <= 250 :  vazoes.append(vaz_referencia_reduzida)
+            elif vaz_referencia > 250: vazoes.append(160)
         try:
             if id_posto == 299:
                 vazoes.append(prevs[130][i] - postos_vazao[298][i] - prevs[203][i] + postos_vazao[304][i])
