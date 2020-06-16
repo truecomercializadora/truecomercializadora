@@ -232,13 +232,17 @@ def _calculate_vazao_artificial(id_posto: int, prevs: dict, postos_vazao: dict) 
             if id_posto == 126:
                 vaz_referencia = postos_vazao[127][i]
                 vaz_referencia_reduzida = vaz_referencia - 90
-                if vaz_referencia <= 430 : vazoes.append(max([0, vaz_referencia_reduzida]))
-                if vaz_referencia > 430 : vazoes.append(340)
+                if vaz_referencia <= 430 :
+                    vazao_calculada = max([0, vaz_referencia_reduzida])
+                    vazoes.append(vazao_calculada)
+                elif vaz_referencia > 430:
+                    vazoes.append(340)
         except:
             pass
         try:
             if id_posto == 127:
-                vazoes.append(prevs[129][i] - postos_vazao[298][i] - prevs[203][i] + postos_vazao[304][i])
+                vazao_calculada = prevs[129][i] - postos_vazao[298][i] - prevs[203][i] + postos_vazao[304][i]
+                vazoes.append(vazao_calculada)
         except:
             pass
         try:
@@ -261,11 +265,8 @@ def _calculate_vazao_artificial(id_posto: int, prevs: dict, postos_vazao: dict) 
             elif vaz_referencia > 250: vazoes.append(160)
         try:
             if id_posto == 299:
-                print(130, prevs[130][i])
-                print(298, prevs[298][i])
-                print(203, prevs[203][i])
-                print(305, prevs[304][i])
-                vazoes.append(prevs[130][i] - postos_vazao[298][i] - prevs[203][i] + postos_vazao[304][i])
+                vazao_calculada = prevs[130][i] - postos_vazao[298][i] - prevs[203][i] + postos_vazao[304][i]
+                vazoes.append(vazao_calculada)
         except:
             pass
         try:
