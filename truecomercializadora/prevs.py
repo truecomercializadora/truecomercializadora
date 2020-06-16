@@ -369,11 +369,13 @@ def _get_vazoes_artificiais(
                 mes=mes_prevs
             )
             D.update({posto['idPosto']: vazoes_posto})
+            continue
         # Vazao depende de um posto ainda nao calculado 
         elif vazoes_posto == [] or posto['idPosto'] == 303:
             continue
         else:
             D.update({posto['idPosto']: vazoes_posto})
+            continue
     
     # Criando uma lista com uma ordem especifica para evitar dependencia circular     
     lista_postos_dependencia_circular = [315,316,304,131,303,299,127,126,306]
