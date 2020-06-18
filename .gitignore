@@ -24,3 +24,5 @@ truecomercializadora/tests/__pycache__
 
 #pyenv
 .python-version
+
+out/
