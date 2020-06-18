@@ -316,7 +316,7 @@ def _calculate_vazao_artificial(id_posto: int, prevs: dict, postos_vazao: dict) 
         if id_posto == 319:
             vazoes.append(prevs[117][i] + prevs[118][i] + 0.1 * (prevs[161][i] - prevs[117][i] - prevs[118][i]))
 
-    return [int(vazao) for vazao in vazoes]
+    return [round(vazao) for vazao in vazoes]
 
 def _get_vazoes_artificiais(
     prevs_obj: dict,
