@@ -1,6 +1,7 @@
 """
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo outgnl
 """
+import datetime
 import pandas as pd
 
 from . import utils_files
@@ -102,7 +103,7 @@ def get_df_from_registro_tg(registro_tg_str: str) -> pd.DataFrame:
         raise Exception("'get_df_from_registro_tg' can only receive a string. "
                         "{} is not a valid input type".format(type(registro_tg_str)))
 
-    if 'Usina           Est           Pat 1               Pat 2               Pat3' not in registro_tg_str:
+    if 'cod  ss      nome   ip   infl disp    cvu    infl disp    cvu    infl disp    cvu' not in registro_tg_str:
         raise Exception("Input string does not seem to represent a Registro TG"
                         "string. Check the input")
 
@@ -114,15 +115,52 @@ def get_df_from_registro_tg(registro_tg_str: str) -> pd.DataFrame:
             "cod_usina": int(line[4:8].strip()),
             "nome_usina": line[14:25].strip(),
             "ip": int(line[25:27].strip()),
-            "inflex_1": float(line[30:34].strip()),
+            "infl_1": float(line[30:34].strip()),
             "disp_1":float(line[34:40].strip()),
             "cvu_1": float(line[40:50].strip()),
-            "inflex_2": float(line[50:54].strip()),
+            "infl_2": float(line[50:54].strip()),
             "disp_2":float(line[54:60].strip()),
             "cvu_2": float(line[60:70].strip()),
-            "inflex_3": float(line[70:74].strip()),
+            "infl_3": float(line[70:74].strip()),
             "disp_3":float(line[74:80].strip()),
             "cvu_3": float(line[80:].strip()),
+        })
+    
+    # Retornando a lista de dicionarios como um pd.DataFrame     
+    return pd.DataFrame(L)
+
+def get_df_from_registro_gl(registro_gl_str: str) -> pd.DataFrame:
+    """
+    Retorna o pd.DataFrame correspondente ao Registro GL informado.
+     A funcao devera receber o Registro GL ja no formato string
+    """
+    if type(registro_gl_str) != str:
+        raise Exception("'get_df_from_registro_gl' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_gl_str)))
+
+    if 'cod  ss  sem    geracao   dur  geracao   dur  geracao   dur  data inic' not in registro_gl_str:
+        raise Exception("Input string does not seem to represent a Registro TG"
+                        "string. Check the input")
+
+    # Interando pelas linhas do registro e estruturando elas como dicionarios     
+    L = []
+    for line in registro_gl_str.splitlines()[4:]:
+        date_str = line[65:].strip()
+        L.append({
+            "bloco": line [:3].strip(),
+            "cod": int(line[4:8].strip()),
+            "ss": int(line[8:12].strip()),
+            "sem": int(line[12:17].strip()),
+            "ger_1": float(line[17:30].strip()) if line[17:30].strip() != '' else None,
+            "dur_1": float(line[30:35].strip()) if line[30:35].strip() != '' else None,
+            "ger_2": float(line[35:45].strip()) if line[35:45].strip() != '' else None,
+            "dur_2": float(line[45:50].strip()) if line[45:50].strip() != '' else None,
+            "ger_3": float(line[50:60].strip()) if line[50:60].strip() != '' else None,
+            "dur_4": float(line[60:65].strip()) if line[60:65].strip() != '' else None,
+            "data_ini": datetime.datetime(
+                int(date_str[4:]),
+                int(date_str[2:4]),
+                int(date_str[:2]))
         })
     
     # Retornando a lista de dicionarios como um pd.DataFrame     
