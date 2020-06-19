@@ -7,8 +7,8 @@ from . import utils_files
 
 def get_registro_tg(outgnl_str: str) -> str:
     """
-    Retorna a substring correspondente ao REGISTRO TG (Bloco 1) de um outgnl dado
-     na forma de uma string
+    Retorna a substring correspondente ao REGISTRO TG (Bloco 1 - Termicas a GNL)
+     de um outgnl dado na forma de uma string.
     """
     if type(outgnl_str) != str:
         raise Exception("'get_registro_tg' can only receive a string."
@@ -29,8 +29,8 @@ def get_registro_tg(outgnl_str: str) -> str:
 
 def get_registro_gs(outgnl_str: str) -> str:
     """
-    Retorna a substring correspondente ao REGISTRO GS (Bloco 2) de um outgnl dado
-     na forma de uma string
+    Retorna a substring correspondente ao REGISTRO GS (Bloco 2 - Numero de Usinas) 
+     de um outgnl dado na forma de uma string.
     """
     if type(outgnl_str) != str:
         raise Exception("'get_registro_gs' can only receive a string."
@@ -51,8 +51,8 @@ def get_registro_gs(outgnl_str: str) -> str:
 
 def get_registro_nl(outgnl_str: str) -> str:
     """
-    Retorna a substring correspondente ao REGISTRO NL (Bloco 3) de um outgnl dado
-     na forma de uma string
+    Retorna a substring correspondente ao REGISTRO NL (Bloco 3 - Lag de antecipacao
+     de Despacho) de um outgnl dado na forma de uma string.
     """
     if type(outgnl_str) != str:
         raise Exception("'get_registro_nl' can only receive a string."
@@ -73,8 +73,8 @@ def get_registro_nl(outgnl_str: str) -> str:
 
 def get_registro_gl(outgnl_str: str) -> str:
     """
-    Retorna a substring correspondente ao REGISTRO NL (Bloco 3) de um outgnl dado
-     na forma de uma string
+    Retorna a substring correspondente ao REGISTRO GL (Bloco 4 - Geracoes de Termicas
+     GNL ja Comandadas) de um outgnl dado na forma de uma string.
     """
     if type(outgnl_str) != str:
         raise Exception("'get_registro_gl' can only receive a string."
