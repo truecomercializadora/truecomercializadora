@@ -94,22 +94,22 @@ def get_registro_gl(outgnl_str: str) -> str:
 
     return registro_gl
 
-def get_df_from_registro_tg(registro_tg_str: str) -> pd.DataFrame:
+def get_df_from_registro_tg(registro_str: str) -> pd.DataFrame:
     """
     Retorna o pd.DataFrame correspondente ao Registro TG informado.
      A funcao devera receber o Registro TG ja no formato string
     """
-    if type(registro_tg_str) != str:
+    if type(registro_str) != str:
         raise Exception("'get_df_from_registro_tg' can only receive a string. "
-                        "{} is not a valid input type".format(type(registro_tg_str)))
+                        "{} is not a valid input type".format(type(registro_str)))
 
-    if 'cod  ss      nome   ip   infl disp    cvu    infl disp    cvu    infl disp    cvu' not in registro_tg_str:
+    if 'cod  ss      nome   ip   infl disp    cvu    infl disp    cvu    infl disp    cvu' not in registro_str:
         raise Exception("Input string does not seem to represent a Registro TG"
                         "string. Check the input")
 
     # Interando pelas linhas do registro e estruturando elas como dicionarios     
     L = []
-    for line in registro_tg_str.splitlines()[4:]:
+    for line in registro_str.splitlines()[4:]:
         L.append({
             "bloco": line [:3].strip(),
             "cod_usina": int(line[4:8].strip()),
@@ -129,22 +129,47 @@ def get_df_from_registro_tg(registro_tg_str: str) -> pd.DataFrame:
     # Retornando a lista de dicionarios como um pd.DataFrame     
     return pd.DataFrame(L)
 
-def get_df_from_registro_gl(registro_gl_str: str) -> pd.DataFrame:
+def get_df_from_registro_gs(registro_str: str) -> pd.DataFrame:
     """
-    Retorna o pd.DataFrame correspondente ao Registro GL informado.
-     A funcao devera receber o Registro GL ja no formato string
+    Retorna o pd.DataFrame correspondente ao Registro GS informado.
+     A funcao devera receber o Registro GS ja no formato string.
     """
-    if type(registro_gl_str) != str:
-        raise Exception("'get_df_from_registro_gl' can only receive a string. "
-                        "{} is not a valid input type".format(type(registro_gl_str)))
+    if type(registro_str) != str:
+        raise Exception("'get_df_from_registro_gs' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_str)))
 
-    if 'cod  ss  sem    geracao   dur  geracao   dur  geracao   dur  data inic' not in registro_gl_str:
+    if 'mes  semanas' not in registro_str:
         raise Exception("Input string does not seem to represent a Registro TG"
                         "string. Check the input")
 
     # Interando pelas linhas do registro e estruturando elas como dicionarios     
     L = []
-    for line in registro_gl_str.splitlines()[4:]:
+    for line in registro_str.splitlines()[4:]:
+        L.append({
+            "bloco": line [:3].strip(),
+            "mes": int(line [3:7].strip()),
+            "semanas": int(line [7:].strip())
+        })
+    
+    # Retornando a lista de dicionarios como um pd.DataFrame     
+    return pd.DataFrame(L)
+
+def get_df_from_registro_gl(registro_str: str) -> pd.DataFrame:
+    """
+    Retorna o pd.DataFrame correspondente ao Registro GL informado.
+     A funcao devera receber o Registro GL ja no formato string
+    """
+    if type(registro_str) != str:
+        raise Exception("'get_df_from_registro_gl' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_str)))
+
+    if 'cod  ss  sem    geracao   dur  geracao   dur  geracao   dur  data inic' not in registro_str:
+        raise Exception("Input string does not seem to represent a Registro TG"
+                        "string. Check the input")
+
+    # Interando pelas linhas do registro e estruturando elas como dicionarios     
+    L = []
+    for line in registro_str.splitlines()[4:]:
         date_str = line[65:].strip()
         L.append({
             "bloco": line [:3].strip(),
@@ -161,6 +186,32 @@ def get_df_from_registro_gl(registro_gl_str: str) -> pd.DataFrame:
                 int(date_str[4:]),
                 int(date_str[2:4]),
                 int(date_str[:2]))
+        })
+    
+    # Retornando a lista de dicionarios como um pd.DataFrame     
+    return pd.DataFrame(L)
+
+def get_df_from_registro_nl(registro_str: str) -> pd.DataFrame:
+    """
+    Retorna o pd.DataFrame correspondente ao Registro NL informado.
+     A funcao devera receber o Registro NL ja no formato string.
+    """
+    if type(registro_str) != str:
+        raise Exception("'get_df_from_registro_nl' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_str)))
+
+    if 'cod  ss  lag' not in registro_str:
+        raise Exception("Input string does not seem to represent a Registro NL"
+                        "string. Check the input")
+
+    # Interando pelas linhas do registro e estruturando elas como dicionarios     
+    L = []
+    for line in registro_str.splitlines()[4:]:
+        L.append({
+            "bloco": line [:3].strip(),
+            "cod": int(line[3:8].strip()),
+            "ss": int(line[8:12].strip()),
+            "lag": int(line [12:16].strip())
         })
     
     # Retornando a lista de dicionarios como um pd.DataFrame     
