@@ -94,6 +94,8 @@ def get_registro_gl(outgnl_str: str) -> str:
 
     return registro_gl
 
+import pandas as pd
+
 def get_df_from_registro_tg(registro_str: str) -> pd.DataFrame:
     """
     Retorna o pd.DataFrame correspondente ao Registro TG informado.
@@ -115,13 +117,13 @@ def get_df_from_registro_tg(registro_str: str) -> pd.DataFrame:
             "cod_usina": int(line[4:8].strip()),
             "nome_usina": line[14:25].strip(),
             "ip": int(line[25:27].strip()),
-            "infl_1": float(line[27:35].strip()),
-            "disp_1":float(line[35:40].strip()),
-            "cvu_1": float(line[40:50].strip()),
-            "infl_2": float(line[50:54].strip()),
-            "disp_2":float(line[54:60].strip()),
-            "cvu_2": float(line[60:70].strip()),
-            "infl_3": float(line[70:74].strip()),
+            "infl_1": float(line[27:34].strip()),
+            "disp_1":float(line[34:40].strip()),
+            "cvu_1": float(line[40:49].strip()),
+            "infl_2": float(line[49:54].strip()),
+            "disp_2":float(line[54:59].strip()),
+            "cvu_2": float(line[60:69].strip()),
+            "infl_3": float(line[69:74].strip()),
             "disp_3":float(line[74:80].strip()),
             "cvu_3": float(line[80:].strip()),
         })
