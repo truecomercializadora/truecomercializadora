@@ -118,11 +118,11 @@ def get_df_from_registro_tg(registro_str: str) -> pd.DataFrame:
             "infl_1": float(line[27:35].strip()),
             "disp_1":float(line[35:40].strip()),
             "cvu_1": float(line[40:50].strip()),
-            "infl_2": float(line[50:55].strip()),
-            "disp_2":float(line[55:60].strip()),
+            "infl_2": float(line[50:54].strip()),
+            "disp_2":float(line[54:60].strip()),
             "cvu_2": float(line[60:70].strip()),
-            "infl_3": float(line[70:75].strip()),
-            "disp_3":float(line[75:80].strip()),
+            "infl_3": float(line[70:74].strip()),
+            "disp_3":float(line[74:80].strip()),
             "cvu_3": float(line[80:].strip()),
         })
     
