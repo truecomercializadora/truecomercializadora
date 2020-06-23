@@ -70,16 +70,26 @@ def get_dias_do_mes_por_estagio(estagios_decomp):
 
     return dias
 
-def get_horas_por_patamar(semana_operativa, patamares_horarios):
+def get_horas_por_patamar(
+    estagio_decomp: dict ,
+    patamares_horarios: dict,
+    mes: int=None) -> dict:
     """
     Retorna um dicionario de horas por patamar de carga para um determinado estagio do DECOMP
       o input 'semana_operativa'  deve ser o mesmo dicionario retornado na lista da funcao
       'get_estagios'.
     """
+    
     ano_patamares = int(list(patamares_horarios['jan'].keys())[0].split('-')[0])
-    inicio_semana = semana_operativa['inicio']
-    fim_semana = semana_operativa['fim']
-    dias_semana = utils_datetime.get_list_of_dates_between_days(inicio_semana, fim_semana)
+    inicio_semana = estagio_decomp['inicio']
+    fim_semana = estagio_decomp['fim']
+    if mes:
+        dias_semana = [d for d in utils_datetime.get_list_of_dates_between_days(inicio_semana, fim_semana) if d.month == mes]
+    else:
+        dias_semana =  utils_datetime.get_list_of_dates_between_days(inicio_semana, fim_semana)
+        
+    print(dias_semana)
+
     horas_patamar = {
         'pesada': 0,
         'media': 0,
