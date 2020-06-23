@@ -87,9 +87,8 @@ def get_horas_por_patamar(
         dias_semana = [d for d in utils_datetime.get_list_of_dates_between_days(inicio_semana, fim_semana) if d.month == mes]
     else:
         dias_semana =  utils_datetime.get_list_of_dates_between_days(inicio_semana, fim_semana)
-        
-    print(dias_semana)
 
+    # Inicializando o dicionario com as horas de cada patamar
     horas_patamar = {
         'pesada': 0,
         'media': 0,
