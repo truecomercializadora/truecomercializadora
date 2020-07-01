@@ -208,7 +208,7 @@ def get_df_from_registro_nl(registro_str: str) -> pd.DataFrame:
 
     # Interando pelas linhas do registro e estruturando elas como dicionarios     
     L = []
-    for line in registro_str.splitlines()[4:]:
+    for line in registro_str.splitlines()[3:]:
         L.append({
             "bloco": line [:3].strip(),
             "cod": int(line[3:8].strip()),
