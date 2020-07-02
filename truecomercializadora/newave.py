@@ -285,24 +285,46 @@ def write_term_file(term_df: pd.DataFrame) -> bytes:
 			str_format = format_A
 		
 		master_io.write(str_format.format(
-		int(line['numeroUsina']),
-		line['nome'],
-		float(line['capInstalada']),
-		float(line['fatorCapacidadeMax']),
-		float(line['teif']),
-		float(line['indispProgramada']),
-		float(line['jan']),
-		float(line['fev']),
-		float(line['mar']),
-		float(line['abr']),
-		float(line['mai']),
-		float(line['jun']),
-		float(line['jul']),
-		float(line['ago']),
-		float(line['set']),
-		float(line['out']),
-		float(line['nov']),
-		float(line['dez']),
-		float(line['futuro'])
+            int(line['numeroUsina']),
+            line['nome'],
+            float(line['capInstalada']),
+            float(line['fatorCapacidadeMax']),
+            float(line['teif']),
+            float(line['indispProgramada']),
+            float(line['jan']),
+            float(line['fev']),
+            float(line['mar']),
+            float(line['abr']),
+            float(line['mai']),
+            float(line['jun']),
+            float(line['jul']),
+            float(line['ago']),
+            float(line['set']),
+            float(line['out']),
+            float(line['nov']),
+            float(line['dez']),
+            float(line['futuro'])
 		).encode())
 	return master_io.getvalue()
+
+def write_adterm_file(adterm_df: pd.DataFrame) -> bytes:
+    """
+    Retorna os bytes correspondentes a um arquivo adterm.dat, escrito a partir do
+      dataframe de entrada.
+    """
+    if type(adterm_df) != pd.DataFrame:
+        raise Exception("'write_adterm_file' can only receive a pandas DataFrame")
+
+    master_io = io.BytesIO()
+    master_io.write(' IUTE  NOME TERMICA LAG\r\n'.encode('latin-1'))
+    master_io.write(' XXXX  XXXXXXXXXXXX  X  XXXXXXX.XX  XXXXXXX.XX  XXXXXXX.XX\r\n'.encode('latin-1'))
+    for row in adterm_df.itertuples():
+        if row._4 != '':
+            str_format = " {:>4}  {:<12}  {:1}  {:>10.2f}  {:>10.2f}  {:>10.2f}\r\n"
+            master_io.write(str_format.format(row._1, row._2, row._3, float(row._4), float(row._5), float(row._6)).encode('latin-1'))
+        else:
+            str_format = " {:>4}  {:<12}  {:1}  {:>13}  {:>13}  {:>13}\r\n"
+            master_io.write(str_format.format(row._1, row._2, row._3, row._4, row._5, row._6).encode('latin-1'))
+    master_io.write(' 9999'.encode('latin-1'))
+    
+    return master_io.getvalue()
