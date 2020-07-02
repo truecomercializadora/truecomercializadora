@@ -277,7 +277,8 @@ def decode_fileReader_zip(fileReader_str: str) -> bytes:
      'data:application/zip;base64...'
     """
 
-    if ('data:application/zip;base64' not in fileReader_str) or \
+    print(fileReader_str)
+    if ('data:application/zip;base64' not in fileReader_str) and \
         ('data:application/x-zip-compressed;base64' not in fileReader_str):
         raise Exception("'decode_fileReader_zip' should receive an encoded file "
                         "complient to JavaScript FileReader format.")
