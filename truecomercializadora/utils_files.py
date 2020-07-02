@@ -277,12 +277,16 @@ def decode_fileReader_zip(fileReader_str: str) -> bytes:
      'data:application/zip;base64...'
     """
 
-    if ('data:application/zip;base64' not in fileReader_str):
+    if ('data:application/zip;base64' not in fileReader_str or\
+        'data:application/x-zip-compressed;base64' not in fileReader_str):
         raise Exception("'decode_fileReader_zip' should receive an encoded file "\
                         "complient to JavaScript FileReader format.")
 
     # Remove fileReader zipfile message from string
-    b64zip_str = fileReader_str.replace('data:application/zip;base64,','')
+    if ('data:application/zip;base64' in fileReader_str):
+        b64zip_str = fileReader_str.replace('data:application/zip;base64,','')
+    else:
+        b64zip_str = fileReader_str.replace('data:application/x-zip-compressed;base64', '')
     # Decode b64string back to a b64bytes
     b64zip_bytes = b64zip_str.encode('latin-1')
     # b64decode bytes back to zipfile bytes
