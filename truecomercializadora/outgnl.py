@@ -156,6 +156,7 @@ def get_df_from_registro_gs(registro_str: str) -> pd.DataFrame:
     # Retornando a lista de dicionarios como um pd.DataFrame     
     return pd.DataFrame(L)
 
+
 def get_df_from_registro_gl(registro_str: str) -> pd.DataFrame:
     """
     Retorna o pd.DataFrame correspondente ao Registro GL informado.
@@ -193,6 +194,7 @@ def get_df_from_registro_gl(registro_str: str) -> pd.DataFrame:
     # Retornando a lista de dicionarios como um pd.DataFrame     
     return pd.DataFrame(L)
 
+
 def get_df_from_registro_nl(registro_str: str) -> pd.DataFrame:
     """
     Retorna o pd.DataFrame correspondente ao Registro NL informado.
@@ -218,3 +220,53 @@ def get_df_from_registro_nl(registro_str: str) -> pd.DataFrame:
     
     # Retornando a lista de dicionarios como um pd.DataFrame     
     return pd.DataFrame(L)
+
+
+def get_nome_usina_from_registro_tg(registro_tg_str: str, id_usina: int) -> str:
+    '''
+    Retorna a string referente ao nome da usina.
+    '''
+    if type(registro_tg_str) != str:
+        raise Exception("'get_nome_usina_from_registro_tg' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_tg_str)))
+
+    if type(id_usina) != int:
+        raise Exception("'get_nome_usina_from_registro_tg' can only receive an int. "
+                        "{} is not a valid input type".format(type(id_usina)))
+
+    if 'cod  ss      nome   ip   infl disp    cvu    infl disp    cvu    infl disp    cvu' not in registro_tg_str:
+        raise Exception("Input string does not seem to represent a Registro TG"
+                        "string. Check the input")
+
+    registro_tg_df = get_df_from_registro_tg(registro_str=registro_tg_str)
+    query_usina = registro_tg_df.query('cod_usina == {}'.format(id_usina))
+    
+    if not query_usina.empty:
+        return query_usina.nome_usina.values[0]
+    else:
+        raise Exception('{id_usina} not found in Registro TG'.format(id_usina=id_usina))
+
+ 
+def get_lag_usina_from_registro_nl(registro_nl_str: str, id_usina: int) -> str:
+    '''
+    Retorna a string referente ao nome da usina.
+    '''
+    if type(registro_nl_str) != str:
+        raise Exception("'get_lag_usina_from_registro_nl' can only receive a string. "
+                        "{} is not a valid input type".format(type(registro_nl_str)))
+
+    if type(id_usina) != int:
+        raise Exception("'get_lag_usina_from_registro_nl' can only receive an int. "
+                        "{} is not a valid input type".format(type(id_usina)))
+
+    if 'cod  ss  lag' not in registro_nl_str:
+        raise Exception("Input string does not seem to represent a Registro NL"
+                        "string. Check the input")
+
+    registro_nl_df = get_df_from_registro_nl(registro_str=registro_nl_str)
+    query_usina = registro_nl_df.query('cod == {}'.format(id_usina))
+
+    if not query_usina.empty:
+        return query_usina.lag.values[0]
+    else:
+        raise Exception('{id_usina} not found in Registro NL'.format(id_usina=id_usina))
