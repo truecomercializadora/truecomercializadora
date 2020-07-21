@@ -169,11 +169,9 @@ def get_cmo_relato(relato_str):
     Retorna um dicionario contendo os custos marginais de operacao do primeiro estagio
       a partir do relato.rv# de uma sensibilidade do DECOMP.
     """
-    begin = 'Custo marginal de operacao do subsistema'
-    end = 'RELATORIO  DA  OPERACAO'
-    cmo_report = utils_files.select_document_part(relato_str, begin, end)
+    begin = utils_files.find_all_occurences_of_substring(relato_str, 'Custo marginal de operacao do subsistema')[0]
 
-    lines = cmo_report.splitlines()
+    lines = relato_str[begin:].splitlines()[:7]
     cmo_lines = lines[:5]
     cmo = {
         custo.replace('Custo marginal de operacao do subsistema ', '').replace(' ($/MWh)','').replace(':','').strip().split()[0]: float(custo.replace('Custo marginal de operacao do subsistema ', '').replace(' ($/MWh)','').replace(':','').strip().split()[1])
@@ -182,7 +180,7 @@ def get_cmo_relato(relato_str):
     
     inviavel = False
     inviabilidades = ''
-    if 'OPERACAO INVIAVEL' in cmo_report:
+    if 'OPERACAO INVIAVEL' in lines[6]:
         inviavel = True
         inviabilidades = lines[5:]
     return {
