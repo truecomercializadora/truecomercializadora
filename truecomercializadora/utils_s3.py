@@ -1,5 +1,7 @@
 import boto3
+from botocore.exceptions import ClientError
 import io
+import logging
 
 def _get_s3_client():
     """
@@ -85,3 +87,30 @@ def upload_io_object(dataIO, bucket_name, key_name, public=False):
         }
     )
     return _remove_access_key_from_link(url_output)
+
+def create_presigned_url(client_method_name:str, method_parameters: str=None,
+                                  expiration: int=3600, http_method: str=None) -> str:
+    """Generate a presigned URL to invoke an S3.Client method
+
+    Not all the client methods provided in the AWS Python SDK are supported.
+
+    :param client_method_name: Name of the S3.Client method, e.g., 'list_buckets'
+    :param method_parameters: Dictionary of parameters to send to the method
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :param http_method: HTTP method to use (GET, etc.)
+    :return: Presigned URL as string. If error, returns None.
+    """
+
+    # Generate a presigned URL for the S3 client method
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.generate_presigned_url(ClientMethod=client_method_name,
+                                                    Params=method_parameters,
+                                                    ExpiresIn=expiration,
+                                                    HttpMethod=http_method)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    # The response contains the presigned URL
+    return response
