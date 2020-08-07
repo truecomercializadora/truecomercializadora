@@ -3,8 +3,11 @@ Modulo desenhado para conter as classes e funcoes relacionadas aos estudos de
  decks encadeados.
 """
 
+import datetime
 import os
 import zipfile as zp
+
+from . import utils_datetime
 
 
 def get_decks_estudo(estudo_zip: zp.ZipFile) -> dict:
@@ -75,3 +78,31 @@ def get_estudo_files(estudo_zip: zp.ZipFile) -> dict:
 
     D[deck_name].update({file_name.lower(): file_path})
   return D
+
+def get_deck_names(refInicio:str, refHorizonte: str) -> dict:
+    '''
+    Retorna um dicionario com o nome dos decks, newave e decomp
+     de todo o horizonte encadeado.
+     
+     :refInicio = data no formato 'YYYY-mm-rev'
+     :refHorizonte = data no formato 'YYYY-mm-rev'
+    '''
+    # Decompondo as datas do deck de entrada e o deck final do horizonte
+    begin_datetime = datetime.datetime(int(refInicio.split('-')[0]), int(refInicio.split('-')[1]), 1)
+
+    end_rev = int(refHorizonte.split('-')[2])
+    end_datetime = datetime.datetime(int(refHorizonte.split('-')[0]), int(refHorizonte.split('-')[1]), 1)
+    
+    diff_months = utils_datetime.diff_month(end_datetime, begin_datetime)
+
+    # Construindo o dicionario
+    D = {'decomp': [], 'newave': []}
+    deck_date = begin_datetime.date()
+    for _ in range(1, diff_months + 1):
+        deck_date = utils_datetime.add_one_month(deck_date)
+        dc_name = 'DC{}{:02d}-sem{}'.format(deck_date.year, deck_date.month, end_rev+1)
+        nw_name = 'NW{}{:02d}'.format(deck_date.year, deck_date.month)
+        D['decomp'].append(dc_name)
+        D['newave'].append(nw_name)
+        
+    return D
