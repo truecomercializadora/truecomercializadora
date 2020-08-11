@@ -19,10 +19,7 @@ def build_zipfile_from_bytesarray(bytes_array: bytes) -> zp.ZipFile:
     """
     return zp.ZipFile(io.BytesIO(bytes_array), "r")
 
-import io
-import zipfile as zp
-
-def build_zipfile(files_dict: dict) -> bytes:
+def build_zipfile_from_files_dict(files_dict: dict) -> bytes:
     """
     Returns a zipfile archive represented by its bytes array. The function
      creates a zipfile archive based on a dict containing the path of each
