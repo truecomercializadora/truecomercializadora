@@ -1,9 +1,11 @@
 """
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo dadger
 """
+import datetime
 import io
 import pandas as pd
 
+from . import utils_datetime
 from . import utils_files
 from . import decomp
 
@@ -203,3 +205,48 @@ def write_registro_ct_from_df(
         )
 
     return "\r\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
+
+def get_registro_te(dadger_str: str) -> str:
+    """
+    Retorna a substring correspondente ao REGISTRO TE (Bloco 1) de um dadger dado
+     na forma de uma string
+    """
+    if type(dadger_str) != str:
+        raise Exception("'get_registro_te' can only receive a string."
+                        "{} is not a valid input type".format(type(dadger_str)))
+
+    if 'BLOCO 1  *** TITULO ***' not in dadger_str:
+        raise Exception("Input string does not seem to represent a dadger.rv# "
+                        "string. Check the input")
+
+    begin = "BLOCO 1"
+    end = "BLOCO 2"
+    registro_te = utils_files.select_document_part(dadger_str, begin, end)
+    
+    # eliminando as linhas antes e depois dos dados     
+    registro_te = '\r\n'.join(registro_te.splitlines()[3:-2])
+
+    return registro_te
+
+def write_registro_te(ano_inicio: int, mes_inicio: int, rev: int) -> str:
+    """
+    Retorna a substring correspondente ao REGISTRO TE (Bloco 1) de um dadger dado
+     considerando os inputs:
+     : mes_inicio deck
+     : ano_inicio deck
+     : rev do deck
+    """
+    if (type(ano_inicio) != int) or (type(mes_inicio) != int) or (type(rev) != int):
+        raise Exception("'write_registro_te' can only receive integers.")
+    
+    date_ini = datetime.date(ano_inicio, mes_inicio, 1)
+    date_fim = utils_datetime.add_one_month(date_ini)
+
+    ref_inicio = '{}/{}'.format(
+        utils_datetime.get_br_month(date_ini.month).upper(),
+        date_ini.year - 2000)
+    ref_fim = '{}/{}'.format(
+        utils_datetime.get_br_month(date_fim.month).upper(),
+        date_fim.year - 2000)
+
+    return '&TE\r\n&&   CENARIOS GERADOS COM HISTORICO DE 1931-2018\r\nTE  PMO - {inicio} - {fim} - REV {rev} - FCF COM CVAR - 12 REE - VALOR ESPERADO      '.format(inicio=ref_inicio, fim=ref_fim, rev=rev)
