@@ -109,24 +109,30 @@ def get_deck_names(ref_inicio:str, ref_horizonte: str) -> dict:
       raise Exception("'ref_horizonte' must have a valid 'rev' value between 1 and 4")
 
     # Decompondo as datas do deck de entrada e o deck final do horizonte
+    begin_rev = int(ref_inicio.split('-')[2])
     begin_datetime = datetime.datetime(int(ref_inicio.split('-')[0]), int(ref_inicio.split('-')[1]), 1)
 
     end_rev = int(ref_horizonte.split('-')[2])
     end_datetime = datetime.datetime(int(ref_horizonte.split('-')[0]), int(ref_horizonte.split('-')[1]), 1)
 
-    if begin_datetime >= end_datetime:
-      raise Exception("'ref_inicio' should be bigger than 'ref_horizonte'")
+    if not begin_datetime <= end_datetime:
+      raise Exception("'ref_inicio' should be earlier then or equal to 'ref_horizonte'")
+
+    if (begin_datetime == end_datetime) and (begin_rev > end_rev):
+      raise Exception("'ref_inicio' and 'ref_horizonte' are from the same date, but rev_inicio is bigger than rev_horizonte")
     
     diff_months = utils_datetime.diff_month(end_datetime, begin_datetime)
-
+    
     # Construindo o dicionario
     D = {'decomp': [], 'newave': []}
     deck_date = begin_datetime.date()
-    for _ in range(1, diff_months + 1):
-        deck_date = utils_datetime.add_one_month(deck_date)
-        dc_name = 'DC{}{:02d}-sem{}'.format(deck_date.year, deck_date.month, end_rev+1)
+    for _ in range(1, diff_months + 2):
         nw_name = 'NW{}{:02d}'.format(deck_date.year, deck_date.month)
-        D['decomp'].append(dc_name)
         D['newave'].append(nw_name)
+        for i in range(begin_rev+1, end_rev+1 + 1):
+            dc_name = 'DC{}{:02d}-sem{}'.format(deck_date.year, deck_date.month, i)
+            D['decomp'].append(dc_name)
+        
+        deck_date = utils_datetime.add_one_month(deck_date)
         
     return D
