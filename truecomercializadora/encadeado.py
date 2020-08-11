@@ -79,43 +79,43 @@ def get_estudo_files(estudo_zip: zp.ZipFile) -> dict:
     D[deck_name].update({file_name.lower(): file_path})
   return D
 
-def get_deck_names(refInicio:str, refHorizonte: str) -> dict:
+def get_deck_names(ref_inicio:str, ref_horizonte: str) -> dict:
     '''
     Retorna um dicionario com o nome dos decks, newave e decomp
      de todo o horizonte encadeado.
      
-     :refInicio = data no formato 'YYYY-mm-rev'
-     :refHorizonte = data no formato 'YYYY-mm-rev'
+     :ref_inicio = data no formato 'YYYY-mm-rev'
+     :ref_horizonte = data no formato 'YYYY-mm-rev'
     '''
-    if type(refInicio) != str or type(refHorizonte) != str:
+    if type(ref_inicio) != str or type(ref_horizonte) != str:
       raise Exception("'get_deck_names' can only receive str inputs")
 
-    if not refInicio.split('-')[2].isdigit():
-      raise Exception("'refInicio' must have a valid 'REV' ")
+    if not ref_inicio.split('-')[2].isdigit():
+      raise Exception("'ref_inicio' must have a valid 'REV' ")
 
-    if int(refInicio.split('-')[2]) not in range(5):
-      raise Exception("'refInicio' must have a valid 'rev' value between 1 and 4")
+    if int(ref_inicio.split('-')[2]) not in range(5):
+      raise Exception("'ref_inicio' must have a valid 'rev' value between 1 and 4")
 
-    if int(refInicio.split('-')[1]) not in range(1, 13):
-      raise Exception("'refInicio' must have a valid 'rev' value between 1 and 4")
+    if int(ref_inicio.split('-')[1]) not in range(1, 13):
+      raise Exception("'ref_inicio' must have a valid 'rev' value between 1 and 4")
 
-    if not refHorizonte.split('-')[2].isdigit():
-      raise Exception("'refHorizonte' must have a valid integer 'rev' ")
+    if not ref_horizonte.split('-')[2].isdigit():
+      raise Exception("'ref_horizonte' must have a valid integer 'rev' ")
 
-    if int(refHorizonte.split('-')[2]) not in range(5):
-      raise Exception("'refHorizonte' must have a valid 'rev' value between 1 and 4")
+    if int(ref_horizonte.split('-')[2]) not in range(5):
+      raise Exception("'ref_horizonte' must have a valid 'rev' value between 1 and 4")
 
-    if int(refHorizonte.split('-')[1]) not in range(1, 13):
-      raise Exception("'refHorizonte' must have a valid 'rev' value between 1 and 4")
+    if int(ref_horizonte.split('-')[1]) not in range(1, 13):
+      raise Exception("'ref_horizonte' must have a valid 'rev' value between 1 and 4")
 
     # Decompondo as datas do deck de entrada e o deck final do horizonte
-    begin_datetime = datetime.datetime(int(refInicio.split('-')[0]), int(refInicio.split('-')[1]), 1)
+    begin_datetime = datetime.datetime(int(ref_inicio.split('-')[0]), int(ref_inicio.split('-')[1]), 1)
 
-    end_rev = int(refHorizonte.split('-')[2])
-    end_datetime = datetime.datetime(int(refHorizonte.split('-')[0]), int(refHorizonte.split('-')[1]), 1)
+    end_rev = int(ref_horizonte.split('-')[2])
+    end_datetime = datetime.datetime(int(ref_horizonte.split('-')[0]), int(ref_horizonte.split('-')[1]), 1)
 
     if begin_datetime >= end_datetime:
-      raise Exception("'refInicio' should be bigger than 'refHorizonte'")
+      raise Exception("'ref_inicio' should be bigger than 'ref_horizonte'")
     
     diff_months = utils_datetime.diff_month(end_datetime, begin_datetime)
 
