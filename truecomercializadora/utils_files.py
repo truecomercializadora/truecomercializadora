@@ -19,6 +19,36 @@ def build_zipfile_from_bytesarray(bytes_array: bytes) -> zp.ZipFile:
     """
     return zp.ZipFile(io.BytesIO(bytes_array), "r")
 
+import io
+import zipfile as zp
+
+def build_zipfile(files_dict: dict) -> bytes:
+    """
+    Returns a zipfile archive represented by its bytes array. The function
+     creates a zipfile archive based on a dict containing the path of each
+     file and its corresponding bytes.
+     
+     :files_dict = {'file_pathA': b'...', 'file_pathB': b'...'}
+    """
+
+    if type(files_dict) != dict:
+        raise Exception("'create_zipfile' should receive a dict as primary input."
+                        "{} is not a valid input type.".format(files_dict))
+
+    # Initialize a buffer for the new zipfile
+    buff = io.BytesIO()
+    with zp.ZipFile(buff, mode="w",compression=zp.ZIP_DEFLATED) as zipwrite:
+        
+        # Iterate over all files within the original zipfile
+        for file in files_dict:
+            file_bytes = files_dict.get(file)
+
+            # Write file to buffer only the files within update_dict
+            zipwrite.writestr(file, file_bytes)
+
+    # Return a bytes array
+    return buff.getvalue()
+
 def update_zipfile(original_zip: zp.ZipFile, update_path: str, content_bytes: bytes) -> bytes:
     """
     Returns an updated zipfile archive represented by its bytes array. The 
