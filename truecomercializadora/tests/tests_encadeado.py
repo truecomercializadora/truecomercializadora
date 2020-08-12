@@ -109,3 +109,18 @@ class TestDeckNames(TestCase):
                 encadeado.get_deck_names(
                     ref_inicio=ref_inicio,
                     ref_horizonte=ref_horizonte)
+
+        with self.subTest():
+            ref_inicio = '2020-11-0'
+            ref_horizonte = '2020-11-0'
+
+            decks = encadeado.get_deck_names(
+                ref_inicio=ref_inicio,
+                ref_horizonte=ref_horizonte)
+
+            result = {
+                'decomp': ['DC202011-sem1'],
+                'newave': ['NW202011']
+            }
+
+            self.assertEqual(decks, result)

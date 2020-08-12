@@ -28,6 +28,48 @@ def get_mercado_energia_total(sistema_str: str) -> str:
 
     return mercado_energia_total
 
+def get_mercado_energia_total_dict(mercado_energia_total_str: str):
+    '''
+    Retorna um objeto contendo os valores de carga, distribuidos em ano, submercado
+     e mes, do bloco Mercado de Energia Total de um sistema.dat
+
+     : mercado_energia_total_str deve ser a string obtida atraves da funcao
+      'get_mercado_energia_total()'
+    '''
+
+    if type(mercado_energia_total_str) != str:
+        raise Exception("'get_mercado_energia_total_dict' can only receive a string."
+                        "{} is not a valid input type".format(type(mercado_energia_total_str)))
+
+    submercados =  {
+        'SE': mercado_energia_total_str.splitlines()[4:10],
+        'S': mercado_energia_total_str.splitlines()[11:17],
+        'NE': mercado_energia_total_str.splitlines()[18:24],
+        'N': mercado_energia_total_str.splitlines()[25:31]
+    }
+
+    D = {}
+    for submercado in submercados:
+        d = {}
+        for row in submercados[submercado]:
+            values = {
+                'jan':row[5:15].strip(),
+                'fev':row[15:23].strip(),
+                'mar':row[23:31].strip(),
+                'abr':row[31:39].strip(),
+                'mai':row[39:47].strip(),
+                'jun':row[47:55].strip(),
+                'jul':row[55:63].strip(),
+                'ago':row[63:71].strip(),
+                'set':row[71:79].strip(),
+                'out':row[79:87].strip(),
+                'nov':row[87:95].strip(),
+                'dez':row[95:].strip(),     
+            }
+            d.update({row[:5].strip(): values})
+        D.update({submercado: d})
+    return D
+
 def _get_mercado_energia_formated_line(
     df_submercado: pd.DataFrame,
     format_type: str,
