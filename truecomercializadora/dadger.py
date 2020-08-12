@@ -8,6 +8,7 @@ import pandas as pd
 from . import utils_datetime
 from . import utils_files
 from . import decomp
+from . import ons
 
 def get_registro_dp(dadger_str: str) -> str:
     """
@@ -250,3 +251,46 @@ def write_registro_te(ano_inicio: int, mes_inicio: int, rev: int) -> str:
         date_fim.year - 2000)
 
     return '&TE\r\n&&   CENARIOS GERADOS COM HISTORICO DE 1931-2018\r\nTE  PMO - {inicio} - {fim} - REV {rev} - FCF COM CVAR - 12 REE - VALOR ESPERADO      '.format(inicio=ref_inicio, fim=ref_fim, rev=rev)
+
+def get_registro_dt(dadger_str: str) -> str:
+    """
+    Retorna a substring correspondente ao REGISTRO DT (Bloco 17) de um dadger dado
+     na forma de uma string
+    """
+    if type(dadger_str) != str:
+        raise Exception("'get_registro_dt' can only receive a string."
+                        "{} is not a valid input type".format(type(dadger_str)))
+
+    if 'BLOCO 17 ***' not in dadger_str:
+        raise Exception("Input string does not seem to represent a dadger.rv# "
+                        "string. Check the input")
+
+    begin = "BLOCO 17"
+    end = "BLOCO 18"
+    registro_dt = utils_files.select_document_part(dadger_str, begin, end)
+    
+    # eliminando as linhas antes e depois dos dados     
+    registro_dt = '\r\n'.join(registro_dt.splitlines()[3:-2])
+
+    return registro_dt
+
+def write_registro_dt(ano_deck: int, mes_deck: int, rev: int) -> str:
+    """
+    Retorna a substring correspondente ao REGISTRO DT (Bloco 17) de um dadger dado
+     considerando os inputs:
+     : mes_deck mes do deck desejado
+     : ano_deck ano do deck desejado 
+     : rev do deck
+    """
+    if (type(ano_deck) != int) or (type(mes_deck) != int) or (type(rev) != int):
+        raise Exception("'write_registro_dt' can only receive integers.")
+    
+    estagios = ons.get_semanas_operativas(ano=ano_deck, mes=mes_deck)
+
+    ano = estagios[rev]['inicio'].year
+    mes = estagios[rev]['inicio'].month
+    dia = estagios[rev]['inicio'].day
+
+    str_format = '&DT\r\nDT  {:02d}   {:02d}   {}'
+
+    return str_format.format(dia, mes, ano)
