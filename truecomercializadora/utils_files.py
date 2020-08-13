@@ -5,12 +5,12 @@ A module designed to keep functions regarding all sorts of files, from a -
  in order to understand any of the functions defined here.
 """
 import base64
+import tarfile
 import csv
 import io
 import os
 import re
 import zipfile as zp
-
 
 def build_zipfile_from_bytesarray(bytes_array: bytes) -> zp.ZipFile:
     """
@@ -18,6 +18,12 @@ def build_zipfile_from_bytesarray(bytes_array: bytes) -> zp.ZipFile:
     getting zipfiles from the requests
     """
     return zp.ZipFile(io.BytesIO(bytes_array), "r")
+
+def build_tarfile_from_bytesarray(bytes_array: bytes) -> tarfile:
+    """
+    Returns a tarfile class from a tarfile bytes array.
+    """
+    return tarfile.open(fileobj=io.BytesIO(bytes_array))
 
 def build_zipfile_from_files_dict(files_dict: dict) -> bytes:
     """
