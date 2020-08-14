@@ -6,10 +6,10 @@ import pandas as pd
 
 from . import utils_files
 
-def get_mercado_energia_total(sistema_str: str) -> str:
+def get_mercado_energia_total_str(sistema_str: str) -> str:
     """
-    Retorna a substring correspondente ao REGISTRO DP (Bloco 6) de um dadger dado
-     na forma de uma string
+    Retorna a substring correspondente ao bloco de mercado de energia total de um
+     arquivo sistema.dat em seu formato string.
     """
     if type(sistema_str) != str:
         raise Exception("'get_mercado_energia_total' can only receive a string."
@@ -24,9 +24,9 @@ def get_mercado_energia_total(sistema_str: str) -> str:
     mercado_energia_total = utils_files.select_document_part(sistema_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    mercado_energia_total = '\r\n'.join(mercado_energia_total.splitlines()[:-1])
+    mercado_energia_total_str = '\r\n'.join(mercado_energia_total.splitlines()[:-1])
 
-    return mercado_energia_total
+    return mercado_energia_total_str
 
 def get_mercado_energia_total_dict(mercado_energia_total_str: str):
     '''
@@ -41,13 +41,17 @@ def get_mercado_energia_total_dict(mercado_energia_total_str: str):
         raise Exception("'get_mercado_energia_total_dict' can only receive a string."
                         "{} is not a valid input type".format(type(mercado_energia_total_str)))
 
+    file_lines = mercado_energia_total_str.splitlines()
+
+    # Dividindo a string em submercados
     submercados =  {
-        'SE': mercado_energia_total_str.splitlines()[4:10],
-        'S': mercado_energia_total_str.splitlines()[11:17],
-        'NE': mercado_energia_total_str.splitlines()[18:24],
-        'N': mercado_energia_total_str.splitlines()[25:31]
+        'SE': file_lines[4:10],
+        'S': file_lines[11:17],
+        'NE': file_lines[18:24],
+        'N': file_lines[25:31]
     }
 
+    # Escrevendo cada submercado de forma iterativa para um dicionario
     D = {}
     for submercado in submercados:
         d = {}
@@ -202,3 +206,83 @@ def write_mercado_energia(
 
     output_str = master_io.getvalue().decode() + bloco_sudeste + bloco_sul + bloco_nordeste + bloco_norte
     return output_str.strip()
+
+def get_usinas_nao_simuladas_str(sistema_str: str) -> str:
+    """
+    Retorna a substring correspondente ao bloco de usinas nao simuladas
+     do arquivo sistema.dat em seu formato string.
+    """
+    if type(sistema_str) != str:
+        raise Exception("'get_usinas_nao_simuladas_str' can only receive a string."
+                        "{} is not a valid input type".format(type(sistema_str)))
+
+    if 'GERACAO DE USINAS NAO SIMULADAS' not in sistema_str:
+        raise Exception("Input string does not seem to represent a sistema.dat "
+                        "string. Check the input")
+
+    begin = ' GERACAO DE USINAS NAO SIMULADAS'
+    begin_idx = sistema_str.find(begin)
+    
+    # eliminando as linhas antes e depois dos dados     
+    usinas_nao_simuladas_str = '\r\n'.join(sistema_str[begin_idx:].splitlines()[:-1])
+
+    return usinas_nao_simuladas_str
+
+def get_nao_simuladas_dict(usinas_nao_simuladas_str: str):
+    '''
+    Retorna um objeto contendo os valores despacho de cada submercado
+     tipo de usina e mes, do bloco Usinas Nao Simuladas de um sistema.dat
+
+     : get_nao_simuladas_dict deve ser a string obtida atraves da funcao
+      'get_usinas_nao_simuladas_str()'
+    '''
+
+    if type(usinas_nao_simuladas_str) != str:
+        raise Exception("'get_nao_simuladas_dict' can only receive a string."
+                        "{} is not a valid input type".format(type(usinas_nao_simuladas_str)))
+
+    file_lines = file_lines = usinas_nao_simuladas_str.splitlines()
+    
+    submercados = {
+        'SE':file_lines[3:27],
+        'S':file_lines[27:51],
+        'NE':file_lines[51:75],
+        'N':file_lines[75:99]
+    }
+
+    # Escrevendo cada submercado em um dicionario
+    nao_simuladas = {}
+    for submercado in submercados:
+        D = {}
+        bloco_usinas = {
+            'PCH':submercados[submercado][1:6],
+            'PCT':submercados[submercado][7:12],
+            'EOL':submercados[submercado][13:18],
+            'UFV':submercados[submercado][19:24]
+        }
+        
+        # Adicionando cada bloco de tipo de usina
+        for bloco in bloco_usinas:
+            d = {}
+            
+            # Iterando pelos anos do bloco
+            for row in bloco_usinas[bloco]:
+                values = {
+                    'jan':row[5:15].strip(),
+                    'fev':row[15:23].strip(),
+                    'mar':row[23:31].strip(),
+                    'abr':row[31:39].strip(),
+                    'mai':row[39:47].strip(),
+                    'jun':row[47:55].strip(),
+                    'jul':row[55:63].strip(),
+                    'ago':row[63:71].strip(),
+                    'set':row[71:79].strip(),
+                    'out':row[79:87].strip(),
+                    'nov':row[87:95].strip(),
+                    'dez':row[95:].strip(),     
+                }
+                d.update({row[:5].strip(): values})
+            D.update({bloco: d})
+        nao_simuladas.update({submercado: D})
+    
+    return nao_simuladas
