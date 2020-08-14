@@ -206,3 +206,14 @@ def diff_month(dt0: datetime.datetime, dt1: datetime.datetime) -> int:
                         'datetime.datetime types are allowed')
 
     return abs((dt0.year - dt1.year) * 12 + dt0.month - dt1.month)
+
+def get_elapsed_minutes(timeStamp: float) -> str:
+    '''
+    Funcao recebe a diferenca entre horario de inicio e de termino em segundos 
+    e retorna uma string que descreve quantos minutos e segundos se passaram
+    '''
+    hours = timeStamp//3600
+    timeStamp = timeStamp - 3600*hours
+    minutes = timeStamp//60
+    seconds = timeStamp - 60*minutes
+    return '{}min {}s'.format(int(minutes),int(seconds))
