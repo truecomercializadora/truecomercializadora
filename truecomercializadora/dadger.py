@@ -33,7 +33,6 @@ def get_registro_dp(dadger_str: str) -> str:
     else:
         registro_dp = '\n'.join(registro_dp_str.splitlines()[2:-2])
 
-    print(registro_dp)
     return registro_dp
 
 def get_registro_ct(dadger_str: str) -> str:
