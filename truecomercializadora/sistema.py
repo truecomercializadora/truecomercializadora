@@ -19,8 +19,8 @@ def get_mercado_energia_total_str(sistema_str: str) -> str:
         raise Exception("Input string does not seem to represent a sistema.dat "
                         "string. Check the input")
 
-    begin = ' MERCADO DE ENERGIA TOTAL'
-    end = ' GERACAO DE USINAS NAO SIMULADAS'
+    begin = 'MERCADO DE ENERGIA TOTAL'
+    end = 'GERACAO DE USINAS NAO SIMULADAS'
     mercado_energia_total = utils_files.select_document_part(sistema_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
