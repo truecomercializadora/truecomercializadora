@@ -27,8 +27,11 @@ def get_registro_dp(dadger_str: str) -> str:
     end = "BLOCO 7"
     registro_dp = utils_files.select_document_part(dadger_str, begin, end)
     
-    # eliminando as linhas antes e depois dos dados     
-    registro_dp = '\r\n'.join(registro_dp.splitlines()[2:-2])
+    # eliminando as linhas antes e depois dos dados
+    if '\r\n' in dadger_str:
+        registro_dp = '\r\n'.join(registro_dp.splitlines()[2:-2])
+    else:
+        registro_dp = '\n'.join(registro_dp.splitlines()[2:-2])
 
     return registro_dp
 
