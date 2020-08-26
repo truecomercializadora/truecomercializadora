@@ -28,10 +28,7 @@ def get_registro_dp(dadger_str: str) -> str:
     registro_dp_str = utils_files.select_document_part(dadger_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados
-    if '\r\n' in registro_dp_str:
-        registro_dp = '\r\n'.join(registro_dp_str.splitlines()[2:-2])
-    else:
-        registro_dp = '\n'.join(registro_dp_str.splitlines()[2:-2])
+    registro_dp = '\n'.join(registro_dp_str.splitlines()[2:-2])
 
     return registro_dp
 
@@ -53,7 +50,7 @@ def get_registro_ct(dadger_str: str) -> str:
     registro_ct = utils_files.select_document_part(dadger_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_ct = '\r\n'.join(registro_ct.splitlines()[2:-2])
+    registro_ct = '\n'.join(registro_ct.splitlines()[2:-2])
 
     return registro_ct
 
@@ -89,13 +86,13 @@ def write_registro_dp(
     estagios_decomp = decomp.get_estagios(ano=ano_deck,mes=mes_deck)
 
     master_io = io.BytesIO()
-    master_io.write("&----------------------------------------------------------------------------------------------\r\n".encode("latin-1"))
-    master_io.write("&                   PESADA              MEDIA               LEVE\r\n".encode('latin-1'))
-    master_io.write("&   5     10  15   20        30        40        50        60        70\r\n".encode('latin-1'))
-    master_io.write("&   ++    +   +    +--------++--------++--------++--------++--------++--------+\r\n".encode('latin-1'))
-    master_io.write("&   IP    S  PAT     MWmed    Pat_1(h)   MWmed    Pat_2(h)   MWmed    Pat_3(h)\r\n".encode('latin-1'))
-    master_io.write("&   ++    +   +    +--------++--------++--------++--------++--------++--------+\r\n".encode('latin-1'))
-    master_io.write("&DP\r\n".encode('latin-1'))
+    master_io.write("&----------------------------------------------------------------------------------------------\n".encode("latin-1"))
+    master_io.write("&                   PESADA              MEDIA               LEVE\n".encode('latin-1'))
+    master_io.write("&   5     10  15   20        30        40        50        60        70\n".encode('latin-1'))
+    master_io.write("&   ++    +   +    +--------++--------++--------++--------++--------++--------+\n".encode('latin-1'))
+    master_io.write("&   IP    S  PAT     MWmed    Pat_1(h)   MWmed    Pat_2(h)   MWmed    Pat_3(h)\n".encode('latin-1'))
+    master_io.write("&   ++    +   +    +--------++--------++--------++--------++--------++--------+\n".encode('latin-1'))
+    master_io.write("&DP\n".encode('latin-1'))
     for i, semana in enumerate(estagios_decomp):
         horas_por_patamar = decomp.get_horas_por_patamar(semana, patamares_table)
         for j, subsistema in enumerate(cargas_mes_atual):
@@ -109,7 +106,7 @@ def write_registro_dp(
                 patamar_medio = subsistema['cargas']['media']
                 patamar_baixo = subsistema['cargas']['leve']
             master_io.write(
-                "DP  {:>2d}   {:>2d}   3    {:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}\r\n".format(
+                "DP  {:>2d}   {:>2d}   3    {:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}{:>10.1f}\n".format(
                 i+1,
                 indice,
                 patamar_alto,
@@ -120,16 +117,16 @@ def write_registro_dp(
                 horas_por_patamar['leve'],
             ).encode('latin-1'))
             if (j+1) % 4 == 0:
-                master_io.write("DP  {:>2d}   11   3              {:>10.1f}          {:>10.1f}          {:>10.1f}\r\n".format(
+                master_io.write("DP  {:>2d}   11   3              {:>10.1f}          {:>10.1f}          {:>10.1f}\n".format(
                     i+1,
                     horas_por_patamar['pesada'],
                     horas_por_patamar['media'],
                     horas_por_patamar['leve']
                 ).encode('latin-1'))
-                master_io.write("&\r\n".encode('latin-1'))
+                master_io.write("&\n".encode('latin-1'))
 
     # Retornando o buffer decoded e eliminando as linhas vazias
-    return "\r\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
+    return "\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
 
 def get_df_from_registro_ct(registro_ct_str: str) -> pd.DataFrame:
     """
@@ -180,15 +177,15 @@ def write_registro_ct_from_df(
 
     # Escrevendo o cabecalho padrao
     master_io = io.BytesIO()
-    master_io.write("&----------------------------------------------------------------------------------------\r\n".encode("latin-1"))
-    master_io.write("&___________________________|______________________PATAMAR DE CARGA_____________________|\r\n".encode("latin-1"))
-    master_io.write("&_______USINA_____________| |_____PESADA________|_______MEDIA_______|_______LEVE________|\r\n".encode("latin-1"))
-    master_io.write("&X  COD  SU   NOMEDAUSINES| |INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|\r\n".encode("latin-1"))
-    master_io.write("&|____|___|____________|__| |____|____|_________|____|____|_________|____|____|_________|\r\n".encode("latin-1"))
-    master_io.write("&CT\r\n".encode("latin-1"))
+    master_io.write("&----------------------------------------------------------------------------------------\n".encode("latin-1"))
+    master_io.write("&___________________________|______________________PATAMAR DE CARGA_____________________|\n".encode("latin-1"))
+    master_io.write("&_______USINA_____________| |_____PESADA________|_______MEDIA_______|_______LEVE________|\n".encode("latin-1"))
+    master_io.write("&X  COD  SU   NOMEDAUSINES| |INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|INFL|DISP|CVUCVUCVU|\n".encode("latin-1"))
+    master_io.write("&|____|___|____________|__| |____|____|_________|____|____|_________|____|____|_________|\n".encode("latin-1"))
+    master_io.write("&CT\n".encode("latin-1"))
     
     # Escrevendo as linhas do DataFrame
-    line_format = "CT  {:>3}   {:>1d}   {:<10} {:>1d}   {:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}\r\n"
+    line_format = "CT  {:>3}   {:>1d}   {:<10} {:>1d}   {:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}\n"
     for i, row in registro_ct_df.iterrows():
         master_io.write(
             line_format.format(
@@ -208,7 +205,7 @@ def write_registro_ct_from_df(
             ).encode('latin-1')
         )
 
-    return "\r\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
+    return "\n".join(master_io.getvalue().decode('latin-1').strip().splitlines())
 
 def get_registro_te(dadger_str: str) -> str:
     """
@@ -228,7 +225,7 @@ def get_registro_te(dadger_str: str) -> str:
     registro_te = utils_files.select_document_part(dadger_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_te = '\r\n'.join(registro_te.splitlines()[3:-2])
+    registro_te = '\n'.join(registro_te.splitlines()[3:-2])
 
     return registro_te
 
@@ -253,7 +250,7 @@ def write_registro_te(ano_inicio: int, mes_inicio: int, rev: int) -> str:
         utils_datetime.get_br_month(date_fim.month).upper(),
         date_fim.year - 2000)
 
-    return '&TE\r\n&&   CENARIOS GERADOS COM HISTORICO DE 1931-2018\r\nTE  PMO - {inicio} - {fim} - REV {rev} - FCF COM CVAR - 12 REE - VALOR ESPERADO      '.format(inicio=ref_inicio, fim=ref_fim, rev=rev)
+    return '&TE\n&&   CENARIOS GERADOS COM HISTORICO DE 1931-2018\nTE  PMO - {inicio} - {fim} - REV {rev} - FCF COM CVAR - 12 REE - VALOR ESPERADO      '.format(inicio=ref_inicio, fim=ref_fim, rev=rev)
 
 def get_registro_dt(dadger_str: str) -> str:
     """
@@ -273,7 +270,7 @@ def get_registro_dt(dadger_str: str) -> str:
     registro_dt = utils_files.select_document_part(dadger_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_dt = '\r\n'.join(registro_dt.splitlines()[3:-2])
+    registro_dt = '\n'.join(registro_dt.splitlines()[3:-2])
 
     return registro_dt
 
@@ -294,6 +291,6 @@ def write_registro_dt(ano_deck: int, mes_deck: int, rev: int) -> str:
     mes = estagios[rev]['inicio'].month
     dia = estagios[rev]['inicio'].day
 
-    str_format = '&DT\r\nDT  {:02d}   {:02d}   {}'
+    str_format = '&DT\nDT  {:02d}   {:02d}   {}'
 
     return str_format.format(dia, mes, ano)
