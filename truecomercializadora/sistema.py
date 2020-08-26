@@ -24,7 +24,7 @@ def get_mercado_energia_total_str(sistema_str: str) -> str:
     mercado_energia_total = utils_files.select_document_part(sistema_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    mercado_energia_total_str = '\r\n'.join(mercado_energia_total.splitlines()[:-1])
+    mercado_energia_total_str = '\n'.join(mercado_energia_total.splitlines()[:-1])
 
     return mercado_energia_total_str
 
@@ -97,7 +97,7 @@ def _get_mercado_energia_formated_line(
                         "{} is not a valid input type".format(type(begin_idx)))
 
     if format_type == 'A':
-        line_format = "   {}\n{}    {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \r\n"
+        line_format = "   {}\n{}    {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \n"
         return line_format.format(submercado_number,
             df_submercado.iloc[begin_idx]['data'].year,
             df_submercado.iloc[begin_idx]['valor'],
@@ -114,7 +114,7 @@ def _get_mercado_energia_formated_line(
             df_submercado.iloc[begin_idx+11]['valor']        
         )
     if format_type == 'B':
-        line_format = "{}    {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \r\n"
+        line_format = "{}    {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \n"
         return line_format.format(
             df_submercado.iloc[begin_idx]['data'].year,
             df_submercado.iloc[begin_idx]['valor'],
@@ -131,7 +131,7 @@ def _get_mercado_energia_formated_line(
             df_submercado.iloc[begin_idx+11]['valor']        
         )    
     elif format_type == 'C':
-        line_format = "POS     {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \r\n"
+        line_format = "POS     {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}.  {:>5.0f}. \n"
         return line_format.format(
         df_submercado.iloc[begin_idx]['valor'],
         df_submercado.iloc[begin_idx+1]['valor'],
@@ -195,9 +195,9 @@ def write_mercado_energia(
                         "{} is not a valid input type".format(type(df_norte)))
 
     master_io = io.BytesIO()
-    master_io.write(" MERCADO DE ENERGIA TOTAL\r\n".encode("latin-1"))
-    master_io.write(" XXX\r\n".encode("latin-1"))
-    master_io.write("       XXXJAN. XXXFEV. XXXMAR. XXXABR. XXXMAI. XXXJUN. XXXJUL. XXXAGO. XXXSET. XXXOUT. XXXNOV. XXXDEZ.\r\n".encode('latin-1'))
+    master_io.write(" MERCADO DE ENERGIA TOTAL\n".encode("latin-1"))
+    master_io.write(" XXX\n".encode("latin-1"))
+    master_io.write("       XXXJAN. XXXFEV. XXXMAR. XXXABR. XXXMAI. XXXJUN. XXXJUL. XXXAGO. XXXSET. XXXOUT. XXXNOV. XXXDEZ.\n".encode('latin-1'))
 
     bloco_sudeste = _write_bloco_submercado(df_sudeste, 1)
     bloco_sul = _write_bloco_submercado(df_sul, 2)
@@ -224,7 +224,7 @@ def get_usinas_nao_simuladas_str(sistema_str: str) -> str:
     begin_idx = sistema_str.find(begin)
     
     # eliminando as linhas antes e depois dos dados     
-    usinas_nao_simuladas_str = '\r\n'.join(sistema_str[begin_idx:].splitlines()[:-1])
+    usinas_nao_simuladas_str = '\n'.join(sistema_str[begin_idx:].splitlines()[:-1])
 
     return usinas_nao_simuladas_str
 

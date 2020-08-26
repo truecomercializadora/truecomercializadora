@@ -47,7 +47,7 @@ def get_duracao_patamares_str(patamar_str: str) -> str:
     duracao_patamares = utils_files.select_document_part(patamar_str, begin, end)
 
     # eliminando as linhas antes e depois dos dados     
-    duracao_patamares_str = '\r\n'.join(duracao_patamares.splitlines()[3:])
+    duracao_patamares_str = '\n'.join(duracao_patamares.splitlines()[3:])
 
     return duracao_patamares_str
 
@@ -140,7 +140,7 @@ def get_carga_str(patamar_str: str) -> str:
     carga = utils_files.select_document_part(patamar_str, begin, end)
 
     # eliminando as linhas antes e depois dos dados     
-    carga_str = '\r\n'.join(carga.splitlines()[4:-1])
+    carga_str = '\n'.join(carga.splitlines()[4:-1])
 
     return carga_str
 

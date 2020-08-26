@@ -17,4 +17,4 @@ def get_clast_conjuntural(clast_str: str) -> str:
     str_begin = ' 9999'
     idx_begin = clast_str.find(str_begin)
 
-    return '\r\n'.join(clast_str[idx_begin:].splitlines()[1:])
+    return '\n'.join(clast_str[idx_begin:].splitlines()[1:])

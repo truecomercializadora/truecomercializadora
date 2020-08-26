@@ -250,10 +250,10 @@ def write_expt_file(expt_df: pd.DataFrame) -> bytes:
 		raise Exception("'write_expt_file' can only receive a pandas DataFrame")
 
 	master_io = io.BytesIO()
-	master_io.write('NUM   TIPO   MODIF  MI ANOI MF ANOF\r\n'.encode('latin-1'))
-	master_io.write('XXXX XXXXX XXXXXXXX XX XXXX XX XXXX\r\n'.encode('latin-1'))
+	master_io.write('NUM   TIPO   MODIF  MI ANOI MF ANOF\n'.encode('latin-1'))
+	master_io.write('XXXX XXXXX XXXXXXXX XX XXXX XX XXXX\n'.encode('latin-1'))
 	for line in json.loads(expt_df.reset_index().to_json(orient='records')):
-		master_io.write("{:>4d} {:>5} {:>8.2f} {:>2d} {:>4d} {:>2d} {:>4d}\r\n".format(
+		master_io.write("{:>4d} {:>5} {:>8.2f} {:>2d} {:>4d} {:>2d} {:>4d}\n".format(
 			int(line['numeroUsina']),
 			line['tipoModificacao'],
 			line['novoValor'],
@@ -273,11 +273,11 @@ def write_term_file(term_df: pd.DataFrame) -> bytes:
 		raise Exception("'write_term_file' can only receive a pandas DataFrame")
 
 	master_io = io.BytesIO()
-	master_io.write(' NUM NOME          POT  FCMX    TEIF   IP    <-------------------- GTMIN PARA O PRIMEIRO ANO DE ESTUDO ------------------------|D+ ANOS\r\n'.encode('latin-1'))
-	master_io.write(' XXX XXXXXXXXXXXX  XXXX. XXX.  XXX.XX XXX.XX JAN.XX FEV.XX MAR.XX ABR.XX MAI.XX JUN.XX JUL.XX AGO.XX SET.XX OUT.XX NOV.XX DEZ.XX XXX.XX\r\n'.encode('latin-1'))
+	master_io.write(' NUM NOME          POT  FCMX    TEIF   IP    <-------------------- GTMIN PARA O PRIMEIRO ANO DE ESTUDO ------------------------|D+ ANOS\n'.encode('latin-1'))
+	master_io.write(' XXX XXXXXXXXXXXX  XXXX. XXX.  XXX.XX XXX.XX JAN.XX FEV.XX MAR.XX ABR.XX MAI.XX JUN.XX JUL.XX AGO.XX SET.XX OUT.XX NOV.XX DEZ.XX XXX.XX\n'.encode('latin-1'))
 
-	format_A = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f}\r\n"
-	format_ANGRA2 = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f}\r\n"
+	format_A = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f} {:>6.2f}\n"
+	format_ANGRA2 = "{:>4d} {:<12}  {:>4.0f}. {:>3.0f}.  {:>6.2f} {:>6.2f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f} {:>6.1f}\n"
 	for line in json.loads(term_df.reset_index().to_json(orient='records')):
 		if int(line['numeroUsina']) == 13:
 			str_format = format_ANGRA2
@@ -316,14 +316,14 @@ def write_adterm_file(adterm_df: pd.DataFrame) -> bytes:
         raise Exception("'write_adterm_file' can only receive a pandas DataFrame")
 
     master_io = io.BytesIO()
-    master_io.write(' IUTE  NOME TERMICA LAG\r\n'.encode('latin-1'))
-    master_io.write(' XXXX  XXXXXXXXXXXX  X  XXXXXXX.XX  XXXXXXX.XX  XXXXXXX.XX\r\n'.encode('latin-1'))
+    master_io.write(' IUTE  NOME TERMICA LAG\n'.encode('latin-1'))
+    master_io.write(' XXXX  XXXXXXXXXXXX  X  XXXXXXX.XX  XXXXXXX.XX  XXXXXXX.XX\n'.encode('latin-1'))
     for row in adterm_df.itertuples():
         if row._4 != '':
-            str_format = " {:>4}  {:<12}  {:1}  {:>10.2f}  {:>10.2f}  {:>10.2f}\r\n"
+            str_format = " {:>4}  {:<12}  {:1}  {:>10.2f}  {:>10.2f}  {:>10.2f}\n"
             master_io.write(str_format.format(row._1, row._2, row._3, float(row._4), float(row._5), float(row._6)).encode('latin-1'))
         else:
-            str_format = " {:>4}  {:<12}  {:1}  {:>13}  {:>13}  {:>13}\r\n"
+            str_format = " {:>4}  {:<12}  {:1}  {:>13}  {:>13}  {:>13}\n"
             master_io.write(str_format.format(row._1, row._2, row._3, row._4, row._5, row._6).encode('latin-1'))
     master_io.write(' 9999'.encode('latin-1'))
     

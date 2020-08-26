@@ -25,7 +25,7 @@ def get_registro_tg(outgnl_str: str) -> str:
     registro_tg = utils_files.select_document_part(outgnl_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_tg = '\r\n'.join(registro_tg.splitlines()[2:-2])
+    registro_tg = '\n'.join(registro_tg.splitlines()[2:-2])
 
     return registro_tg
 
@@ -47,7 +47,7 @@ def get_registro_gs(outgnl_str: str) -> str:
     registro_gs = utils_files.select_document_part(outgnl_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_gs = '\r\n'.join(registro_gs.splitlines()[2:-2])
+    registro_gs = '\n'.join(registro_gs.splitlines()[2:-2])
 
     return registro_gs
 
@@ -69,7 +69,7 @@ def get_registro_nl(outgnl_str: str) -> str:
     registro_nl = utils_files.select_document_part(outgnl_str, begin, end)
     
     # eliminando as linhas antes e depois dos dados     
-    registro_nl = '\r\n'.join(registro_nl.splitlines()[2:-2])
+    registro_nl = '\n'.join(registro_nl.splitlines()[2:-2])
 
     return registro_nl
 
@@ -90,7 +90,7 @@ def get_registro_gl(outgnl_str: str) -> str:
     registro_gl = outgnl_str[begin:]
     
     # eliminando as linhas antes e depois dos dados     
-    registro_gl = '\r\n'.join(registro_gl.splitlines()[2:])
+    registro_gl = '\n'.join(registro_gl.splitlines()[2:])
 
     return registro_gl
 
