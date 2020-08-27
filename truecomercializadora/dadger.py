@@ -186,7 +186,7 @@ def write_registro_ct_from_df(
     
     # Escrevendo as linhas do DataFrame
     line_format = "CT  {:>3}   {:>1d}   {:<10} {:>1d}   {:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}{:>5}{:>5}   {:>7}\n"
-    for i, row in registro_ct_df.iterrows():
+    for _, row in registro_ct_df.iterrows():
         master_io.write(
             line_format.format(
                 row['COD'],
