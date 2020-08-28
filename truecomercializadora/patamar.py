@@ -223,3 +223,107 @@ def get_carga_df(carga_dict: dict) -> pd.DataFrame:
                 L.append(row)
 
     return pd.DataFrame(L).set_index(['submercado', 'ano', 'mes'])
+
+# =============================== INTERCAMBIO ==================================
+def get_intercambio_str(patamar_str: str) -> str:
+    """
+    Retorna a substring correspondente ao bloco de intercambios de um 
+     arquivo patamar.dat em seu formato string.
+    """
+    if type(patamar_str) != str:
+        raise Exception("'get_intercambio_str' can only receive a string."
+                        "{} is not a valid input type".format(type(patamar_str)))
+
+    if 'INTERCAMBIO(P.U.INTERC.MEDIO)' not in patamar_str:
+        raise Exception("Input string does not seem to represent a patamar.dat "
+                        "string. Check the input")
+    
+
+    begin = '   A ->B'
+    end = ' SBM  BLOCO'
+
+    intercambio = utils_files.select_document_part(patamar_str, begin, end)
+
+    # eliminando as linhas antes e depois dos dados     
+    intercambio_str = '\r\n'.join(intercambio.splitlines()[4:-1])
+
+    return intercambio_str
+
+def get_intercambio_dict(intercambio_str: str) -> dict:
+    '''
+    Retorna um objeto contendo os P.Us de intercambio, distribuidos em ano,
+     mes e tipo de patamar, interpretados a partir do bloco de intercambios
+     do arquivo patamar.dat
+
+     : intercambio_str deve ser a string obtida atraves da funcao
+      'get_intercambio_str()'
+    '''
+    
+    if type(intercambio_str) != str:
+        raise Exception("'get_intercambio_dict' can only receive a string."
+                        "{} is not a valid input type".format(type(intercambio_str)))
+    # Check se o bloco possui as linhas correspondentes ao horizonte total
+    if len(intercambio_str.splitlines()) != 192:
+        raise Exception("intercambio_str nao parece representar o bloco de intercambio do arquivo patamar.dat. Verifique")
+    
+    # Definindo nomes para os patamares
+    switch_patamar = {0: 'pesado', 1: 'medio', 2: 'leve'}
+
+    idx = 0
+    D = {}
+    for i, row in enumerate(intercambio_str.splitlines()):
+        patamar = switch_patamar.get(idx%3)
+
+        # Inicializando o dicionário dos intercambios:
+        if i%16 == 0:
+            intercambio = '->'.join(row.strip().split())
+            D.update({intercambio: {}})
+            continue
+
+        # Atualizando o dicionario de intercambios para cada um dos anos
+        if row[:7].strip() != '':
+            ano = int(row[:7].strip())
+
+            # O dicionario incorpora um dict comprehension para permitir a iteracao
+            #  por cada um dos meses, e posteriormente permitir o update de cada
+            #  valor de patamar.
+            D[intercambio].update({ano:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
+
+
+        values = [float(value) for value in row[7:].split()]
+        # Iterando pelos meses e atualizando o dicionario final
+        for mes in range(1,13):
+            mes_abr = utils_datetime.get_br_abreviated_month(mes)
+            D[intercambio][ano][mes_abr].update({patamar: float(values[mes-1])})
+
+        idx += 1
+    
+    return D
+
+def get_intercambio_df(intercambio_dict: dict) -> pd.DataFrame:
+    '''
+    Retorna um DataFrame a partir do dicionario interpretado dos P.Us de intercambio
+     : intercambio_dict deve ser o dict obtida atraves da funcao
+     'get_intercambio_dict()'
+    '''
+    
+    if type(intercambio_dict) != dict:
+        raise Exception("'get_intercambio_df' can only receive a dictionary."
+                        "{} is not a valid input type".format(type(intercambio_dict)))
+    
+    # Iterando pelas chaves do dicionario e construindo linhas de um dataframe
+    L = []
+    for intercambio, intercambios_obj in intercambio_dict.items():
+        for ano, anos_obj in intercambios_obj.items():
+            for mes, patamares_obj in anos_obj.items():
+                row = {
+                    'intercambio': intercambio,
+                    'ano': ano, 
+                    'mes': utils_datetime.get_br_abreviated_month_number(mes),
+                    'pesado': patamares_obj['pesado'],
+                    'medio': patamares_obj['medio'],
+                    'leve': patamares_obj['leve'],
+                }
+                L.append(row)
+
+    return pd.DataFrame(L).set_index(['intercambio', 'ano', 'mes'])
