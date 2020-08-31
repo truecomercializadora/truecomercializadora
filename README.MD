@@ -31,9 +31,9 @@ Should contain generic code, code that could be used outside the enterprise doma
 ___
 [`utils_datetime`](truecomercializadora/utils_datetime.py)
 
-___
 [`utils_files`](truecomercializadora/utils_files.py)
 
+[`utils_string`](truecomercializadora/utils_string.py)
 ___
 [`utils_gsheets`](truecomercializadora/utils_gsheets.py):
 
@@ -50,13 +50,19 @@ Some tools are specific to the AWS domain. This tools are related to specific se
 
 [utils_ses](truecomercializadora/utils_ses.py)
 
+[utils_sns](truecomercializadora/utils_ses.py)
+
 
 ### Domain Specific Modules
 Should contain code to be reused based on a specific subject. The size of the module does not matter as long as it is consistend with the sub-domain under its care.
 ___
 [`ons`](truecomercializadora/ons.py)
+
+[`outgnl`](truecomercializadora/outgnl.py)
 ___
 [`decomp`](truecomercializadora/decomp.py)
+
+[`newave`](truecomercializadora/newave.py)
 
 [`encadeado`](truecomercializadora/encadeado.py)
 
@@ -64,7 +70,13 @@ ___
 
 [`dadger`](truecomercializadora/dadger.py)
 
+[`sistema`](truecomercializadora/sistema.py)
+
+[`patamar`](truecomercializadora/patamar.py)
+
 [`ccee`](truecomercializadora/ccee.py)
+
+[`clast`](truecomercializadora/clast.py)
 
 ### TYPES!
 Whenever possible, avoid using Python specific data types in function returns. Imagine a context where this library might be in use in a serverless application, publish and request operations can only use strings, `datatetime.date`, `datetime.dateime`, `numpy.ndarray` etc, cannot be parsed to `str` using `json.dumps()` or other typical method so, avoid returning theses types in a context where such functions might be used to publish a message or post to a REST API.
