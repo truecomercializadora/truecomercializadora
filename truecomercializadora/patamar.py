@@ -222,7 +222,7 @@ def get_carga_df(carga_dict: dict) -> pd.DataFrame:
                 }
                 L.append(row)
 
-    return pd.DataFrame(L).set_index(['submercado', 'ano', 'mes'])
+    return pd.DataFrame(L)
 
 # =============================== INTERCAMBIO ==================================
 def get_intercambio_str(patamar_str: str) -> str:
@@ -245,7 +245,7 @@ def get_intercambio_str(patamar_str: str) -> str:
     intercambio = utils_files.select_document_part(patamar_str, begin, end)
 
     # eliminando as linhas antes e depois dos dados     
-    intercambio_str = '\r\n'.join(intercambio.splitlines()[4:-1])
+    intercambio_str = '\n'.join(intercambio.splitlines()[4:-1])
 
     return intercambio_str
 
@@ -326,4 +326,117 @@ def get_intercambio_df(intercambio_dict: dict) -> pd.DataFrame:
                 }
                 L.append(row)
 
-    return pd.DataFrame(L).set_index(['intercambio', 'ano', 'mes'])
+    return pd.DataFrame(L)
+
+# =============================== NAO SIMULADAS ================================
+def get_nao_simuladas_str(patamar_str: str) -> str:
+    """
+    Retorna a substring correspondente ao bloco de usinas nao simuladas 
+     de um arquivo patamar.dat em seu formato string.
+    """
+    if type(patamar_str) != str:
+        raise Exception("'get_nao_simuladas_str' can only receive a string."
+                        "{} is not a valid input type".format(type(patamar_str)))
+
+    if 'BLOCO DE USINAS NAO SIMULADAS' not in patamar_str:
+        raise Exception("Input string does not seem to represent a patamar.dat "
+                        "string. Check the input")
+        
+    begin = ' SBM  BLOCO'
+    begin_idx = patamar_str.find(begin)
+    
+    # eliminando as linhas antes e depois dos dados     
+    nao_simuladas_str = '\n'.join(patamar_str[begin_idx:].splitlines()[4:])
+
+    return nao_simuladas_str
+
+def get_nao_simuladas_dict(nao_simuladas_str: str) -> dict:
+    '''
+    Retorna um objeto contendo os P.Us de usinas nao simuladas, distribuidos em submercado
+     ano, mes e tipo de patamar, interpretados a partir do bloco de nao simuladas
+     do arquivo patamar.dat
+
+     : usinas_nao_simuladas_str deve ser a string obtida atraves da funcao
+      'get_nao_simuladas_str()'
+    '''
+    
+    if type(nao_simuladas_str) != str:
+        raise Exception("'get_usinas_nao_simuladas_dict' can only receive a string."
+                        "{} is not a valid input type".format(type(nao_simuladas_str)))
+    # Check se o bloco possui as linhas correspondentes ao horizonte total
+    if len(nao_simuladas_str.splitlines()) != 256:
+        raise Exception("usinas_nao_simuladas_str nao parece representar o bloco de nao simuladas do arquivo patamar.dat. Verifique")
+    
+    # Definindo nomes para os patamares
+    switch_patamar = {0: 'pesado', 1: 'medio', 2: 'leve'}
+    switch_submercado = {1: "SE", 2: "S", 3: "NE", 4: "N"}
+    switch_tipo = {1: "PCH", 2: "PCT", 3: "EOL", 4: "UFV"}
+
+    idx = 0
+    
+    # Inicializando objeto
+    D = {
+        'SE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
+        'S': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
+        'NE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
+        'N': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}}
+    }
+    for i, row in enumerate(nao_simuladas_str.splitlines()):
+        patamar = switch_patamar.get(idx%3)
+
+        # Capturando as referencias do bloco:
+        if i%16 == 0:
+            submercado = switch_submercado.get(int(row.strip().split()[0]))
+            tipo_usina = switch_tipo.get(int(row.strip().split()[1]))
+            continue
+
+        # Atualizando o dicionario de intercambios para cada um dos anos
+        if row[:7].strip() != '':
+            ano = int(row[:7].strip())
+
+            # O dicionario incorpora um dict comprehension para permitir a iteracao
+            #  por cada um dos meses, e posteriormente permitir o update de cada
+            #  valor de patamar.
+
+            D[submercado][tipo_usina].update({ano:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
+
+
+        values = [float(value) for value in row[7:].split()]
+    #     # Iterando pelos meses e atualizando o dicionario final
+        for mes in range(1,13):
+            mes_abr = utils_datetime.get_br_abreviated_month(mes)
+            D[submercado][tipo_usina][ano][mes_abr].update({patamar: float(values[mes-1])})
+
+        idx += 1
+    
+    return D
+
+def get_nao_simuladas_df(nao_simuladas_dict: dict) -> pd.DataFrame:
+    '''
+    Retorna um DataFrame a partir do dicionario interpretado dos P.Us de usinas nao simuladas
+     : nao_simuladas_dict deve ser o dict obtido atraves da funcao
+     'get_nao_simuladas_dict()'
+    '''
+    
+    if type(nao_simuladas_dict) != dict:
+        raise Exception("'get_nao_simuladas_df' can only receive a dictionary."
+                        "{} is not a valid input type".format(type(nao_simuladas_dict)))
+    
+    # Iterando pelas chaves do dicionario e construindo linhas de um dataframe
+    L = []
+    for submercado, submercados_obj in nao_simuladas_dict.items():
+        for usina, usinas_obj in submercados_obj.items():
+            for ano, anos_obj in usinas_obj.items():
+                for mes, patamares_obj in anos_obj.items():
+                    row = {
+                        'submercado': submercado,
+                        'tipo': usina,
+                        'ano': ano, 
+                        'mes': utils_datetime.get_br_abreviated_month_number(mes),
+                        'pesado': patamares_obj['pesado'],
+                        'medio': patamares_obj['medio'],
+                        'leve': patamares_obj['leve'],
+                    }
+                    L.append(row)
+
+    return pd.DataFrame(L)

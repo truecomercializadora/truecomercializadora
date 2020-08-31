@@ -207,7 +207,7 @@ def write_mercado_energia(
     output_str = master_io.getvalue().decode() + bloco_sudeste + bloco_sul + bloco_nordeste + bloco_norte
     return output_str.strip()
 
-def get_usinas_nao_simuladas_str(sistema_str: str) -> str:
+def get_nao_simuladas_str(sistema_str: str) -> str:
     """
     Retorna a substring correspondente ao bloco de usinas nao simuladas
      do arquivo sistema.dat em seu formato string.
@@ -224,24 +224,24 @@ def get_usinas_nao_simuladas_str(sistema_str: str) -> str:
     begin_idx = sistema_str.find(begin)
     
     # eliminando as linhas antes e depois dos dados     
-    usinas_nao_simuladas_str = '\n'.join(sistema_str[begin_idx:].splitlines()[:-1])
+    nao_simuladas_str = '\n'.join(sistema_str[begin_idx:].splitlines()[:-1])
 
-    return usinas_nao_simuladas_str
+    return nao_simuladas_str
 
-def get_nao_simuladas_dict(usinas_nao_simuladas_str: str):
+def get_nao_simuladas_dict(nao_simuladas_str: str):
     '''
     Retorna um objeto contendo os valores despacho de cada submercado
      tipo de usina e mes, do bloco Usinas Nao Simuladas de um sistema.dat
 
      : get_nao_simuladas_dict deve ser a string obtida atraves da funcao
-      'get_usinas_nao_simuladas_str()'
+      'get_nao_simuladas_str()'
     '''
 
-    if type(usinas_nao_simuladas_str) != str:
+    if type(nao_simuladas_str) != str:
         raise Exception("'get_nao_simuladas_dict' can only receive a string."
-                        "{} is not a valid input type".format(type(usinas_nao_simuladas_str)))
+                        "{} is not a valid input type".format(type(nao_simuladas_str)))
 
-    file_lines = file_lines = usinas_nao_simuladas_str.splitlines()
+    file_lines = nao_simuladas_str.splitlines()
     
     submercados = {
         'SE':file_lines[3:27],
