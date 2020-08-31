@@ -431,7 +431,7 @@ def get_nao_simuladas_df(nao_simuladas_dict: dict) -> pd.DataFrame:
                     row = {
                         'submercado': submercado,
                         'tipo': usina,
-                        'ano': ano, 
+                        'ano': int(ano), 
                         'mes': utils_datetime.get_br_abreviated_month_number(mes),
                         'pesado': patamares_obj['pesado'],
                         'medio': patamares_obj['medio'],

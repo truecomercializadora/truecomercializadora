@@ -4,6 +4,7 @@ Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo sistem
 import io
 import pandas as pd
 
+from . import utils_datetime
 from . import utils_files
 
 def get_mercado_energia_total_str(sistema_str: str) -> str:
@@ -207,6 +208,7 @@ def write_mercado_energia(
     output_str = master_io.getvalue().decode() + bloco_sudeste + bloco_sul + bloco_nordeste + bloco_norte
     return output_str.strip()
 
+# =============================== NAO SIMULADAS ================================
 def get_nao_simuladas_str(sistema_str: str) -> str:
     """
     Retorna a substring correspondente ao bloco de usinas nao simuladas
@@ -286,3 +288,30 @@ def get_nao_simuladas_dict(nao_simuladas_str: str):
         nao_simuladas.update({submercado: D})
     
     return nao_simuladas
+
+def get_nao_simuladas_df(nao_simuladas_dict: dict) -> pd.DataFrame:
+    '''
+    Retorna um DataFrame a partir do dicionario interpretado das geracoes das usinas nao simuladas
+     : nao_simuladas_dict deve ser o dict obtido atraves da funcao
+     'get_nao_simuladas_dict()'
+    '''
+    
+    if type(nao_simuladas_dict) != dict:
+        raise Exception("'get_nao_simuladas_df' can only receive a dictionary."
+                        "{} is not a valid input type".format(type(nao_simuladas_dict)))
+    
+    # Iterando pelas chaves do dicionario e construindo linhas de um dataframe
+    L = []
+    for submercado, submercados_obj in nao_simuladas_dict.items():
+        for usina, usinas_obj in submercados_obj.items():
+            for ano, anos_obj in usinas_obj.items():
+                for mes, value in anos_obj.items():
+                    row = {
+                        'submercado': submercado,
+                        'tipo': usina,
+                        'ano': int(ano), 
+                        'mes': utils_datetime.get_br_abreviated_month_number(mes),
+                        'geracao': value
+                    }
+                    L.append(row)
+    return pd.DataFrame(L)
