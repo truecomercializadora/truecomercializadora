@@ -114,3 +114,22 @@ def create_presigned_url(client_method_name:str, method_parameters: str=None,
 
     # The response contains the presigned URL
     return response
+
+def check_prefix_has_contents(Bucket: str, Prefix: str) -> bool:
+    '''
+    Returns True if prefix has contents in it or False if it
+     does not
+    '''
+    
+    client = _get_s3_client()
+    try:
+        response = client.list_objects(
+            Bucket = Bucket,
+            Prefix = Prefix)
+
+        if response.get('Contents'):
+            return True
+        else:
+            return False
+    except ClientError as e:
+        raise e
