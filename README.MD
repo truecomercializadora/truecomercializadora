@@ -22,6 +22,11 @@ In order to upgrade the installed library to the latest version:
 
 ```pip install git+https://github.com/truecomercializadora/truecomercializadora.git --upgrade```
 
+## TESTS
+Build tests in `tests/` and run them with the command:
+
+```python setup.py test```
+
 
 ## CONSIDERATIONS AND LIBRARY STRUCTURE
 
