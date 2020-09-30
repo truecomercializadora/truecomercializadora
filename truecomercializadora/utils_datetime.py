@@ -1,5 +1,8 @@
 import datetime
 
+from . import utils_types
+
+
 def subtract_one_month(dt0):
     """
     # ============================================================================================ #
@@ -217,3 +220,14 @@ def get_elapsed_minutes(timeStamp: float) -> str:
     minutes = timeStamp//60
     seconds = timeStamp - 60*minutes
     return '{}min {}s'.format(int(minutes),int(seconds))
+
+@utils_types.type_check
+def datetime2sqltimeStamp(timeStamp: datetime.datetime) -> str:
+    '''
+    Takes a datetime.datetime format and returns a java.sql.Timestamp compatible
+      format, such as yyyy-MM-dd HH:mm:ss[.f...]. For example, 
+      TIMESTAMP '2020-09-30 07:30:11.721'
+    '''
+
+
+    return timeStamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
