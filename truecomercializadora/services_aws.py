@@ -90,14 +90,14 @@ class Athena:
                 state = response['QueryExecution']['Status']['State']
 
                 if state == 'FAILED':
-                    raise Exception('Query {executionId} failed execution'.format(executionId))
+                    raise Exception('Query {executionId} failed execution'.format(executionId=executionId))
                 elif state == 'SUCCEEDED':
                     s3_path = response['QueryExecution']['ResultConfiguration']['OutputLocation']
                     filename = re.findall(r'.*\/(.*)', s3_path)[0]
                     return filename
             time.sleep(2)
 
-        raise Exception('Query {executionId} failed execution'.format(executionId))
+        raise Exception('Query {executionId} failed after 5 executions.'.format(executionId=executionId))
 
     def __get_query_result(self, bucket: str, temp_dir: str, query_result_file: str):
         '''
