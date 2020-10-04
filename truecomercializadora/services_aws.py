@@ -91,9 +91,6 @@ class Athena:
 
         state = 'RUNNING'
         
-        if self.debug:
-            print("Query execution countdown: {timeout}s.".format(timeout=timeout))
-        
         while (timeout > 0 and state in ['RUNNING', 'QUEUED']):
             if self.debug:
                 print("Query execution countdown: {timeout}s.".format(timeout=timeout))
