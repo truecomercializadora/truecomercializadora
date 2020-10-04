@@ -43,8 +43,6 @@ class Athena:
 
         # Initialize logger if debug=True
         self.debug = debug
-        self._logger = logging.getLogger('Athena')
-        logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')
             
 
     # Setting the class properties
@@ -94,14 +92,11 @@ class Athena:
         state = 'RUNNING'
         
         if self.debug:
-            self._logger.debug(
-                "Executing query: {executionId}".format(executionId=executionId),
-                exc_info=True)
+            print("Query execution countdown: {timeout}s.".format(timeout=timeout))
         
         while (timeout > 0 and state in ['RUNNING', 'QUEUED']):
             if self.debug:
-                self._logger.debug(
-                    "Query execution countdown: {timeout}s.".format(timeout=timeout))
+                print("Query execution countdown: {timeout}s.".format(timeout=timeout))
         
             timeout = timeout - 1
             response = self._athenaClient.get_query_execution(QueryExecutionId = executionId)
