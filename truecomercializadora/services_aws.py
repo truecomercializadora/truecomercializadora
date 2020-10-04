@@ -75,9 +75,11 @@ class Athena:
         Await for the query to finish execution and returns the filename of the
           query result. 
         '''
+        print("Execution Athena Query {executionId}".format(executionId=executionId))
         state = 'RUNNING'
         
         while (max_execution > 0 and state in ['RUNNING', 'QUEUED']):
+            print("max execution: {}".format(max_execution))
             max_execution = max_execution - 1
             response = self._athenaClient.get_query_execution(QueryExecutionId = executionId)
 
@@ -142,6 +144,9 @@ class Athena:
             query=query,
             bucket=bucket,
             temp_dir=temp_dir)
+
+        print("Athena Execution:")
+        print(execution)
 
         # Await for results
         query_result_file = self.__await_query_result(
