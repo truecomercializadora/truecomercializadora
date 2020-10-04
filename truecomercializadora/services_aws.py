@@ -93,13 +93,13 @@ class Athena:
         state = 'RUNNING'
         
         if self.debug:
-            self._logger.debug(
+            self._logger.info(
                 "Executing query: {executionId}".format(executionId=executionId),
                 exc_info=True)
         
         while (timeout > 0 and state in ['RUNNING', 'QUEUED']):
             if self.debug:
-                self._logger.debug(
+                self._logger.info(
                     "Query execution countdown: {timeout}s.".format(timeout=timeout))
         
             timeout = timeout - 1
@@ -120,7 +120,7 @@ class Athena:
             # AWAIT ANOTHER SECOND
             time.sleep(1)
 
-        raise Exception('Query {executionId} timeout ({timeout}s) fail.'.format(
+        raise Exception('Query {executionId} timeout after {timeout}s.'.format(
                         executionId=executionId,
                         timeout=timeout))
 
