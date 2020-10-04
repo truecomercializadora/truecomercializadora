@@ -97,8 +97,7 @@ class Athena:
         while (timeout > 0 and state in ['RUNNING', 'QUEUED']):
             if self.debug:
                 print("Query execution countdown: {timeout}s.".format(timeout=timeout))
-        
-            timeout = timeout - 1
+                
             response = self._athenaClient.get_query_execution(QueryExecutionId = executionId)
 
             if 'QueryExecution' in response \
@@ -113,7 +112,9 @@ class Athena:
                     s3_path = response['QueryExecution']['ResultConfiguration']['OutputLocation']
                     filename = re.findall(r'.*\/(.*)', s3_path)[0]
                     return filename
+
             # AWAIT ANOTHER SECOND
+            timeout = timeout - 1
             time.sleep(1)
 
         raise Exception('Query {executionId} timeout after {timeout}s.'.format(
