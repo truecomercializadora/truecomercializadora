@@ -1,9 +1,12 @@
 import boto3
 import io
+import logging
 import operator
 import pandas as pd
 import re
 import time
+
+from . import utils_types
 
 AVAILABLE_REGIONS = [
     "us-eas-1",
@@ -27,7 +30,7 @@ class Athena:
     Class encapsulating useful methods associated with the AWS Athena service.
     '''
     
-    def __init__(self, region: str):
+    def __init__(self, region: str, debug: bool=False):
         session = boto3.Session()
 
         # Public Attributes
@@ -37,15 +40,26 @@ class Athena:
         self._athenaClient = session.client('athena', region_name=region)
         self._s3Client = session.client('s3')
         self._s3Resource = session.resource('s3')
-        
-    # Setting the class property
+
+        # Initialize logger if debug=True
+        self.debug = debug
+        if debug:
+            self._logger = logging.getLogger('Athena')
+
+    # Setting the class properties
     region = property(operator.attrgetter('_region'))
+    debug = property(operator.attrgetter('_debug'))
         
     @region.setter
     def region(self, r):
         if not r: raise Exception("AWS region cannot be empty")
         if r not in AVAILABLE_REGIONS: raise Exception("AWS region '{r}' does not exist".format(r=r))
         self._region = r
+
+    @debug.setter
+    def debug(self, d):
+        if type(d) != bool: raise Exception("Debug should be a boolean flag")
+        self._debug = d
 
     # ============================ PRIVATE METHODS =============================
     def __format_query(self, query: str):
@@ -70,17 +84,25 @@ class Athena:
                 }
             )
 
-    def __await_query_result(self, executionId: str, max_execution: int):
+    def __await_query_result(self, executionId: str, timeout: int):
         '''
         Await for the query to finish execution and returns the filename of the
           query result. 
         '''
-        print("Execution Athena Query {executionId}".format(executionId=executionId))
+
         state = 'RUNNING'
         
-        while (max_execution > 0 and state in ['RUNNING', 'QUEUED']):
-            print("max execution: {}".format(max_execution))
-            max_execution = max_execution - 1
+        if self.debug:
+            self._logger.debug(
+                "Executing query: {executionId}".format(executionId=executionId),
+                exc_info=True)
+        
+        while (timeout > 0 and state in ['RUNNING', 'QUEUED']):
+            if self.debug:
+                self._logger.debug(
+                    "Query execution countdown: {timeout}s.".format(timeout=timeout))
+        
+            timeout = timeout - 1
             response = self._athenaClient.get_query_execution(QueryExecutionId = executionId)
 
             if 'QueryExecution' in response \
@@ -95,9 +117,12 @@ class Athena:
                     s3_path = response['QueryExecution']['ResultConfiguration']['OutputLocation']
                     filename = re.findall(r'.*\/(.*)', s3_path)[0]
                     return filename
-            time.sleep(2)
+            # AWAIT ANOTHER SECOND
+            time.sleep(1)
 
-        raise Exception('Query {executionId} failed after 5 executions.'.format(executionId=executionId))
+        raise Exception('Query {executionId} timeout ({timeout}s) fail.'.format(
+                        executionId=executionId,
+                        timeout=timeout))
 
     def __get_query_result(self, bucket: str, temp_dir: str, query_result_file: str):
         '''
@@ -122,11 +147,13 @@ class Athena:
 
 
     # ============================ PUBLIC METHODS ==============================    
-    def query(self, database:str, query: str, bucket: str, temp_dir: str):
+    @utils_types.type_check
+    def query(self, database:str, query: str, timeout:int, bucket: str, temp_dir: str):
         '''
         Returns a pandas dataframe out of query.
           database: Database defined in Athena
           query: SQL query to be executed on the database
+          timeout: Timeout to wait for execution (seconds)
           bucket: Bucket where the file resulting from the query shall be writen
           temp_dir: Temporary directory inside the bucket where the file will stay
             until the dataset is processed and returned.
@@ -145,13 +172,10 @@ class Athena:
             bucket=bucket,
             temp_dir=temp_dir)
 
-        print("Athena Execution:")
-        print(execution)
-
         # Await for results
         query_result_file = self.__await_query_result(
             executionId=execution['QueryExecutionId'],
-            max_execution=5)
+            timeout=timeout)
 
         # Get a dataset out of the result
         dataset = self.__get_query_result(
