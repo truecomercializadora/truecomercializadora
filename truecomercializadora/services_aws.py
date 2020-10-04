@@ -40,11 +40,11 @@ class Athena:
         self._athenaClient = session.client('athena', region_name=region)
         self._s3Client = session.client('s3')
         self._s3Resource = session.resource('s3')
+        self._logger = logging.getLogger('Athena')
 
         # Initialize logger if debug=True
         self.debug = debug
-        if debug:
-            self._logger = logging.getLogger('Athena')
+            
 
     # Setting the class properties
     region = property(operator.attrgetter('_region'))
