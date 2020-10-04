@@ -95,7 +95,7 @@ class Athena:
                     s3_path = response['QueryExecution']['ResultConfiguration']['OutputLocation']
                     filename = re.findall(r'.*\/(.*)', s3_path)[0]
                     return filename
-            time.sleep(1)
+            time.sleep(2)
 
         raise Exception('Query {executionId} failed execution'.format(executionId))
 
