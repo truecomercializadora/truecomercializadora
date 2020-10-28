@@ -13,6 +13,7 @@
 
 # Notebooks
 .jupyter*
+*.ipynb
 
 # Cache
 /*.ipynb_checkpoints/
