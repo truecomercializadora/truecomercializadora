@@ -68,6 +68,17 @@ class Athena:
         '''
         return ' '.join([line.strip() for line in query.splitlines()]).strip()
 
+    def __select_query_type(self, query: str):
+        '''
+        Return the type of the event described in the query string.
+        '''
+        if all(x in query for x in ['CREATE', 'TABLE']):
+            return 'create'
+        elif all(x in query for x in ['DROP', 'TABLE']):
+            return 'delete'
+        else:
+            return 'read'
+
     def __execute_query(self, database: str, query: str, bucket: str, temp_dir: str):
         '''
         Starts the execution of a query on top of a database, and returns the Athena
@@ -158,6 +169,11 @@ class Athena:
         # Check if temporary repository has one of the protected keys
         if temp_dir in PROTECTED_LAKE_KEYS:
             raise Exception('Temporary dir {temp_dir} has protected keyword')
+
+        # Check query event type
+        query_type = self.__select_query_type(
+            query=query
+        )
         
         # Execute SQL Query
         execution = self.__execute_query(
@@ -172,12 +188,14 @@ class Athena:
             timeout=timeout)
 
         # Get a dataset out of the result
-        dataset = self.__get_query_result(
-            bucket=bucket,
-            temp_dir=temp_dir,
-            query_result_file=query_result_file)
+        if query_type not in ['create', 'delete']:
+            dataset = self.__get_query_result(
+                bucket=bucket,
+                temp_dir=temp_dir,
+                query_result_file=query_result_file)
 
         # Cleanup temporary directory
-        self.__cleanup(bucket=bucket, temp_dir=temp_dir)
+        if query_type == 'delete':
+            self.__cleanup(bucket=bucket, temp_dir=temp_dir)
 
-        return dataset
+        return dataset if query_type not in ['create', 'delete'] else query_result_file
