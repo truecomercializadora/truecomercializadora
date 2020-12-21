@@ -56,7 +56,7 @@ def get_patamares_horarios(ano):
   #   }                                                                                          #
   # ============================================================================================ #
   """
-  patamares_gsheet = utils_gsheets.get_workheet_records('AAC001',  str(2020))
+  patamares_gsheet = utils_gsheets.get_workheet_records('AAC001',  str(ano))
   df_patamares = pd.DataFrame(patamares_gsheet)
 
   translationTable = str.maketrans("éáàèùâêîôûç", "eaaeuaeiouc")
