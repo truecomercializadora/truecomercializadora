@@ -217,7 +217,6 @@ def get_pld_sumario(sumario_str):
         valores = [ccee.adjust_teto_piso(float(value)) for value in line.split()[1:]]
         if i%4 == 3:
             idx_substistema += 1
-            continue
         D[subsistema].update({
             patamar: valores
         })
@@ -246,12 +245,11 @@ def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patama
     plds = get_pld_sumario(sumario_str)
     D = {"SE": [], 'S': [], 'NE': [], "N": []}
     for i,estagio in enumerate(estagios_decomp[rev:-1]):
-        h_patamar = get_horas_por_patamar(estagio, patamares_horarios)
-        pld_sudeste = (plds['SE']['pesada'][i]*h_patamar['pesada'] + plds['SE']['media'][i]*h_patamar['media'] + plds['SE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
-        pld_sul = (plds['S']['pesada'][i]*h_patamar['pesada'] + plds['S']['media'][i]*h_patamar['media'] + plds['S']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
-        pld_nordeste = (plds['NE']['pesada'][i]*h_patamar['pesada'] + plds['NE']['media'][i]*h_patamar['media'] + plds['NE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
-        pld_norte = (plds['N']['pesada'][i]*h_patamar['pesada'] + plds['N']['media'][i]*h_patamar['media'] + plds['N']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
-
+        pld_sudeste = plds['SE']['medio'][i]
+        pld_sul = plds['S']['medio'][i]
+        pld_nordeste = plds['NE']['medio'][i]
+        pld_norte = plds['N']['medio'][i]
+        
         D['SE'].append(pld_sudeste)
         D['S'].append(pld_sul)
         D['NE'].append(pld_nordeste)
