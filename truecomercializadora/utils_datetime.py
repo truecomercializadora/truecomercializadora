@@ -231,3 +231,29 @@ def datetime2sqltimeStamp(timeStamp: datetime.datetime) -> str:
 
 
     return timeStamp.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+
+def check_is_date(data_str: str) -> bool:
+    '''
+    Checks if given string is a date. The string must be in following formats:
+        - YYYYMMDD
+        - YYYY-MM-DD
+        - YYYY/MM/DD
+        - DD-MM-YYYY
+        - DD-MM-YYYY
+    If true, returns the given date string in datetime.datetime, otherwise it returns False
+    '''
+    try:
+        data_len = len(data_str)
+        if data_len == 8:
+            data = datetime.strptime(data_str, '%Y%m%d')
+        elif data_len == 10 and len(data_str.split('-')[0]) == 4:
+            data = datetime.strptime(data_str, '%Y-%m-%d')
+        elif data_len == 10 and len(data_str.split('/')[0]) == 4:
+            data = datetime.strptime(data_str, '%Y/%m/%d')
+        elif data_len == 10 and len(data_str.split('-')[0]) == 2:
+            data = datetime.strptime(data_str, '%d-%m-%Y')
+        elif data_len == 10 and len(data_str.split('/')[0]) == 2:
+            data = datetime.strptime(data_str, '%d/%m/%Y')
+        return data
+    except:
+        return False
