@@ -245,15 +245,15 @@ def check_is_date(data_str: str) -> bool:
     try:
         data_len = len(data_str)
         if data_len == 8:
-            data = datetime.strptime(data_str, '%Y%m%d')
+            data = datetime.datetime.strptime(data_str, '%Y%m%d')
         elif data_len == 10 and len(data_str.split('-')[0]) == 4:
-            data = datetime.strptime(data_str, '%Y-%m-%d')
+            data = datetime.datetime.strptime(data_str, '%Y-%m-%d')
         elif data_len == 10 and len(data_str.split('/')[0]) == 4:
-            data = datetime.strptime(data_str, '%Y/%m/%d')
+            data = datetime.datetime.strptime(data_str, '%Y/%m/%d')
         elif data_len == 10 and len(data_str.split('-')[0]) == 2:
-            data = datetime.strptime(data_str, '%d-%m-%Y')
+            data = datetime.datetime.strptime(data_str, '%d-%m-%Y')
         elif data_len == 10 and len(data_str.split('/')[0]) == 2:
-            data = datetime.strptime(data_str, '%d/%m/%Y')
+            data = datetime.datetime.strptime(data_str, '%d/%m/%Y')
         return data
     except:
         return False
