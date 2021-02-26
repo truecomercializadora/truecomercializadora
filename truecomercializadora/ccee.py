@@ -4,8 +4,8 @@ import pandas as pd
 
 from . import utils_gsheets
 
-PISO = 39.68
-TETO = 559.75
+PISO = 49.77
+TETO = 583.88
 
 def get_piso():
   return PISO
