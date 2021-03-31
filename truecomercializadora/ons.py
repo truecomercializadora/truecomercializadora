@@ -25,29 +25,38 @@ def get_semanas_operativas(ano,mes):
     """
     lista = []
     count = 0
+    last_day = 0
     for d in utils_datetime.yield_all_saturdays(ano):
         if d.month == mes and d.day != 1:
             prim_sabado = d
             inicio = d - datetime.timedelta(7)
             fim = d - datetime.timedelta(1)
+            semana = d.isocalendar()[1]
+            if semana == last_day:
+                semana = semana +1
             lista.append({
                 'inicio': inicio,
                 'fim': fim,
-                'semana': d.isocalendar()[1],
+                'semana': semana,
                 'rev': count
             })
             count += 1
-        
+            last_day = d.isocalendar()[1]
+            
         if d.month == mes and ((d + datetime.timedelta(7)).day == 1):
             prim_sabado = (d + datetime.timedelta(7))
             inicio = prim_sabado - datetime.timedelta(7)
             fim = prim_sabado - datetime.timedelta(1)
+            if semana == last_day:
+                semana = semana +1            
             lista.append({
                 'inicio': inicio,
                 'fim': fim,
-                'semana': d.isocalendar()[1],
+                'semana': semana,
                 'rev': count
             })
             count += 1
+            last_day = d.isocalendar()[1]
+            
     return lista
 
