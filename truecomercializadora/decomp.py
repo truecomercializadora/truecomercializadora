@@ -80,7 +80,7 @@ def get_horas_por_patamar(
       'get_estagios'.
     """
     
-    ano_patamares = int(list(patamares_horarios['jan'].keys())[0].split('-')[0])
+    ano_patamares = int(list(patamares_horarios['jan'].keys())[-1].split('-')[0])
     inicio_semana = estagio_decomp['inicio']
     fim_semana = estagio_decomp['fim']
     if mes:
@@ -96,11 +96,14 @@ def get_horas_por_patamar(
     }
     for dia in dias_semana:
         # Ajuste para considerar os patamares do ano anterior em um caso de patamar de longo prazo.
+        dia_str = dia.strftime('%Y-%m-%d')
         if dia.year > ano_patamares:
             dia = datetime.date(ano_patamares, dia.month, dia.day)
+            dia_str = dia.strftime('%Y-%m-%d')
+        elif dia.year < ano_patamares:
+            dia = datetime.date(dia.year, 1, dia.day)
 
         mes = utils_datetime.get_br_abreviated_month(dia.month)
-        dia_str = dia.strftime('%Y-%m-%d')
         patamares = patamares_horarios[mes][dia_str]
         horas_patamar['pesada'] = horas_patamar['pesada'] + len([horario['hora'] for horario in patamares if horario['patamar'] == "pesado"])
         horas_patamar['media'] = horas_patamar['media'] + len([horario['hora'] for horario in patamares if horario['patamar'] == "medio"])
