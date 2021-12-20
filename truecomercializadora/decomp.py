@@ -215,10 +215,11 @@ def get_pld_sumario(sumario_str,ano_deck):
     D = {'SE': {}, 'S': {}, 'NE':{}, 'N': {}, 'FC': {}}
     
     idx_substistema = 0
+    piso, teto = ccee.get_pld_db(ano_deck=ano_deck)
     for i,line in enumerate(cmo_lines):
         subsistema = subsistemas[idx_substistema] 
         patamar = patamares[i%4]
-        valores = [ccee.adjust_teto_piso(float(value),ano_deck) for value in line.split()[1:]]
+        valores = [ccee.adjust_teto_piso(float(value),piso, teto) for value in line.split()[1:]]
         if i%4 == 3:
             idx_substistema += 1
         D[subsistema].update({

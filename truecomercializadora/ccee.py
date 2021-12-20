@@ -5,9 +5,22 @@ from . import utils_gsheets
 
 import boto3
 
+def get_pld_db(ano_deck):
+  dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
+  table = dynamodb.Table('pld-valor')
+  print('Extraindo dados do dynamo')
+  response = table.get_item(
+      Key={
+          'ano':ano_deck
+      }
+  )
+  item = response['Item']
+  piso = float(item['min'])
+  estrutural = float(item['max_estrutural'])
 
+  return piso, estrutural
 
-def adjust_teto_piso(valor,ano_deck):
+def adjust_teto_piso(valor, piso, teto):
   """
   # ========================================================================================= #
   #  Ajusta um float representando um custo marginal de operação para um valor correspondente #
@@ -16,24 +29,6 @@ def adjust_teto_piso(valor,ano_deck):
   """
   if type(valor) not in [float, int]:
     raise Exception("'adjust_teto_piso' can only receive a numerical value, float or int")
-  
-
-  def get_pld_db(ano_deck):
-    dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
-    table = dynamodb.Table('pld-valor')
-    print('Extraindo dados do dynamo')
-    response = table.get_item(
-        Key={
-            'ano':ano_deck
-        }
-    )
-    item = response['Item']
-    piso = float(item['min'])
-    estrutural = float(item['max_estrutural'])
-
-    return piso, estrutural
-
-  piso,teto = get_pld_db(int(ano_deck))
 
   if valor >= teto:
     valor = teto
