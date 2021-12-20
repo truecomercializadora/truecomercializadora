@@ -8,6 +8,7 @@ from . import utils_files
 
 from . import ccee
 from . import ons
+import boto3
 
 def get_estagios(ano: int, mes: int) -> list:
     """
@@ -192,7 +193,7 @@ def get_cmo_relato(relato_str):
         'inviabilidades': ''.join(inviabilidades).strip()
     }
 
-def get_pld_sumario(sumario_str):
+def get_pld_sumario(sumario_str,ano_deck):
     """
     Retorna um dicionario contendo os custos marginais de operacao considerando os valores
       maximos e minimos de Preco de Liquidacao de Diferencas, definidos pela CCEE.
@@ -217,7 +218,7 @@ def get_pld_sumario(sumario_str):
     for i,line in enumerate(cmo_lines):
         subsistema = subsistemas[idx_substistema] 
         patamar = patamares[i%4]
-        valores = [ccee.adjust_teto_piso(float(value)) for value in line.split()[1:]]
+        valores = [ccee.adjust_teto_piso(float(value),ano_deck) for value in line.split()[1:]]
         if i%4 == 3:
             idx_substistema += 1
         D[subsistema].update({
@@ -225,7 +226,7 @@ def get_pld_sumario(sumario_str):
         })
     return D
 
-def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patamares_horarios):
+def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patamares_horarios,ano_deck):
     """
     Retorna um dicionario contendo os plds medios semanais de cada um dos submercados. A
       partir da str representando o sumario.rv# e ja considerando os valores de pld max e min
@@ -245,7 +246,7 @@ def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patama
     if type(patamares_horarios) != dict:
         raise Exception("'get_pld_medio_semanal_from_sumario' should receive a dict of 'patamares_horarios'. 'patamares_horarios' of type {} detected.".format(type(patamares_horarios)))
 
-    plds = get_pld_sumario(sumario_str)
+    plds = get_pld_sumario(sumario_str,ano_deck)
     D = {"SE": [], 'S': [], 'NE': [], "N": []}
     for i,estagio in enumerate(estagios_decomp[rev:-1]):
 
