@@ -216,6 +216,7 @@ def get_pld_sumario(sumario_str,ano_deck):
     
     idx_substistema = 0
     piso, teto = ccee.get_pld_db(ano_deck=ano_deck)
+    print(piso, teto)
     for i,line in enumerate(cmo_lines):
         subsistema = subsistemas[idx_substistema] 
         patamar = patamares[i%4]
