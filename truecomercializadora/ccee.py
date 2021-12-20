@@ -19,7 +19,7 @@ def adjust_teto_piso(valor,ano_deck):
   
 
   def get_pld_db(ano_deck):
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource('dynamodb', region_name='sa-east-1')
     table = dynamodb.Table('pld-valor')
     print('Extraindo dados do dynamo')
     response = table.get_item(
