@@ -224,37 +224,35 @@ def comparaClast(clast_strA, clast_strB):
 
     return dfAcusto.reset_index(), dfAalteracoes, dfBcusto.reset_index(), dfBalteracoes, dfCcusto.reset_index().drop('index',axis=1), dfCalteracoes.reset_index().drop('index',axis=1)
 
-# def uploadComparacaoClast(dfAcusto, dfAalteracoes, dfBcusto, dfBalteracoes, dfCcusto, dfCalteracoes, S3_path):
-#     '''
-#     Efetua o upload das dataframes provindas de comparaClast
-#     para datawarehouse-true no caminho S3_path
-#     '''
-#     try:
-#         if(dfAcusto.equals(dfBcusto) and dfAalteracoes.equals(dfBalteracoes)):
-#             message = 'Não há diferença entre os decks'
-#             lista_custo=[dfAcusto.to_dict(orient='records')]
-#             lista_alteracoes = [dfAalteracoes.to_dict(orient='records')]
-#             dct_clast={
-#               'ESTRUTURAL':lista_custo,
-#               'CONJUNTURAL':lista_alteracoes,
-#             }
+def PayloadClast(dfAcusto, dfAalteracoes, dfBcusto, dfBalteracoes, dfCcusto, dfCalteracoes):
+    '''
+    Cria um payload a partir das saidas da função comparacaClast
+    '''
+    try:
+        if(dfAcusto.equals(dfBcusto) and dfAalteracoes.equals(dfBalteracoes)):
+            message = 'Não há diferença entre os decks'
+            lista_custo=[dfAcusto.to_dict(orient='records')]
+            lista_alteracoes = [dfAalteracoes.to_dict(orient='records')]
+            dct_clast={
+              'ESTRUTURAL':lista_custo,
+              'CONJUNTURAL':lista_alteracoes,
+            }
 
-#             payload_body = io.BytesIO(json.dumps(dct_clast).encode())
-#             utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
-#             print(message)
-#         else:
-#             message = 'Há diferença entre os decks'
-#             print(message)
-#             lista_custo=[dfAcusto.to_dict(orient='records'),dfBcusto.to_dict(orient='records'),dfCcusto.to_dict(orient='records')]
-#             lista_alteracoes = [dfAalteracoes.to_dict(orient='records'), dfBalteracoes.to_dict(orient='records'), dfCalteracoes.to_dict(orient='records')]
-#             dct_clast={
-#               'ESTRUTURAL':lista_custo,
-#               'CONJUNTURAL':lista_alteracoes,
-#             }
-#             payload_body = io.BytesIO(json.dumps(dct_clast).encode())
-#             utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
-
-#         return utils_http.success_response(200, 'Lambda executado com sucesso')
-#     except Exception as error:
-#             print(error.args)
-#             return utils_http.server_error_response(500, "Erro no upload para s3")
+            payload_body = io.BytesIO(json.dumps(dct_clast).encode())
+            print(message)
+            return payload_body
+            
+        else:
+            message = 'Há diferença entre os decks'
+            print(message)
+            lista_custo=[dfAcusto.to_dict(orient='records'),dfBcusto.to_dict(orient='records'),dfCcusto.to_dict(orient='records')]
+            lista_alteracoes = [dfAalteracoes.to_dict(orient='records'), dfBalteracoes.to_dict(orient='records'), dfCalteracoes.to_dict(orient='records')]
+            dct_clast={
+              'ESTRUTURAL':lista_custo,
+              'CONJUNTURAL':lista_alteracoes,
+            }
+            payload_body = io.BytesIO(json.dumps(dct_clast).encode())
+            return payload_body
+    except Exception as error:
+            print(error.args)
+            return utils_http.server_error_response(500, "Erro na comparacao")
