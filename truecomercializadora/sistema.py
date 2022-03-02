@@ -315,3 +315,115 @@ def get_nao_simuladas_df(nao_simuladas_dict: dict) -> pd.DataFrame:
                     }
                     L.append(row)
     return pd.DataFrame(L)
+
+
+
+def carga_df(sistema):
+    '''
+    Retorna um dataframe com o bloco carga do sistema. Tem como entrada a string do sistema.dat
+    '''
+    dict={0:"SUDESTE",1:"SUL",2:"NORDESTE",3:"NORTE"}
+    sistema=sistema.splitlines()
+    carga=[]
+    for item in sistema[92:120]:
+        teste=[item[0:5],item[8:14],item[16:22],item[24:30],item[32:38],item[40:46],item[48:54],item[56:62],item[64:70],item[72:78],item[80:86],item[88:94],item[96:102]]
+        for i in range(len(teste)):
+            if teste[i].strip()=="":
+                teste[i]=0
+            else: teste[i]=teste[i].strip()
+        carga.append(teste)
+    df_final=pd.DataFrame()
+    for i in range(4):
+        carga1={}
+        for item in carga[i*7+1:7*i+7]:
+            carga1[dict[i],item[0]]=item[1:]
+            df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
+        df_final=df_final.append(df)
+    df_final=df_final.astype({i+1:float for i in range(12)})
+    df_final=df_final.astype({i+1:int for i in range(12)})
+    return(df_final)
+
+def intercambio_df(sistema):
+    '''
+    Retorna um dataframe com o bloco intercambio do sistema. Tem como entrada a string do sistema.dat
+    '''
+    dict={0:"1-2",1:"2-1",2:"1-11",3:"11-1",4:"3-11",5:"11-3",6:"4-11",7:"11-4",8:"1-3",9:"3-1",10:"1-4",11:"4-1",}
+    sistema=sistema.splitlines()
+    intercambio=[]
+    for item in sistema[16:88]:
+        teste=[item[0:5],item[8:14],item[16:22],item[24:30],item[32:38],item[40:46],item[48:54],item[56:62],item[64:70],item[72:78],item[80:86],item[88:94],item[96:102]]
+        for i in range(len(teste)):
+            if teste[i].strip()=="":
+                teste[i]=0
+            else: teste[i]=teste[i].strip()
+        intercambio.append(teste)
+    df_final=pd.DataFrame()
+    for i in range(12):
+        carga1={}
+        for item in intercambio[i*6+1:(i+1)*6]:
+            carga1[dict[i],item[0]]=item[1:]
+            df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
+        df_final=df_final.append(df)
+    df_final=df_final.astype({i+1:float for i in range(12)})
+    df_final=df_final.astype({i+1:int for i in range(12)})
+    return df_final
+
+def pequenas_df(sistema):
+    '''
+    Retorna um dataframe com o bloco pequenas do sistema. Tem como entrada a string do sistema.dat
+    '''
+    dict={0:"1",1:"1",2:"1",3:"1",4:"2",5:"2",6:"2",7:"2",8:"3",9:"3",10:"3",11:"3",12:"4",13:"4",14:"4",15:"4"}
+    sistema=sistema.splitlines()
+    intercambio=[]
+    for item in sistema[124:220]:
+        teste=[item[0:5],item[8:14],item[16:22],item[24:30],item[32:38],item[40:46],item[48:54],item[56:62],item[64:70],item[72:78],item[80:86],item[88:94],item[96:102]]
+        for i in range(len(teste)):
+            if teste[i].strip()=="":
+                teste[i]=0
+            else: teste[i]=teste[i].strip()
+        intercambio.append(teste)
+    df_intermediario=pd.DataFrame()
+    for i in range(16):
+        carga1={}
+        for item in intercambio[i*6+1:(i+1)*6]:
+            carga1[dict[i],item[0]]=item[1:]
+            df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
+        df_intermediario=df_intermediario.append(df)
+    df_intermediario=df_intermediario.astype({i+1:float for i in range(12)})
+    df_intermediario=df_intermediario.astype({i+1:int for i in range(12)})
+    dict={1:"SUDESTE",2:"SUL",3:"NORDESTE",4:"NORTE"}
+    inicio=int(list(df_intermediario.index)[0][1])
+    fim=int(list(df_intermediario.index)[-1][1])
+    df_final=pd.DataFrame()
+    for i in range(4):
+        for j in range(fim-inicio+1):
+            df_2=pd.DataFrame(df_intermediario[df_intermediario.index.isin( [(str(i+1), str(inicio+j))])].sum()).T
+            df_2["ANO"]=inicio+j
+            df_2["SUBSISTEMA"]=dict[i+1]
+            df_final=df_final.append(df_2)
+    df_final=df_final.set_index(["SUBSISTEMA","ANO"])
+    return df_final
+
+
+def tabela_diferencas(df1,df2):
+    '''
+    Retorna um dataframe com a diferença entre dois dataframes resultantes das funções 'bloco'_df, com o 'bloco' podendo ser 'pequenas','intercambio' ou 'carga'.
+    '''
+    df_diff=df1-df2
+    index=list(df_diff.index)
+    teste2=[]
+    for item in index:
+        teste=0
+        for item2 in df_diff.loc[item]:
+            if item2==0 or pd.isna(item2):
+                teste=teste+1
+        if teste==len(df_diff.columns):
+            continue
+        teste2.append(item)
+
+    df_1=df1.loc[list(df_diff.loc[teste2].index)]
+    df_2=df2.loc[list(df_diff.loc[teste2].index)]
+
+    return (df_diff.loc[teste2]).round().astype(int),df_1.round().astype(int),df_2.round().astype(int)
+
+
