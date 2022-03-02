@@ -3,7 +3,7 @@ import json
 import numpy as np
 import datetime
 import io
-from truecomercializadora import utils_datetime, utils_http, utils_s3
+from . import utils_datetime, utils_http, utils_s3
 """
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo clast.dat
 """

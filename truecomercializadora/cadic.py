@@ -1,14 +1,12 @@
 
 import json
 
-from truecomercializadora import (
+from . import (
     utils_http, utils_files,utils_s3
 )
 
 import pandas as pd
-import io, os
-
-from truecomercializadora.clast import BUCKET_TRUE
+import io
 
 """
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo cadic.dat
