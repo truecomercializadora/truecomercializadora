@@ -217,40 +217,40 @@ def get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,mo
     return payload_body
 
 
-def uploadComparacaoExpt(df_expt_A,df_expt_B,S3_path,dates):
-    '''
-    Formata as entradas para utilizar as funções disponiveis de comparação e
-    efetuar o upload de todas as diferenças entre A e B para datawarehouse-true
-    '''
+# def uploadComparacaoExpt(df_expt_A,df_expt_B,S3_path,dates):
+#     '''
+#     Formata as entradas para utilizar as funções disponiveis de comparação e
+#     efetuar o upload de todas as diferenças entre A e B para datawarehouse-true
+#     '''
 
-    modific_A_potef = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
+#     modific_A_potef = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
 
-    modific_A_potef=modific_A_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
-    modific_A_potef.set_index(['numeroUsina'],inplace=True)
-    modific_A_potef=modific_A_potef.reset_index()
+#     modific_A_potef=modific_A_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
+#     modific_A_potef.set_index(['numeroUsina'],inplace=True)
+#     modific_A_potef=modific_A_potef.reset_index()
 
-    modific_B_potef = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
+#     modific_B_potef = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
 
-    modific_B_potef.set_index(['numeroUsina'],inplace=True)
-    modific_B_potef=modific_B_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
-    modific_B_potef=modific_B_potef.reset_index()
+#     modific_B_potef.set_index(['numeroUsina'],inplace=True)
+#     modific_B_potef=modific_B_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
+#     modific_B_potef=modific_B_potef.reset_index()
 
 
-    df_sum_A_sis = getPOTEFporSIS(dates,modific_A_potef)
-    df_sum_B_sis = getPOTEFporSIS(dates,modific_B_potef)
+#     df_sum_A_sis = getPOTEFporSIS(dates,modific_A_potef)
+#     df_sum_B_sis = getPOTEFporSIS(dates,modific_B_potef)
     
 
-    modific_A_gtmin = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
-    modific_B_gtmin = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
+#     modific_A_gtmin = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
+#     modific_B_gtmin = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
         
-    payload_body = get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin)
+#     payload_body = get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin)
 
-    if(payload_body!=None):
-        try:
-            utils_s3.upload_io_object(payload_body,'datawarehouse-true',S3_path)
-            return utils_http.success_response(200, "Upload feito com sucesso para o s3")
-        except Exception as error:
-            print(error.args)
-            return utils_http.server_error_response(500, "Erro no upload para s3")
-    else:
-        print('Não há diferença entre os arquivos expt')
+#     if(payload_body!=None):
+#         try:
+#             utils_s3.upload_io_object(payload_body,'datawarehouse-true',S3_path)
+#             return utils_http.success_response(200, "Upload feito com sucesso para o s3")
+#         except Exception as error:
+#             print(error.args)
+#             return utils_http.server_error_response(500, "Erro no upload para s3")
+#     else:
+#         print('Não há diferença entre os arquivos expt')

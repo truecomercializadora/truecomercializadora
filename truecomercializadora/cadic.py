@@ -38,31 +38,31 @@ def comparaCadic(cadic_str_A, cadic_str_B):
 
     return df_comp1.round().astype(int), df_comp2.round().astype(int)
 
-def uploadComparacaoCadic(df_comp1, df_comp2, S3_path):
-    '''
-    Efetua o upload das dataframes de comparação, caso existam diferenças entre
-    df1 e df2, realiza a subtração entre elas para adicionar a df de comparação ao payload
-    '''
-    try:
-        if(df_comp1.equals(df_comp2)):
-            message = 'Não há diferença entre os decks'
-            df_comp1['USINAS'] = Usinas
-            lista=[df_comp1.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records')]
-            payload_body = io.BytesIO(json.dumps(lista).encode())
-            utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
-            print(message)
-        else:
-            message = 'Há diferença entre os decks'
-            print(message)
-            df_differences = df_comp2.subtract(df_comp1)
-            df_differences['USINAS'] = Usinas
-            df_comp1['USINAS'] = Usinas
-            df_comp2['USINAS'] = Usinas
-            lista=[df_comp1.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records'),df_comp2.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records'),df_differences.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records')]
-            payload_body = io.BytesIO(json.dumps(lista).encode())
-            utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
+# def uploadComparacaoCadic(df_comp1, df_comp2, S3_path):
+#     '''
+#     Efetua o upload das dataframes de comparação, caso existam diferenças entre
+#     df1 e df2, realiza a subtração entre elas para adicionar a df de comparação ao payload
+#     '''
+#     try:
+#         if(df_comp1.equals(df_comp2)):
+#             message = 'Não há diferença entre os decks'
+#             df_comp1['USINAS'] = Usinas
+#             lista=[df_comp1.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records')]
+#             payload_body = io.BytesIO(json.dumps(lista).encode())
+#             utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
+#             print(message)
+#         else:
+#             message = 'Há diferença entre os decks'
+#             print(message)
+#             df_differences = df_comp2.subtract(df_comp1)
+#             df_differences['USINAS'] = Usinas
+#             df_comp1['USINAS'] = Usinas
+#             df_comp2['USINAS'] = Usinas
+#             lista=[df_comp1.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records'),df_comp2.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records'),df_differences.reset_index().rename(columns={"index": "ANO"}).to_dict(orient='records')]
+#             payload_body = io.BytesIO(json.dumps(lista).encode())
+#             utils_s3.upload_io_object(payload_body,BUCKET_TRUE,S3_path)
 
-        return utils_http.success_response(200, 'Lambda executado com sucesso')
-    except Exception as error:
-            print(error.args)
-            return utils_http.server_error_response(500, "Erro no upload para s3")
+#         return utils_http.success_response(200, 'Lambda executado com sucesso')
+#     except Exception as error:
+#             print(error.args)
+#             return utils_http.server_error_response(500, "Erro no upload para s3")

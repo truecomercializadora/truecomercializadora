@@ -413,64 +413,64 @@ def get_differences(mdf_vmint_diff_A,df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,v
 
     return payload_body
 
-def uploadComparacaoModif(df_modif_A,df_modif_B,anos,meses,datas,S3_path):
-    '''
-    Formata as entradas para utilizar as funções disponiveis de comparação e
-    efetuar o upload de todas as diferenças entre A e B para datawarehouse-true
-    '''
-    vmint_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VMINT')] # A ons
-    vmint_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VMINT')] # B true
-    vmint_B.reset_index(inplace=True)
-    vmint_A.reset_index(inplace=True)
-    vmint_A = vmint_A.sort_index()
-    vmint_B = vmint_B.sort_index()
+# def uploadComparacaoModif(df_modif_A,df_modif_B,anos,meses,datas,S3_path):
+#     '''
+#     Formata as entradas para utilizar as funções disponiveis de comparação e
+#     efetuar o upload de todas as diferenças entre A e B para datawarehouse-true
+#     '''
+#     vmint_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VMINT')] # A ons
+#     vmint_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VMINT')] # B true
+#     vmint_B.reset_index(inplace=True)
+#     vmint_A.reset_index(inplace=True)
+#     vmint_A = vmint_A.sort_index()
+#     vmint_B = vmint_B.sort_index()
   
-    df_vmint_diff_A, df_vmint_diff_B = getVmintComp(vmint_B,vmint_A)
+#     df_vmint_diff_A, df_vmint_diff_B = getVmintComp(vmint_B,vmint_A)
 
-    vazmin_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VAZMIN')].reset_index() # A ons
-    vazmin_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VAZMIN')].reset_index() # B true
+#     vazmin_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VAZMIN')].reset_index() # A ons
+#     vazmin_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VAZMIN')].reset_index() # B true
 
-    vazmin_expandido_A= expanded_vazmin_modif(vazmin_A,anos,meses)
-    vazmin_expandido_B = expanded_vazmin_modif(vazmin_B,anos,meses)
+#     vazmin_expandido_A= expanded_vazmin_modif(vazmin_A,anos,meses)
+#     vazmin_expandido_B = expanded_vazmin_modif(vazmin_B,anos,meses)
 
-    vazmint_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VAZMINT')].reset_index()
-    vazmint_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VAZMINT')].reset_index()
+#     vazmint_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VAZMINT')].reset_index()
+#     vazmint_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VAZMINT')].reset_index()
 
-    vazmint_A['mes'] = vazmint_A['mes'].apply(lambda x: x.zfill(2))
-    vazmint_A['ano'] = vazmint_A['ano'].apply(lambda x: x.zfill(4))
+#     vazmint_A['mes'] = vazmint_A['mes'].apply(lambda x: x.zfill(2))
+#     vazmint_A['ano'] = vazmint_A['ano'].apply(lambda x: x.zfill(4))
 
-    vazmint_B['mes'] = vazmint_B['mes'].apply(lambda x: x.zfill(2))
-    vazmint_B['ano'] = vazmint_B['ano'].apply(lambda x: x.zfill(4))
+#     vazmint_B['mes'] = vazmint_B['mes'].apply(lambda x: x.zfill(2))
+#     vazmint_B['ano'] = vazmint_B['ano'].apply(lambda x: x.zfill(4))
 
-    vazmint_B.drop(columns=['unidade','nConjunto'],inplace=True)
+#     vazmint_B.drop(columns=['unidade','nConjunto'],inplace=True)
 
-    vazmint_A.drop(columns=['unidade','nConjunto'],inplace=True)
+#     vazmint_A.drop(columns=['unidade','nConjunto'],inplace=True)
 
-    vazmint_B['pChave'] = vazmint_A['pChave'] = 'VAZMIN'
+#     vazmint_B['pChave'] = vazmint_A['pChave'] = 'VAZMIN'
 
-    vazmint_expandido_A = expand_vazmint_modif(vazmint_A,datas).set_index(['idUsina','mes','ano'],inplace=True)
-    vazmint_expandido_B = expand_vazmint_modif(vazmint_B,datas).set_index(['idUsina','mes','ano'],inplace=True)
-
-
-    vazmin_B = pd.concat([vazmin_expandido_B,vazmint_expandido_B],ignore_index=True)
-    vazmin_B.sort_values(by= ['idUsina','mes','ano'],axis=0,ascending=True,inplace=True)
-    vazmin_B.sort_index(inplace=True)
-
-    vazmin_A = pd.concat([vazmin_expandido_A,vazmint_expandido_A],ignore_index=True)
-    vazmin_A.sort_values(by= ['idUsina','mes','ano'],axis=0,ascending=True,inplace=True)
-    vazmin_A.sort_index(inplace=True)
+#     vazmint_expandido_A = expand_vazmint_modif(vazmint_A,datas).set_index(['idUsina','mes','ano'],inplace=True)
+#     vazmint_expandido_B = expand_vazmint_modif(vazmint_B,datas).set_index(['idUsina','mes','ano'],inplace=True)
 
 
-    vmaxt_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VMAXT')].reset_index()
-    vmaxt_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VMAXT')].reset_index()
-    payload_body = get_differences(df_vmint_diff_A, df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,vmaxt_B)
+#     vazmin_B = pd.concat([vazmin_expandido_B,vazmint_expandido_B],ignore_index=True)
+#     vazmin_B.sort_values(by= ['idUsina','mes','ano'],axis=0,ascending=True,inplace=True)
+#     vazmin_B.sort_index(inplace=True)
 
-    if(payload_body!=None):
-        try:
-            utils_s3.upload_io_object(payload_body,'datawarehouse-true',S3_path)
-            return utils_http.success_response(200, "Upload feito com sucesso para o s3")
-        except Exception as error:
-            print(error.args)
-            return utils_http.server_error_response(500, "Erro no upload para s3")
-    else:
-        print('Não há diferença entre os arquivos modif')
+#     vazmin_A = pd.concat([vazmin_expandido_A,vazmint_expandido_A],ignore_index=True)
+#     vazmin_A.sort_values(by= ['idUsina','mes','ano'],axis=0,ascending=True,inplace=True)
+#     vazmin_A.sort_index(inplace=True)
+
+
+#     vmaxt_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VMAXT')].reset_index()
+#     vmaxt_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VMAXT')].reset_index()
+#     payload_body = get_differences(df_vmint_diff_A, df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,vmaxt_B)
+
+#     if(payload_body!=None):
+#         try:
+#             utils_s3.upload_io_object(payload_body,'datawarehouse-true',S3_path)
+#             return utils_http.success_response(200, "Upload feito com sucesso para o s3")
+#         except Exception as error:
+#             print(error.args)
+#             return utils_http.server_error_response(500, "Erro no upload para s3")
+#     else:
+#         print('Não há diferença entre os arquivos modif')
