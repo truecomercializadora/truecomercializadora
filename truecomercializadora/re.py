@@ -114,8 +114,12 @@ def getFileRE(re_A,re_B):
     re_B_lines = transcribe_re_value(re_B)
     new_re_A_lines = expand_re(re_A_lines)
     new_re_B_lines = expand_re(re_B_lines)
+
     df_A = pd.DataFrame().from_dict(new_re_A_lines).drop(columns='idRestricao')
+    df_A=df_A.astype({'mesInicio':'int32','anoInicio':'int32','mesFim':'int32','anoFim':'int32','idP':'int32'})
+
     df_B = pd.DataFrame().from_dict(new_re_B_lines).drop(columns='idRestricao')
+    df_B=df_B.astype({'mesInicio':'int32','anoInicio':'int32','mesFim':'int32','anoFim':'int32','idP':'int32'})
     return df_A,df_B
 
 def comparaRE(df_A,df_B):
@@ -144,6 +148,7 @@ def comparaRE(df_A,df_B):
         filtered_df_A = filtered_df_A.loc[filtered_df_A['anoInicio']==anoInicio]
         filtered_df_A = filtered_df_A.loc[filtered_df_A['mesFim']==mesFim]
         filtered_df_A = filtered_df_A.loc[filtered_df_A['anoFim']==anoFim]
+
         if(filtered_df_B.empty):
             element = {
                 'usinasRestricao:':[usinas],
@@ -186,7 +191,7 @@ def comparaRE(df_A,df_B):
                             df_A_diff = df_A_diff.append(filtered_df_A)
                     else:
                         df_A_diff = df_A_diff.append(filtered_df_A)
-
+        
     for row in df_B.itertuples():
         usinas = list(map(str, row[1]))
         mesInicio = row[2]
@@ -223,12 +228,13 @@ def comparaRE(df_A,df_B):
             
         else:
             row_A_new=filtered_df_A
+
         filtered_df_B.set_index('usinasRestricao:',inplace=True)
         row_A_new.set_index('usinasRestricao:',inplace=True)
 
         comparasion_df = row_A_new.compare(filtered_df_B, keep_equal=False)
         if(not(comparasion_df.empty)):
-            if(df_B_diff.empty == True):    
+            if(df_B_diff.empty == True):
                 df_B_diff = df_B_diff.append(filtered_df_B)
             else:
                 if not [usinas] in (list(df_B_diff.index)):
@@ -236,9 +242,9 @@ def comparaRE(df_A,df_B):
                 else:
                     if any(df_B_diff['anoInicio']==anoInicio):
                         if not any(df_B_diff['mesInicio']==mesInicio):
-                            df_B_diff = df_B_diff.append(filtered_df_B)
+                            df_B_diff = df_B_diff.append(filtered_df_B)     
                     else:
-                        df_B_diff = df_B_diff.append(filtered_df_B)
+                        df_B_diff = df_B_diff.append(filtered_df_B)  
             if(df_A_diff.empty == True):    
                 df_A_diff = df_A_diff.append(row_A_new)
             else:
@@ -251,4 +257,29 @@ def comparaRE(df_A,df_B):
                     else:
                         df_A_diff = df_A_diff.append(row_A_new)
 
+
+
+    df_B_diff=(df_B_diff.reset_index()).round().astype({'usinasRestricao:':'str'})
+    df_B_diff=df_B_diff.drop_duplicates(keep='first')
+    usinasRestr=list(df_B_diff['usinasRestricao:'])
+    lista_converted= []
+    for i in range(len(usinasRestr)):
+        word = usinasRestr[i]
+        partial = [int(x) for x in word[2:len(word)-2].replace('\'',"").split(",")]
+        lista_converted.append(partial)
+    df_B_diff['usinasRestricao:']=lista_converted   
+
+
+    df_A_diff=(df_A_diff.reset_index()).round().astype({'usinasRestricao:':'str'})
+    df_A_diff=df_A_diff.drop_duplicates(keep='first')
+    usinasRestr=list(df_A_diff['usinasRestricao:'])
+    lista_converted= []
+    for i in range(len(usinasRestr)):
+        word = usinasRestr[i]
+        partial = [int(x) for x in word[2:len(word)-2].replace('\'',"").split(",")]
+        lista_converted.append(partial)
+    df_A_diff['usinasRestricao:']=lista_converted   
+
+
+   
     return (df_B_diff.reset_index()).round(),(df_A_diff.reset_index()).round()

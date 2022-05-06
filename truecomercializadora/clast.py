@@ -59,19 +59,14 @@ def _get_custoOperacao_diff(blocoA, blocoB):
     '''
     Calcula a diferença entre os blocos estruturais de entrada tratando valores NaN, retorna um json loads do dataframe de diferenças
     '''
-    dfA = pd.DataFrame(blocoA, columns = ['numUsina', 'tipo', 'custo1', 'custo2', 'custo3','custo4', 'custo5']).set_index(['numUsina', 'tipo']).replace(r'^\s*$', np.nan, regex=True).astype(float)
-    dfB = pd.DataFrame(blocoB, columns = ['numUsina', 'tipo', 'custo1', 'custo2', 'custo3','custo4', 'custo5']).set_index(['numUsina', 'tipo']).replace(r'^\s*$', np.nan, regex=True).astype(float)
-    
+    dfA = pd.DataFrame(blocoA, columns = ['numUsina','tipo', 'custo1', 'custo2', 'custo3','custo4', 'custo5']).set_index(['numUsina', 'tipo']).replace(r'^\s*$', np.nan, regex=True).astype(float)
+    dfB = pd.DataFrame(blocoB, columns = ['numUsina','tipo', 'custo1', 'custo2', 'custo3','custo4', 'custo5']).set_index(['numUsina', 'tipo']).replace(r'^\s*$', np.nan, regex=True).astype(float)
     dfDiff = dfA.subtract(dfB)
     dfDiff = dfDiff.fillna(0).reset_index()
 
-    dfDiff['custo1'] = dfDiff['custo1'].astype(int)
-    dfDiff['custo2'] = dfDiff['custo2'].astype(int)
-    dfDiff['custo3'] = dfDiff['custo3'].astype(int)
-    dfDiff['custo4'] = dfDiff['custo4'].astype(int)
-    dfDiff['custo5'] = dfDiff['custo5'].astype(int)
-
     dfDiff.numUsina = pd.to_numeric(dfDiff.numUsina, errors='coerce')
+
+
 
     return json.loads(dfDiff.reset_index().to_json(orient='records'))
 
@@ -79,15 +74,11 @@ def _get_alteracaoCusto_diff(blocoA, blocoB):
     '''
     Calcula a diferença entre os blocos conjunturais de entrada tratando valores NaN, retorna um json loads do dataframe de diferenças
     '''
-    dfA = pd.DataFrame(blocoA, columns = ['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao','custo','nomeUsina']).set_index(['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao'])
-    dfB = pd.DataFrame(blocoB, columns = ['numUsina','mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao','custo','nomeUsina']).set_index(['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao'])
+    dfA = pd.DataFrame(blocoA, columns = ['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao','custo']).set_index(['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao'])
+    dfB = pd.DataFrame(blocoB, columns = ['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao','custo']).set_index(['numUsina', 'mesInicioModificacao', 'anoInicioModificacao','mesFimModificacao', 'anoFimModificacao'])
 
-    df_auxA = dfA.drop('nomeUsina', inplace=False, axis =1)
-    df_auxB = dfB.drop('nomeUsina', inplace=False, axis =1)
-    dfDiff = df_auxA - df_auxB
-
+    dfDiff = dfA - dfB
     dfDiff = dfDiff.fillna(0).reset_index()
-    dfDiff['custo'] = dfDiff['custo'].round().astype(int)
 
     dfDiff.numUsina = pd.to_numeric(dfDiff.numUsina, errors='coerce')
     dfDiff.mesInicioModificacao = pd.to_numeric(dfDiff.mesInicioModificacao, errors='coerce')
@@ -200,29 +191,39 @@ def comparaClast(clast_strA, clast_strB):
 
     dfAcusto = pd.DataFrame(blocoA['custoOperacao']).set_index('numUsina')
     dfAalteracoes = pd.DataFrame(blocoA['alteracaoCusto'])
-    dfAalteracoes = dfAalteracoes.reindex(columns=['numUsina','nomeUsina',	'mesInicioModificacao',	'anoInicioModificacao',	'mesFimModificacao',	'anoFimModificacao',	'custo'])
+    dfAalteracoes=dfAalteracoes.loc[:, ["nomeUsina","custo","mesInicioModificacao","anoInicioModificacao","mesFimModificacao","anoFimModificacao"]]
 
     blocoB = transcribe_clast(clast_str=clast_strB)
 
     dfBcusto = pd.DataFrame(blocoB['custoOperacao']).set_index('numUsina')
     dfBalteracoes = pd.DataFrame(blocoB['alteracaoCusto'])
-    dfBalteracoes = dfBalteracoes.reindex(columns=['numUsina','nomeUsina',	'mesInicioModificacao',	'anoInicioModificacao',	'mesFimModificacao',	'anoFimModificacao',	'custo'])
+    dfBalteracoes=dfBalteracoes.loc[:, ["nomeUsina","custo","mesInicioModificacao","anoInicioModificacao","mesFimModificacao","anoFimModificacao"]]
 
     blocoC = get_diff_clast(blocoA, blocoB)
 
-    dfCcusto = pd.DataFrame(blocoC['custoOperacao'])
-    dfCcusto = (dfCcusto[(dfCcusto != 0).all(1)])
-    dfCcusto = retornaNome(dfAcusto, dfCcusto)
+    dfCcusto = pd.DataFrame(blocoC['custoOperacao']).set_index('numUsina')
     dfCcusto.drop('index',axis = 1, inplace=True)
-    dfCcusto = dfCcusto.reindex(columns=['numUsina', 'nomeUsina', 'tipo', 'custo1', 'custo2', 'custo3', 'custo4', 'custo5'])
+    dfCcusto = dfCcusto[(dfCcusto != 0).all(1)]
 
-    dfCalteracoes = pd.DataFrame(blocoC['alteracaoCusto'])
-    dfCalteracoes = (dfCalteracoes[(dfCalteracoes != 0).all(1)])
-    dfCalteracoes = retornaNome(dfAcusto, dfCalteracoes)
-    dfCalteracoes = dfCalteracoes.reindex(columns=['numUsina','nomeUsina',	'mesInicioModificacao',	'anoInicioModificacao',	'mesFimModificacao',	'anoFimModificacao',	'custo'])
-    dfCalteracoes.set_index('nomeUsina')
+    values = [str(x) for x in list(dfCcusto.index)]
+    df_filtered_A  = dfAcusto[dfAcusto.index.isin(values)].sort_index(ascending=True)
+    df_filtered_B  = dfBcusto[dfBcusto.index.isin(values)].sort_index(ascending=True)
+    dfCcusto['nomeUsina']=list(df_filtered_A['nomeUsina'])
+    dfCcusto=dfCcusto.loc[:, ['nomeUsina','tipo','custo1','custo2','custo3','custo4','custo5']]
 
-    return dfAcusto.reset_index(), dfAalteracoes, dfBcusto.reset_index(), dfBalteracoes, dfCcusto.reset_index().drop('index',axis=1), dfCalteracoes.reset_index().drop('index',axis=1)
+    dfCalteracoes = pd.DataFrame(blocoC['alteracaoCusto']).set_index('numUsina')
+    dfCalteracoes = dfCalteracoes[(dfCalteracoes != 0).all(1)]
+    usinas = list((dfCalteracoes.index))
+    nomeUsinas = [dfAalteracoes.loc[str(x)]['nomeUsina'] for x in usinas]
+    dfCalteracoes['nomeUsina']=nomeUsinas
+    dfCalteracoes=dfCalteracoes.loc[:, ["nomeUsina","custo","mesInicioModificacao","anoInicioModificacao","mesFimModificacao","anoFimModificacao"]]
+    
+    values = [str(x) for x in list(set(dfCalteracoes.index))]
+    df_filtered_Aalt  = dfAalteracoes[dfAalteracoes.index.isin(values)].sort_index(ascending=True)
+    df_filtered_Balt  = dfBalteracoes[dfBalteracoes.index.isin(values)].sort_index(ascending=True)
+
+
+    return df_filtered_A.round(2), df_filtered_Aalt.round(2), df_filtered_B.round(2), df_filtered_Balt.round(2), dfCcusto.round(2), dfCalteracoes.round(2)
 
 def PayloadClast(dfAcusto, dfAalteracoes, dfBcusto, dfBalteracoes, dfCcusto, dfCalteracoes):
     '''

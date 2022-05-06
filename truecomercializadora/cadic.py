@@ -25,7 +25,7 @@ def comparaCadic(cadic_str_A, cadic_str_B):
     str_bloco2 = '\n'.join(bloco_2_A[1:7])
     df2 = pd.read_fwf(io.StringIO(str_bloco2),names=['XXXJAN.','XXXFEV.','XXXMAR.','XXXABR.','XXXMAI.','XXXJUN.','XXXJUL.','XXXAGO.','XXXSET.','XXXOUT.','XXXNOV.','XXXDEZ.'])
     df_comp1 = pd.concat([df1,df2]).fillna(0)
-
+    df_comp1['USINAS'] = Usinas
 
     bloco_1_B = (utils_files.select_document_parts(cadic_str_B,'CONS.ITAIPU','ANDE'))[0].splitlines()
     str_bloco1_B = '\n'.join(bloco_1_B[1:7])
@@ -34,8 +34,10 @@ def comparaCadic(cadic_str_A, cadic_str_B):
     str_bloco2 = '\n'.join(bloco_2_B[1:7])
     df2 = pd.read_fwf(io.StringIO(str_bloco2),names=['XXXJAN.','XXXFEV.','XXXMAR.','XXXABR.','XXXMAI.','XXXJUN.','XXXJUL.','XXXAGO.','XXXSET.','XXXOUT.','XXXNOV.','XXXDEZ.'])
     df_comp2 = pd.concat([df1,df2]).fillna(0)
+    df_comp2['USINAS'] = Usinas
 
-    return df_comp1.round().astype(int), df_comp2.round().astype(int)
+    
+    return df_comp1.round(), df_comp2.round()
 
 def ComparacaoCadic(df_comp1, df_comp2):
     '''

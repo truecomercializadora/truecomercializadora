@@ -52,27 +52,32 @@ def comparaExph(exph_strA, exph_strB):
     exph_strA = exphDF(exph_strA)
     df1 = pd.read_fwf(io.StringIO(exph_strA), skiprows=2)
     df1 = df1.fillna(' ')
-    df1 = df1.rename(columns={'XXXX': 'COD', 'XXXXXXXXXXXX': 'NOME', 'XX': 'MES INICIO', 'XXXX.1':'ANO INICIO', 
+    df1 = df1.rename(columns={'XXXX': 'COD', 'XXXXXXXXXXXX': 'NOME', 'XX': 'MES ENCHIMENTO', 'XXXX.1':'ANO ENCHIMENTO', 
     'XX.1':'DURACAO','XX.X':'VOLUME %', 'XX.2':'MES ENTRADA', 'XXXX.2':'ANO ENTRADA', 
     'XXXX.X': 'POT', 'Unnamed: 9': 'MQ', 'Unnamed: 10': 'CJ'})
+    df1 = df1.set_index('COD')
     
     exph_strB = exphDF(exph_strB)
     df2 = pd.read_fwf(io.StringIO(exph_strB), skiprows=2)
     df2 = df2.fillna(' ')
-    df2 = df2.rename(columns={'XXXX': 'COD', 'XXXXXXXXXXXX': 'NOME', 'XX': 'MES INICIO', 'XXXX.1':'ANO INICIO', 
+    df2 = df2.rename(columns={'XXXX': 'COD', 'XXXXXXXXXXXX': 'NOME', 'XX': 'MES ENCHIMENTO', 'XXXX.1':'ANO ENCHIMENTO', 
     'XX.1':'DURACAO','XX.X':'VOLUME %', 'XX.2':'MES ENTRADA', 'XXXX.2':'ANO ENTRADA', 
     'XXXX.X': 'POT', 'Unnamed: 9': 'MQ', 'Unnamed: 10': 'CJ'})
+    df2 = df2.set_index('COD')
 
-    df1 = addColumn(df1, 'Hidrelétrica')
-    df2 = addColumn(df2, 'Hidrelétrica')
-
-    df1 = df1.sort_index()
-    df2 = df2.sort_index()
-
-    df3 = (df1).compare(df2)
-    df3 = addColumn(df3,'Hidrelétrica')
-    df3 = df3.sort_index()
+    df3 = df1.compare(df2)
     df3 = df3.fillna(' ').rename(columns={'self': 'A', 'other': 'B'})
     df3.columns = df3.columns.get_level_values(0) + ' ' +  df3.columns.get_level_values(1)
+
+    values = [x for x in list((df3.index))]
+    dct={}
+    for i in set(values):
+        dct.update({
+            i:(list(df2.loc[i]['NOME'])[0])
+        })
+    nomes = [dct[x] for x in list((df3.index))]
+    df3['NOME']=nomes
+
+    df3=df3.loc[:, ["NOME","MES ENCHIMENTO A","ANO ENCHIMENTO A","MES ENCHIMENTO B","ANO ENCHIMENTO B","MES ENTRADA A","ANO ENTRADA A","MES ENTRADA B","ANO ENTRADA B"]]
 
     return df1, df2, df3
