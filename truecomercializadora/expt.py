@@ -134,22 +134,103 @@ def get_expt_df(expt_str, ano_deck):
 
 def getPOTEFporSIS(dates,df_potef):
     '''
-	Retorna a soma dos valores de potef para cada sistema
+	Retorna a soma acumulada dos valores de potef para cada sistema 
 	'''
     df_sum = pd.DataFrame(columns = ['data', 'valor'])
+    somas=[]
+    
+    for i in range(len(dates)):
+        year=dates[i][:4]
+        month = dates[i][4:6]
+        df_data = ((df_potef.loc[(df_potef['mesInicio']==int(month))]).loc[(df_potef['anoInicio']==int(year))])
+        if i == 0:
+            if(len(df_data)!=0):
+                sum = df_data['degrau'].sum()
+            else:
+                sum=0
+        else:
+            newsum = df_data['degrau'].sum()
+            sum = newsum + somas[-1]
 
-    for date in dates:
-        year=date[:4]
-        month = date[4:6]
-        sum = ((df_potef.loc[(df_potef['mesInicio']==int(month))]).loc[(df_potef['anoInicio']==int(year))])['novoValor'].sum()
+        somas.append(int(sum.round(3)))
         dct_sum = {
-            'data':f'{int(month)}/{int(year)}',
-            'valor':int(sum.round(3))
+        'data':f'{int(month)}/{int(year)}',
+        'valor':int(sum.round(3))
         }
         df_sum = df_sum.append(dct_sum,ignore_index=True)
+          
     return df_sum 
+def get_degrau(df):
+    '''
+	Retorna um dataframe com o degrau acumulado de cada usina do parâmetro POTEF
 
+	'''
 
+    usinas = list(set(df['numeroUsina']))
+    usinas.sort(reverse=False)
+    df_degrau = pd.DataFrame(columns=['numeroUsina','tipoModificacao','nomeUsina','mesInicio','anoInicio','mesFim','anoFim','novoValor','degrau'])
+    dct={}
+    for usina in usinas:
+        potef_usina=df.loc[df['numeroUsina']==usina]
+        for i in range(len(potef_usina)):
+            dct.update({
+            'numeroUsina':usina,
+            'tipoModificacao':'POTEF',
+            'nomeUsina':list(potef_usina['nomeUsina'])[0],
+            'mesInicio':potef_usina['mesInicio'].iloc[i],
+            'anoInicio':potef_usina['anoInicio'].iloc[i],
+            'mesFim':potef_usina['mesFim'].iloc[i],
+            'anoFim':potef_usina['anoFim'].iloc[i],
+            'novoValor':potef_usina['novoValor'].iloc[i],
+            })
+            if i == 0:
+                dct.update({
+                    'degrau':potef_usina['novoValor'].iloc[i],
+                })
+            else:
+                dct.update({
+                    'degrau':potef_usina['novoValor'].iloc[i]-potef_usina['novoValor'].iloc[i-1],
+                })
+            df_degrau=df_degrau.append(dct,ignore_index=True)
+    
+    return df_degrau
+def unexpand_potef(df):
+    '''
+	Retorna um dataframe do parâmetro POTEF do expt sem expansão até o final do horizonte do deck
+	'''
+
+    df_unexpanded=pd.DataFrame(columns=list(df.columns))
+    usinas = list(set(df['numeroUsina']))
+    usinas.sort(reverse=False)
+    dct={}
+    for usina in usinas:
+    
+        values=[]
+        potef_usina=df.loc[df['numeroUsina']==usina]
+        for v in list(potef_usina['novoValor']):
+            if v not in values:
+                values.append(v)
+        
+        for value in values:
+            df_value = potef_usina.loc[potef_usina['novoValor']==value]
+            mesInicio = df_value['mesInicio'].iloc[0]
+            anoInicio = df_value['anoInicio'].iloc[0]
+            mesFim = df_value['mesFim'].iloc[-1]
+            anoFim = df_value['anoFim'].iloc[-1]
+
+            dct.update({
+                'numeroUsina':usina,
+                'tipoModificacao':'POTEF',
+                'nomeUsina':list(df_value['nomeUsina'])[0],
+                'mesInicio':mesInicio,
+                'anoInicio':anoInicio,
+                'mesFim':mesFim,
+                'anoFim':anoFim,
+                'novoValor':round(float(value),2)
+            })
+            df_unexpanded=df_unexpanded.append(dct,ignore_index=True)
+
+    return df_unexpanded
 def getFilesExpt(expt_A,expt_B,year):
     '''
 	Retorna as dataframes formatadas de expt_A e expt_B com elementos inteiros
