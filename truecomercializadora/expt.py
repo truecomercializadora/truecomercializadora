@@ -142,7 +142,7 @@ def getPOTEFporSIS(dates,df_potef):
     for i in range(len(dates)):
         year=dates[i][:4]
         month = dates[i][4:6]
-        df_data = ((df_potef.loc[(df_potef['mesInicio']==int(month))]).loc[(df_potef['anoInicio']==int(year))])
+        df_data = df_potef.loc[(df_potef['mesInicio']==int(month)) & (df_potef['anoInicio']==int(year))]
         if i == 0:
             if(len(df_data)!=0):
                 sum = df_data['degrau'].sum()
@@ -152,13 +152,14 @@ def getPOTEFporSIS(dates,df_potef):
             newsum = df_data['degrau'].sum()
             sum = newsum + somas[-1]
 
-        somas.append(int(sum.round(3)))
+        somas.append(int(sum))
         dct_sum = {
         'data':f'{int(month)}/{int(year)}',
-        'valor':int(sum.round(3))
+        'valor':int(sum)
         }
         df_sum = df_sum.append(dct_sum,ignore_index=True)
           
+        
     return df_sum 
 def get_degrau(df):
     '''
@@ -177,19 +178,19 @@ def get_degrau(df):
             'numeroUsina':usina,
             'tipoModificacao':'POTEF',
             'nomeUsina':list(potef_usina['nomeUsina'])[0],
-            'mesInicio':potef_usina['mesInicio'].iloc[i],
-            'anoInicio':potef_usina['anoInicio'].iloc[i],
-            'mesFim':potef_usina['mesFim'].iloc[i],
-            'anoFim':potef_usina['anoFim'].iloc[i],
-            'novoValor':potef_usina['novoValor'].iloc[i],
+            'mesInicio':int(potef_usina['mesInicio'].iloc[i]),
+            'anoInicio':int(potef_usina['anoInicio'].iloc[i]),
+            'mesFim':int(potef_usina['mesFim'].iloc[i]),
+            'anoFim':int(potef_usina['anoFim'].iloc[i]),
+            'novoValor':int(potef_usina['novoValor'].iloc[i]),
             })
             if i == 0:
                 dct.update({
-                    'degrau':potef_usina['novoValor'].iloc[i],
+                    'degrau':int(potef_usina['novoValor'].iloc[i]),
                 })
             else:
                 dct.update({
-                    'degrau':potef_usina['novoValor'].iloc[i]-potef_usina['novoValor'].iloc[i-1],
+                    'degrau':int(potef_usina['novoValor'].iloc[i]-potef_usina['novoValor'].iloc[i-1]),
                 })
             df_degrau=df_degrau.append(dct,ignore_index=True)
     
@@ -213,10 +214,10 @@ def unexpand_potef(df):
         
         for value in values:
             df_value = potef_usina.loc[potef_usina['novoValor']==value]
-            mesInicio = df_value['mesInicio'].iloc[0]
-            anoInicio = df_value['anoInicio'].iloc[0]
-            mesFim = df_value['mesFim'].iloc[-1]
-            anoFim = df_value['anoFim'].iloc[-1]
+            mesInicio = int(df_value['mesInicio'].iloc[0])
+            anoInicio = int(df_value['anoInicio'].iloc[0])
+            mesFim = int(df_value['mesFim'].iloc[-1])
+            anoFim = int(df_value['anoFim'].iloc[-1])
 
             dct.update({
                 'numeroUsina':usina,
@@ -226,7 +227,7 @@ def unexpand_potef(df):
                 'anoInicio':anoInicio,
                 'mesFim':mesFim,
                 'anoFim':anoFim,
-                'novoValor':round(float(value),2)
+                'novoValor':int(value)
             })
             df_unexpanded=df_unexpanded.append(dct,ignore_index=True)
 
