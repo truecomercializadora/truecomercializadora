@@ -78,7 +78,7 @@ def comparaCurva(curva_strA, curva_strB):
     custoA['SISTEMA'] = newIndexesA
     custoA=custoA.set_index('SISTEMA')
 
-    custo_diff = custoB.subtract(custoA, fill_value=0).reindex_like(custoA).astype(float)
+    custo_diff = custoA.subtract(custoB, fill_value=0).reindex_like(custoA).astype(float)
     custo_diff = custo_diff[(custo_diff != 0).all(1)]
 
     curvaB = utils_files.select_document_part(curva_strB, "CURVA", "9999").splitlines()[2:]
@@ -87,7 +87,7 @@ def comparaCurva(curva_strA, curva_strB):
     curvaA = utils_files.select_document_part(curva_strA, "CURVA", "9999").splitlines()[2:]
     curvaA = curvaDF(curvaA)
     
-    curva_diff = curvaB.subtract(curvaA, fill_value=0).reindex_like(curvaB).astype(float)
+    curva_diff = curvaA.subtract(curvaB, fill_value=0).reindex_like(curvaB).astype(float)
     curva_diff = curva_diff[(curva_diff != 0).all(1)]
 
     return custoA.round(2), custoB.round(2), custo_diff.round(2), curvaA.round(), curvaB.round(), curva_diff.round()

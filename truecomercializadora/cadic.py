@@ -1,5 +1,6 @@
 
 import json
+from turtle import update
 
 from . import (
     utils_http, utils_files,utils_s3
@@ -55,7 +56,23 @@ def ComparacaoCadic(df_comp1, df_comp2):
         else:
             message = 'Há diferença entre os decks'
             print(message)
-            df_differences = df_comp2.subtract(df_comp1)
+
+            colunasdf1 = list(df_comp1.columns)
+            columns_type = {}
+            for coluna in colunasdf1[:-1]:
+                columns_type.update({
+                    coluna:'int'
+                })
+            colunasdf2 = list(df_comp2.columns)
+            columns_type2= {}
+            for coluna in colunasdf2[:-1]:
+                columns_type2.update({
+                    coluna:'int'
+                })
+            df_comp1=df_comp1.astype(columns_type)
+            df_comp2=df_comp2.astype(columns_type2)
+            
+            df_differences = df_comp1.subtract(df_comp2)
             df_differences['USINAS'] = Usinas
             df_comp1['USINAS'] = Usinas
             df_comp2['USINAS'] = Usinas

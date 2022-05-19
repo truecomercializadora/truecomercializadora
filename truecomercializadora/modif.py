@@ -323,9 +323,9 @@ def get_differences(mdf_vmint_diff_A,df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,v
         for item in df_differences["idUsina"]:
             listaNomes.append(dictHD[item])
         df_differences.insert(0, 'Nomes', listaNomes)
-        df_filter_A.insert(8, 'Tipo','Hidrelétrica' )
-        df_filter_B.insert(8, 'Tipo','Hidrelétrica' )
-        df_differences.insert(8, 'Tipo','Hidrelétrica' )
+        df_filter_A.insert(len(df_filter_A.columns)-2, 'Tipo','Hidrelétrica' )
+        df_filter_B.insert(len(df_filter_B.columns)-2, 'Tipo','Hidrelétrica' )
+        df_differences.insert(len(df_differences.columns)-2, 'Tipo','Hidrelétrica' )
 
         lista_vmint=[df_filter_B.to_dict(orient='records'),df_filter_A.to_dict(orient='records'),df_differences.to_dict(orient='records')]
     print(message)
@@ -355,9 +355,9 @@ def get_differences(mdf_vmint_diff_A,df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,v
         for item in df_differences["idUsina"]:
             listaNomes.append(dictHD[item])
         df_differences.insert(0, 'Nomes', listaNomes)
-        df_filter_A.insert(8, 'Tipo','Hidrelétrica' )
-        df_filter_B.insert(8, 'Tipo','Hidrelétrica' )
-        df_differences.insert(8, 'Tipo','Hidrelétrica' )
+        df_filter_A.insert(len(df_filter_A.columns)-2, 'Tipo','Hidrelétrica' )
+        df_filter_B.insert(len(df_filter_B.columns)-2, 'Tipo','Hidrelétrica' )
+        df_differences.insert(len(df_differences.columns)-2, 'Tipo','Hidrelétrica' )
 
 
         lista_vazmin=[df_filter_B.to_dict(orient='records'),df_filter_A.to_dict(orient='records'),df_differences.to_dict(orient='records')]
@@ -385,11 +385,9 @@ def get_differences(mdf_vmint_diff_A,df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,v
         for item in df_differences["idUsina"]:
             listaNomes.append(dictHD[item])
         df_differences.insert(0, 'Nomes', listaNomes)
-        df_filter_A.insert(8, 'Tipo','Hidrelétrica' )
-        df_filter_B.insert(8, 'Tipo','Hidrelétrica' )
-        df_differences.insert(8, 'Tipo','Hidrelétrica' )
-
-
+        df_filter_A.insert(len(df_filter_A.columns)-2, 'Tipo','Hidrelétrica' )
+        df_filter_B.insert(len(df_filter_B.columns)-2, 'Tipo','Hidrelétrica' )
+        df_differences.insert(len(df_differences.columns)-2, 'Tipo','Hidrelétrica' )
         lista_vmaxt=[df_filter_B.to_dict(orient='records'),df_filter_A.to_dict(orient='records'),df_differences.to_dict(orient='records')]
     print(message)
 

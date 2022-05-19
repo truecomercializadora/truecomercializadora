@@ -107,7 +107,7 @@ def intercambio_df(agrint):
 
   return intercambio.astype(int),limites.astype(int)
     
-def tabela_diferencas(df1,df2):
+def tabela_diferencas_limites(df1,df2):
     '''
     Retorna um dataframe com a diferença entre dois blocos iguais resultantes da função 'intercambio_df'.
     
@@ -186,3 +186,49 @@ def tabela_diferencas(df1,df2):
                     df_diferenca=df_diferenca.append(dct,ignore_index=True)
     df_diferenca = df_diferenca.loc[(df_diferenca['limP1']!=0) & (df_diferenca['limP2']!=0) & (df_diferenca['limP2']!=0)]
     return df1,df2,df_diferenca.set_index(['agrupamento','mesInicial','anoInicial','mesFinal','anoFinal'])
+def tabela_diferencas(df1,df2):
+  '''
+  Retorna um dataframe com a diferença entre dois blocos iguais resultantes da função 'intercambio_df'.
+  '''
+  df_diff=df1.subtract(df2, fill_value=0)
+
+  index=list(df_diff.index)
+  teste2=[]
+  df1_dif=[]
+  df2_dif=[]
+  for item in index:
+      teste=0
+      for item2 in df_diff.loc[item]:
+          if item2==0 or pd.isna(item2):
+              teste=teste+1
+          if pd.isna(item2):
+              try:
+                df1.loc[item]
+                df1_dif.append(item)
+              except:
+                df2.loc[item]
+                df2_dif.append(item)
+      if teste==len(df_diff.columns):
+          continue
+      teste2.append(item)
+  df_diff=df_diff.loc[teste2]
+  df_diff=df_diff.append(df2.loc[df2_dif])
+  df_diff=df_diff.append(df1.loc[df1_dif])
+  for item in teste2:
+    df2_dif.append(item)
+    df1_dif.append(item)
+  
+  df1_new = df1.subtract(df2) # ons - true
+  df1_new = df1_new[(df1_new != 0).all(1)]
+  df1_new = df1_new.fillna(0)
+
+  df2_new = df2.subtract(df1)
+  df2_new = df2_new[(df2_new != 0).all(1)]
+  df2_new = df2_new.fillna(0)
+
+  if len(df2) > len(df1):
+    df2_new = df2.add(df2_new).dropna()
+  else:
+    df1_new = df1.add(df1_new).dropna()
+
+  return df_diff.round().astype(int), df2_new.round().astype(int), df1_new.round().astype(int)
