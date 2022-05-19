@@ -63,8 +63,8 @@ def comparaExph(exph_strA, exph_strB):
     df2 = df2.rename(columns={'XXXX': 'COD', 'XXXXXXXXXXXX': 'NOME', 'XX': 'MES ENCHIMENTO', 'XXXX.1':'ANO ENCHIMENTO', 
     'XX.1':'DURACAO','XX.X':'VOLUME %', 'XX.2':'MES ENTRADA', 'XXXX.2':'ANO ENTRADA', 
     'XXXX.X': 'POT', 'Unnamed: 9': 'MQ', 'Unnamed: 10': 'CJ'})
+    
     df2 = df2.set_index('COD')
-
     df3 = df1.compare(df2)
     df3 = df3.fillna(' ').rename(columns={'self': 'A', 'other': 'B'})
     df3.columns = df3.columns.get_level_values(0) + ' ' +  df3.columns.get_level_values(1)
@@ -77,7 +77,13 @@ def comparaExph(exph_strA, exph_strB):
         })
     nomes = [dct[x] for x in list((df3.index))]
     df3['NOME']=nomes
-
-    df3=df3.loc[:, ["NOME","MES ENCHIMENTO A","ANO ENCHIMENTO A","MES ENCHIMENTO B","ANO ENCHIMENTO B","MES ENTRADA A","ANO ENTRADA A","MES ENTRADA B","ANO ENTRADA B"]]
+    df3=df3.replace(' ',0)
+    dct_type={}
+    for column in df3.columns[:-1]:
+        dct_type.update({
+            column:'int'
+        })
+    df3=df3.astype(dct_type)
+    df3=df3.replace(0,' ')
 
     return df1, df2, df3

@@ -108,48 +108,81 @@ def intercambio_df(agrint):
   return intercambio.astype(int),limites.astype(int)
     
 def tabela_diferencas(df1,df2):
-  '''
-  Retorna um dataframe com a diferença entre dois blocos iguais resultantes da função 'intercambio_df'.
-  '''
-  df_diff=df1.subtract(df2, fill_value=0)
+    '''
+    Retorna um dataframe com a diferença entre dois blocos iguais resultantes da função 'intercambio_df'.
+    
+    '''
+    df1 = df1.reset_index()
+    df2 = df2.reset_index()
+    agrupamentos = sorted(list(set(df1['agrupamento'])))
+    df_diferenca = pd.DataFrame(columns=df1.columns)
+    dct={}
+    for agrupamento in agrupamentos:
+        df1_agrupamento = df1.loc[df1['agrupamento']==agrupamento]
+        df2_agrupamento = df2.loc[df1['agrupamento']==agrupamento]
+        
+        for ano in sorted(list(set(df1_agrupamento['anoInicial']))):
+            df_ano = df1_agrupamento.loc[df1_agrupamento['anoInicial']==ano]
+            for mes in list(df_ano['mesInicial']):
+                df_mes = df_ano.loc[df_ano['mesInicial']==mes]
+                agrupamento = list(df_mes['agrupamento'])[0]
+                mes_limite = list(df_mes['mesInicial'])[0]
+                ano_limite = list(df_mes['anoInicial'])[0]
+                
+                df2_filtered = df2_agrupamento.loc[(df2_agrupamento['agrupamento']==agrupamento) & (df2_agrupamento['mesInicial']==mes_limite) & (df2_agrupamento['anoInicial']==ano_limite)]
+                if len(df2_filtered) !=0:
+                    limP1 = int(df_mes['limP1'].subtract(df2_filtered['limP1']))
+                    limP2 = int(df_mes['limP2'].subtract(df2_filtered['limP2']))
+                    limP3 = int(df_mes['limP3'].subtract(df2_filtered['limP3']))
 
-  index=list(df_diff.index)
-  teste2=[]
-  df1_dif=[]
-  df2_dif=[]
-  for item in index:
-      teste=0
-      for item2 in df_diff.loc[item]:
-          if item2==0 or pd.isna(item2):
-              teste=teste+1
-          if pd.isna(item2):
-              try:
-                df1.loc[item]
-                df1_dif.append(item)
-              except:
-                df2.loc[item]
-                df2_dif.append(item)
-      if teste==len(df_diff.columns):
-          continue
-      teste2.append(item)
-  df_diff=df_diff.loc[teste2]
-  df_diff=df_diff.append(df2.loc[df2_dif])
-  df_diff=df_diff.append(df1.loc[df1_dif])
-  for item in teste2:
-    df2_dif.append(item)
-    df1_dif.append(item)
-  
-  df1_new = df1.subtract(df2)
-  df1_new = df1_new[(df1_new != 0).all(1)]
-  df1_new = df1_new.fillna(0)
+                else:
+                    limP1 = int(df_mes['limP1'])
+                    limP2 = int(df_mes['limP2'])
+                    limP3 = int(df_mes['limP3'])
 
-  df2_new = df2.subtract(df1)
-  df2_new = df2_new[(df2_new != 0).all(1)]
-  df2_new = df2_new.fillna(0)
+                
+                dct.update({
+                    'agrupamento':agrupamento,
+                    'mesInicial':mes_limite,
+                    'anoInicial':ano_limite,
+                    'mesFinal':mes_limite,
+                    'anoFinal':ano_limite,
+                    'limP1':limP1,
+                    'limP2':limP2,
+                    'limP3':limP3,
+                })
+                
+                df_diferenca=df_diferenca.append(dct,ignore_index=True)
 
-  if len(df2) > len(df1):
-    df2_new = df2.add(df2_new).dropna()
-  else:
-    df1_new = df1.add(df1_new).dropna()
+    agrupamentos2 = sorted(list(set(df2['agrupamento'])))
+    for agrupamento in agrupamentos2:
+        df1_agrupamento = df1.loc[df1['agrupamento']==agrupamento]
+        df2_agrupamento = df2.loc[df1['agrupamento']==agrupamento]
+        for ano in sorted(list(set(df2_agrupamento['anoInicial']))):
+            df_ano = df2_agrupamento.loc[df2_agrupamento['anoInicial']==ano]
+            for mes in list(df_ano['mesInicial']):
+                df_mes = df_ano.loc[df_ano['mesInicial']==mes]
+                agrupamento = list(df_mes['agrupamento'])[0]
+                mes_limite = list(df_mes['mesInicial'])[0]
+                ano_limite = list(df_mes['anoInicial'])[0]
 
-  return df_diff.round().astype(int), df2_new.round().astype(int), df1_new.round().astype(int)
+                df1_filtered = df1_agrupamento.loc[(df1_agrupamento['agrupamento']==(agrupamento)) & (df1_agrupamento['mesInicial']==mes_limite) & (df1_agrupamento['anoInicial']==ano_limite)]
+            
+                if len(df1_filtered)==0:
+                    limP1 = int(df_mes['limP1'])
+                    limP2 = int(df_mes['limP2'])
+                    limP3 = int(df_mes['limP3'])
+                    dct.update({
+                        'agrupamento':agrupamento,
+                        'mesInicial':mes_limite,
+                        'anoInicial':ano_limite,
+                        'mesFinal':mes_limite,
+                        'anoFinal':ano_limite,
+                        'limP1':-limP1,
+                        'limP2':-limP2,
+                        'limP3':-limP3,
+                        })
+
+                    df_diferenca=df_diferenca.append(dct,ignore_index=True)
+    df_diferenca = df_diferenca.loc[(df_diferenca['limP1']!=0) & (df_diferenca['limP2']!=0) & (df_diferenca['limP2']!=0)]
+    return df1,df2,df_diferenca.set_index(['agrupamento','mesInicial','anoInicial','mesFinal','anoFinal'])

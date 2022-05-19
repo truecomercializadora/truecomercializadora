@@ -256,7 +256,7 @@ def comparaRE(df_A,df_B):
                             df_A_diff = df_A_diff.append(row_A_new)
                     else:
                         df_A_diff = df_A_diff.append(row_A_new)
-
+    
 
 
     df_B_diff=(df_B_diff.reset_index()).round().astype({'usinasRestricao:':'str'})
@@ -282,4 +282,4 @@ def comparaRE(df_A,df_B):
 
 
    
-    return (df_B_diff.reset_index()).round(),(df_A_diff.reset_index()).round()
+    return (df_A_diff.reset_index()).round(),(df_B_diff.reset_index()).round()

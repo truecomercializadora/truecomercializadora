@@ -304,26 +304,33 @@ def ComparacaoExpt(df_expt_A,df_expt_B,dates):
     Formata as entradas para utilizar as funções disponiveis de comparação e
     efetuar a comparacao entre A e B, retorna um payload com os dados
     '''
-
     modific_A_potef = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
 
-    modific_A_potef=modific_A_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
+    modific_A_potef=modific_A_potef.sort_values(by=['numeroUsina','anoInicio','mesInicio','mesFim','anoFim'])
     modific_A_potef.set_index(['numeroUsina'],inplace=True)
     modific_A_potef=modific_A_potef.reset_index()
 
     modific_B_potef = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='POTEF')].reset_index()
 
     modific_B_potef.set_index(['numeroUsina'],inplace=True)
-    modific_B_potef=modific_B_potef.sort_values(by=['numeroUsina','mesInicio','anoInicio','mesFim','anoFim'])
+    modific_B_potef=modific_B_potef.sort_values(by=['numeroUsina','anoInicio','mesInicio','mesFim','anoFim'])
     modific_B_potef=modific_B_potef.reset_index()
 
 
-    df_sum_A_sis = getPOTEFporSIS(dates,modific_A_potef)
-    df_sum_B_sis = getPOTEFporSIS(dates,modific_B_potef)
-    
+    unexpanded_B = unexpand_potef(modific_B_potef)
+    unexpanded_A = unexpand_potef(modific_A_potef)
+
+    degrau_B = get_degrau(unexpanded_B)
+    degrau_A= get_degrau(unexpanded_A)
+
+    df_sum_A_sis = getPOTEFporSIS(dates,degrau_A)
+    df_sum_B_sis = getPOTEFporSIS(dates,degrau_B)
+
+   
 
     modific_A_gtmin = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
     modific_B_gtmin = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
+    
         
     payload_body = get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin)
 
