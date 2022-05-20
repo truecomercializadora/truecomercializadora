@@ -1,6 +1,5 @@
 
 import json
-from turtle import update
 
 from . import (
     utils_http, utils_files,utils_s3
