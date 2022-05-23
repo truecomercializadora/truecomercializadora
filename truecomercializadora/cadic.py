@@ -55,23 +55,11 @@ def ComparacaoCadic(df_comp1, df_comp2):
         else:
             message = 'Há diferença entre os decks'
             print(message)
+            df_differences=pd.DataFrame(columns=['USINAS','XXXJAN.','XXXFEV.','XXXMAR.','XXXABR.','XXXMAI.','XXXJUN.' ,'XXXJUL.','XXXAGO.','XXXSET.','XXXOUT.','XXXNOV.','XXXDEZ.'])
+            for coluna in list(df_comp1.columns)[:-1]:
+                df_differences[coluna] = df_comp1[coluna] - df_comp2[coluna] 
 
-            colunasdf1 = list(df_comp1.columns)
-            columns_type = {}
-            for coluna in colunasdf1[:-1]:
-                columns_type.update({
-                    coluna:'int'
-                })
-            colunasdf2 = list(df_comp2.columns)
-            columns_type2= {}
-            for coluna in colunasdf2[:-1]:
-                columns_type2.update({
-                    coluna:'int'
-                })
-            df_comp1=df_comp1.astype(columns_type)
-            df_comp2=df_comp2.astype(columns_type2)
-            
-            df_differences = df_comp1.subtract(df_comp2)
+    
             df_differences['USINAS'] = Usinas
             df_comp1['USINAS'] = Usinas
             df_comp2['USINAS'] = Usinas
@@ -80,5 +68,5 @@ def ComparacaoCadic(df_comp1, df_comp2):
             return payload_body
 
     except Exception as error:
-            print(error.args)
-            return utils_http.server_error_response(500, "Erro na comparacao")
+        print(error.args)
+        return utils_http.server_error_response(500, "Erro na comparacao")
