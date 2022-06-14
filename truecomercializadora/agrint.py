@@ -112,14 +112,16 @@ def tabela_diferencas_limites(df1,df2):
     Retorna um dataframe com a diferença entre dois blocos iguais resultantes da função 'intercambio_df'.
     
     '''
-    df1 = df1.reset_index()
-    df2 = df2.reset_index()
+
+    df1=df1.reset_index()
+    df2=df2.reset_index()
+    
     agrupamentos = sorted(list(set(df1['agrupamento'])))
     df_diferenca = pd.DataFrame(columns=df1.columns)
     dct={}
     for agrupamento in agrupamentos:
         df1_agrupamento = df1.loc[df1['agrupamento']==agrupamento]
-        df2_agrupamento = df2.loc[df1['agrupamento']==agrupamento]
+        df2_agrupamento = df2.loc[df2['agrupamento']==agrupamento]
         
         for ano in sorted(list(set(df1_agrupamento['anoInicial']))):
             df_ano = df1_agrupamento.loc[df1_agrupamento['anoInicial']==ano]
@@ -129,18 +131,19 @@ def tabela_diferencas_limites(df1,df2):
                 mes_limite = list(df_mes['mesInicial'])[0]
                 ano_limite = list(df_mes['anoInicial'])[0]
                 
-                df2_filtered = df2_agrupamento.loc[(df2_agrupamento['agrupamento']==agrupamento) & (df2_agrupamento['mesInicial']==mes_limite) & (df2_agrupamento['anoInicial']==ano_limite)]
+                df2_filtered = df2_agrupamento.loc[(df2_agrupamento['agrupamento']==agrupamento) & (df2_agrupamento['mesInicial']==mes_limite) & (df2_agrupamento['anoInicial']==ano_limite)]    
+
                 if len(df2_filtered) !=0:
-                    limP1 = int(df_mes['limP1'].subtract(df2_filtered['limP1']))
-                    limP2 = int(df_mes['limP2'].subtract(df2_filtered['limP2']))
-                    limP3 = int(df_mes['limP3'].subtract(df2_filtered['limP3']))
+                    
+                    limP1 = int((df_mes['limP1']).subtract(df2_filtered['limP1']))
+                    limP2 = int((df_mes['limP2']).subtract(df2_filtered['limP2']))
+                    limP3 = int((df_mes['limP3']).subtract(df2_filtered['limP3']))
 
                 else:
                     limP1 = int(df_mes['limP1'])
                     limP2 = int(df_mes['limP2'])
                     limP3 = int(df_mes['limP3'])
 
-                
                 dct.update({
                     'agrupamento':agrupamento,
                     'mesInicial':mes_limite,
@@ -157,7 +160,7 @@ def tabela_diferencas_limites(df1,df2):
     agrupamentos2 = sorted(list(set(df2['agrupamento'])))
     for agrupamento in agrupamentos2:
         df1_agrupamento = df1.loc[df1['agrupamento']==agrupamento]
-        df2_agrupamento = df2.loc[df1['agrupamento']==agrupamento]
+        df2_agrupamento = df2.loc[df2['agrupamento']==agrupamento]
         for ano in sorted(list(set(df2_agrupamento['anoInicial']))):
             df_ano = df2_agrupamento.loc[df2_agrupamento['anoInicial']==ano]
             for mes in list(df_ano['mesInicial']):
@@ -184,7 +187,10 @@ def tabela_diferencas_limites(df1,df2):
                         })
 
                     df_diferenca=df_diferenca.append(dct,ignore_index=True)
+
     df_diferenca = df_diferenca.loc[(df_diferenca['limP1']!=0) & (df_diferenca['limP2']!=0) & (df_diferenca['limP2']!=0)]
+
+    
     return df1,df2,df_diferenca.set_index(['agrupamento','mesInicial','anoInicial','mesFinal','anoFinal'])
 def tabela_diferencas(df1,df2):
   '''
