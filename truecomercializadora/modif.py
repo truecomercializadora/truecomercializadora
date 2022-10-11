@@ -461,6 +461,8 @@ def ComparacaoModif(df_modif_A,df_modif_B,anos,meses,datas):
 
     vmaxt_A = df_modif_A.loc[(df_modif_A.index.get_level_values('pChave')=='VMAXT')].reset_index()
     vmaxt_B = df_modif_B.loc[(df_modif_B.index.get_level_values('pChave')=='VMAXT')].reset_index()
-    payload_body = get_differences(df_vmint_diff_A, df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,vmaxt_B)
+    return vmint_A, vmint_B,vazmin_A,vazmin_B,vmaxt_A,vmaxt_B
 
-    return payload_body
+    # payload_body = get_differences(df_vmint_diff_A, df_vmint_diff_B,vazmin_A,vazmin_B,vmaxt_A,vmaxt_B)
+
+    # return payload_body

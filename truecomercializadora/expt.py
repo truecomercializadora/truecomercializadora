@@ -331,7 +331,8 @@ def ComparacaoExpt(df_expt_A,df_expt_B,dates):
     modific_A_gtmin = df_expt_A.loc[(df_expt_A.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
     modific_B_gtmin = df_expt_B.loc[(df_expt_B.index.get_level_values('tipoModificacao')=='GTMIN')].reset_index()
     
-        
-    payload_body = get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin)
+    return modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin
 
-    return payload_body
+    # payload_body = get_differences(modific_A_potef,modific_B_potef,df_sum_A_sis,df_sum_B_sis,modific_A_gtmin,modific_B_gtmin)
+
+    # return payload_body
