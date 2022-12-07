@@ -53,7 +53,7 @@ def _get_vazoes_artificiais_bmonte(
     if type(hidrograma_table) != list:
         raise Exception("'get_vazoes_artificiais_bmonte' can only receive a list for input 'hidrograma_table'."
                         "{} is not a valid input type".format(type(hidrograma_table)))
-    if hidrograma_type not in ['A', 'B', 'medio']:
+    if hidrograma_type not in ['A', 'B', 'medio','true','ibama']:
         raise Exception("'get_vazoes_artificiais_bmonte' can only receive 'A', 'B' or 'medio' for input 'hidrograma_type'."
                         "{} is not a valid input".format(hidrograma_type))
     if type(ano) != int:
