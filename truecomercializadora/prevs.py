@@ -323,7 +323,8 @@ def _get_vazoes_artificiais(
     ano_prevs: int,
     mes_prevs: int,
     postos_artificiais: list,
-    hidrograma_bmonte_table: list) -> dict:
+    hidrograma_bmonte_table: list,
+    hidrograma='medio') -> dict:
     
     '''
     Retorna um objeto (dicionario de listas). Contendo as vazoes de cada um dos
@@ -359,7 +360,7 @@ def _get_vazoes_artificiais(
             vazoes_posto = _get_vazoes_artificiais_bmonte(
                 vazoes_prevs_bmonte=prevs_obj[288],
                 hidrograma_table=hidrograma_bmonte_table,
-                hidrograma_type='medio',
+                hidrograma_type=hidrograma,
                 ano=ano_prevs,
                 mes=mes_prevs
             )
@@ -390,7 +391,8 @@ def get_vazoes_obj_from_prevs(
     postos_table: list,
     hidrograma_bmonte_table: list,
     ano_prevs:int,
-    mes_prevs:int) -> dict:
+    mes_prevs:int,
+    hidrograma='medio') -> dict:
     
     '''
     Retorna um objeto (dicionario de listas). Contendo as vazoes de cada um dos
@@ -427,7 +429,8 @@ def get_vazoes_obj_from_prevs(
         ano_prevs=ano_prevs,
         mes_prevs=mes_prevs,
         postos_artificiais=postos_artificiais,
-        hidrograma_bmonte_table=hidrograma_bmonte_table
+        hidrograma_bmonte_table=hidrograma_bmonte_table,
+        hidrograma=hidrograma
     )
     
     # Concatenando os objetos:
