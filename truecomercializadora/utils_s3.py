@@ -50,6 +50,24 @@ def list_s3_files(bucket_name, prefix):
     for content in response.get('Contents', []):
         yield content.get('Key')
 
+def list_all_s3_files(bucket_name,prefix=None,region_name='sa-east-1'):
+    """ 
+    # ============================================================================================ #
+    # Funcao para retornar todo o conteudo de uma determinada pasta. Seu retorno eh um PageItera-  #
+    # tor que ao ser utilizado com o loop for possui os dicionarios com todos os parametros dos    #
+    # arquivos localizados na pasta.Seu conteudo principal pode ser acessado em page['Contents']   # 
+    # ============================================================================================ #
+    """
+    client = boto3.client('s3', region_name=region_name)
+    paginator = client.get_paginator('list_objects')
+    if prefix != None:
+        page_iterator = paginator.paginate(Bucket=bucket_name,Prefix = prefix)
+    else:
+        page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    return page_iterator
+
+
 
 def upload_io_object(dataIO, bucket_name, key_name, public=False):
     """
