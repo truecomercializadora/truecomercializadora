@@ -13,7 +13,10 @@ setup(
         'gspread',
         'oauth2client',
         'numpy',
-        'pandas'
+        'pandas',
+        'google-api-python-client',
+        'google-auth-httplib2',
+        'google-auth-oauthlib',
     ],
     classifiers=[
         'Development Status :: 0 - Beta',
