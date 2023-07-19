@@ -1,5 +1,5 @@
-from apiclient.discovery import build
-from googleapiclient.http import MediaFileUpload,MediaIoBaseUpload
+from googleapiclientlocal.discovery import build
+from googleapiclientlocal.http import MediaFileUpload,MediaIoBaseUpload
 from google.oauth2 import service_account
 import mimetypes
 
@@ -32,6 +32,7 @@ def mandarMsgGChat(space,msg,cards=[],cardsOld=[],NomeArquivo="",BytesIOArquivo=
             chat = build('chat', 'v1', credentials=credentials)
             attachment_uploaded=[]
         chat.spaces().messages().create(parent=space,body={'text': msg,'cardsV2':cards,'cards':cardsOld,'attachment': attachment_uploaded}).execute()
-    except:
+    except Exception as e:
+        print(e)
         print("Sem permissão necessária")
     return
