@@ -1,5 +1,4 @@
-from googleapiclientlocal.discovery import build
-from googleapiclientlocal.http import MediaFileUpload,MediaIoBaseUpload
+from truecomercializadora.gchatConfig import MediaFileUpload,MediaIoBaseUpload,build
 from google.oauth2 import service_account
 import mimetypes
 
