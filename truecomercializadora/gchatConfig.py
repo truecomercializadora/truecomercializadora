@@ -26,14 +26,12 @@ from email.mime.nonmultipart import MIMENonMultipart
 from email.parser import FeedParser
 from functools import reduce
 
-import google.api_core.client_options
 import google.auth
 import google.auth.credentials
 import google_auth_httplib2
 import httplib2
 import oauth2client
 import oauth2client.client
-import uritemplate
 from google.auth.exceptions import MutualTLSChannelError
 from google.auth.transport import mtls
 from google.oauth2 import service_account
@@ -1057,7 +1055,7 @@ def build(
         discovery_http = http
     service = None
     for discovery_url in _discovery_service_uri_options(discoveryServiceUrl, version):
-        requested_url = uritemplate.expand(discovery_url, params)
+        requested_url = expand(discovery_url, params)
         try:
             content = _retrieve_discovery_doc(
                 requested_url,
@@ -1197,9 +1195,9 @@ def build_from_document(
     always_use_jwt_access=False,
 ):
     if client_options is None:
-        client_options = google.api_core.client_options.ClientOptions()
+        client_options = ClientOptions()
     if isinstance(client_options, collections.abc.Mapping):
-        client_options = google.api_core.client_options.from_dict(client_options)
+        client_options = client_options.from_dict(client_options)
     if http is not None:
         banned_options = [
             (credentials, "credentials"),
@@ -1233,9 +1231,7 @@ def build_from_document(
         )
         if scopes and not developerKey:
             if client_options.credentials_file and credentials:
-                raise google.api_core.exceptions.DuplicateCredentialArgs(
-                    "client_options.credentials_file and credentials are mutually exclusive."
-                )
+                print("erro")
             if client_options.credentials_file:
                 credentials = credentials_from_file(
                     client_options.credentials_file,
@@ -1510,7 +1506,7 @@ def createMethod(methodName, methodDesc, rootDesc, schema):
         headers, params, query, body = model.request(
             headers, actual_path_params, actual_query_params, body_value
         )
-        expanded_url = uritemplate.expand(pathUrl, params)
+        expanded_url = expand(pathUrl, params)
         url = _urljoin(self._baseUrl, expanded_url + query)
         resumable = None
         multipart_boundary = ""
@@ -1533,7 +1529,7 @@ def createMethod(methodName, methodDesc, rootDesc, schema):
                 raise TypeError("media_filename must be str or MediaUpload.")
             if media_upload.size() is not None and media_upload.size() > maxSize > 0:
                 raise MediaUploadSizeError("Media larger than: %s" % maxSize)
-            expanded_url = uritemplate.expand(mediaPathUrl, params)
+            expanded_url = expand(mediaPathUrl, params)
             url = _urljoin(self._baseUrl, expanded_url + query)
             url = _fix_up_media_path_base_url(url, self._baseUrl)
             if media_upload.resumable():
@@ -2330,3 +2326,680 @@ def _filter_blank(i):
     for s in i:
         if s.strip():
             yield s
+
+class ClientOptions(object):
+    def __init__(
+        self,
+        api_endpoint=None,
+        client_cert_source=None,
+        client_encrypted_cert_source=None,
+        quota_project_id=None,
+        credentials_file=None,
+        scopes=None,
+        api_key=None,
+        api_audience=None,
+    ):
+        if client_cert_source and client_encrypted_cert_source:
+            raise ValueError(
+                "client_cert_source and client_encrypted_cert_source are mutually exclusive"
+            )
+        if api_key and credentials_file:
+            raise ValueError("api_key and credentials_file are mutually exclusive")
+        self.api_endpoint = api_endpoint
+        self.client_cert_source = client_cert_source
+        self.client_encrypted_cert_source = client_encrypted_cert_source
+        self.quota_project_id = quota_project_id
+        self.credentials_file = credentials_file
+        self.scopes = scopes
+        self.api_key = api_key
+        self.api_audience = api_audience
+    def __repr__(self):
+        return "ClientOptions: " + repr(self.__dict__)
+
+
+def from_dict(options):
+    client_options = ClientOptions()
+
+    for key, value in options.items():
+        if hasattr(client_options, key):
+            setattr(client_options, key, value)
+        else:
+            raise ValueError("ClientOptions does not accept an option '" + key + "'")
+
+    return client_options
+
+import collections.abc
+import typing as t
+import urllib.parse
+
+ScalarVariableValue = t.Union[int, float, complex, str]
+VariableValue = t.Union[
+    t.Sequence[ScalarVariableValue],
+    t.Mapping[str, ScalarVariableValue],
+    t.Tuple[str, ScalarVariableValue],
+    ScalarVariableValue,
+]
+VariableValueDict = t.Dict[str, VariableValue]
+import typing as t
+
+def expand(
+    uri: str,
+    var_dict: t.Optional[VariableValueDict] = None,
+    **kwargs: VariableValue,
+) -> str:
+    return URITemplate(uri).expand(var_dict, **kwargs)
+template_re = re.compile("{([^}]+)}")
+
+def _merge(
+    var_dict: t.Optional[VariableValueDict],
+    overrides: VariableValueDict,
+) -> VariableValueDict:
+    if var_dict:
+        opts = var_dict.copy()
+        opts.update(overrides)
+        return opts
+    return overrides
+
+class URITemplate:
+    def __init__(self, uri: str):
+        #: The original URI to be parsed.
+        self.uri: str = uri
+        #: A list of the variables in the URI. They are stored as
+        #: :class:`~uritemplate.variable.URIVariable`\ s
+        self.variables: t.List[URIVariable] = [
+            URIVariable(m.groups()[0])
+            for m in template_re.finditer(self.uri)
+        ]
+        #: A set of variable names in the URI.
+        self.variable_names = OrderedSet()
+        for var in self.variables:
+            for name in var.variable_names:
+                self.variable_names.add(name)
+
+    def __repr__(self) -> str:
+        return 'URITemplate("%s")' % self
+
+    def __str__(self) -> str:
+        return self.uri
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, URITemplate):
+            return NotImplemented
+        return self.uri == other.uri
+
+    def __hash__(self) -> int:
+        return hash(self.uri)
+
+    def _expand(
+        self, var_dict: VariableValueDict, replace: bool
+    ) -> str:
+        if not self.variables:
+            return self.uri
+
+        expansion = var_dict
+        expanded: t.Dict[str, str] = {}
+        for v in self.variables:
+            expanded.update(v.expand(expansion))
+
+        def replace_all(match: "re.Match[str]") -> str:
+            return expanded.get(match.groups()[0], "")
+
+        def replace_partial(match: "re.Match[str]") -> str:
+            match_group = match.groups()[0]
+            var = "{%s}" % match_group
+            return expanded.get(match_group) or var
+
+        replace_func = replace_partial if replace else replace_all
+
+        return template_re.sub(replace_func, self.uri)
+
+    def expand(
+        self,
+        var_dict: t.Optional[VariableValueDict] = None,
+        **kwargs: VariableValue,
+    ) -> str:
+        """Expand the template with the given parameters.
+
+        :param dict var_dict: Optional dictionary with variables and values
+        :param kwargs: Alternative way to pass arguments
+        :returns: str
+
+        Example::
+
+            t = URITemplate('https://api.github.com{/end}')
+            t.expand({'end': 'users'})
+            t.expand(end='gists')
+
+        .. note:: Passing values by both parts, may override values in
+                  ``var_dict``. For example::
+
+                      expand('https://{var}', {'var': 'val1'}, var='val2')
+
+                  ``val2`` will be used instead of ``val1``.
+
+        """
+        return self._expand(_merge(var_dict, kwargs), False)
+
+    def partial(
+        self,
+        var_dict: t.Optional[VariableValueDict] = None,
+        **kwargs: VariableValue,
+    ) -> "URITemplate":
+        """Partially expand the template with the given parameters.
+
+        If all of the parameters for the template are not given, return a
+        partially expanded template.
+
+        :param dict var_dict: Optional dictionary with variables and values
+        :param kwargs: Alternative way to pass arguments
+        :returns: :class:`URITemplate`
+
+        Example::
+
+            t = URITemplate('https://api.github.com{/end}')
+            t.partial()  # => URITemplate('https://api.github.com{/end}')
+
+        """
+        return URITemplate(self._expand(_merge(var_dict, kwargs), True))
+
+
+"""
+
+uritemplate.variable
+====================
+
+This module contains the URIVariable class which powers the URITemplate class.
+
+What treasures await you:
+
+- URIVariable class
+
+You see a hammer in front of you.
+What do you do?
+>
+
+"""
+
+
+class URIVariable:
+
+    """This object validates everything inside the URITemplate object.
+
+    It validates template expansions and will truncate length as decided by
+    the template.
+
+    Please note that just like the :class:`URITemplate <URITemplate>`, this
+    object's ``__str__`` and ``__repr__`` methods do not return the same
+    information. Calling ``str(var)`` will return the original variable.
+
+    This object does the majority of the heavy lifting. The ``URITemplate``
+    object finds the variables in the URI and then creates ``URIVariable``
+    objects.  Expansions of the URI are handled by each ``URIVariable``
+    object. ``URIVariable.expand()`` returns a dictionary of the original
+    variable and the expanded value. Check that method's documentation for
+    more information.
+
+    """
+
+    operators = ("+", "#", ".", "/", ";", "?", "&", "|", "!", "@")
+    reserved = ":/?#[]@!$&'()*+,;="
+
+    def __init__(self, var: str):
+        #: The original string that comes through with the variable
+        self.original: str = var
+        #: The operator for the variable
+        self.operator: str = ""
+        #: List of safe characters when quoting the string
+        self.safe: str = ""
+        #: List of variables in this variable
+        self.variables: t.List[
+            t.Tuple[str, t.MutableMapping[str, t.Any]]
+        ] = []
+        #: List of variable names
+        self.variable_names: t.List[str] = []
+        #: List of defaults passed in
+        self.defaults: t.MutableMapping[str, ScalarVariableValue] = {}
+        # Parse the variable itself.
+        self.parse()
+        self.post_parse()
+
+    def __repr__(self) -> str:
+        return "URIVariable(%s)" % self
+
+    def __str__(self) -> str:
+        return self.original
+
+    def parse(self) -> None:
+        """Parse the variable.
+
+        This finds the:
+            - operator,
+            - set of safe characters,
+            - variables, and
+            - defaults.
+
+        """
+        var_list_str = self.original
+        if self.original[0] in URIVariable.operators:
+            self.operator = self.original[0]
+            var_list_str = self.original[1:]
+
+        if self.operator in URIVariable.operators[:2]:
+            self.safe = URIVariable.reserved
+
+        var_list = var_list_str.split(",")
+
+        for var in var_list:
+            default_val = None
+            name = var
+            if "=" in var:
+                name, default_val = tuple(var.split("=", 1))
+
+            explode = False
+            if name.endswith("*"):
+                explode = True
+                name = name[:-1]
+
+            prefix: t.Optional[int] = None
+            if ":" in name:
+                name, prefix_str = tuple(name.split(":", 1))
+                prefix = int(prefix_str)
+
+            if default_val:
+                self.defaults[name] = default_val
+
+            self.variables.append(
+                (name, {"explode": explode, "prefix": prefix})
+            )
+
+        self.variable_names = [varname for (varname, _) in self.variables]
+
+    def post_parse(self) -> None:
+        """Set ``start``, ``join_str`` and ``safe`` attributes.
+
+        After parsing the variable, we need to set up these attributes and it
+        only makes sense to do it in a more easily testable way.
+        """
+        self.safe = ""
+        self.start = self.join_str = self.operator
+        if self.operator == "+":
+            self.start = ""
+        if self.operator in ("+", "#", ""):
+            self.join_str = ","
+        if self.operator == "#":
+            self.start = "#"
+        if self.operator == "?":
+            self.start = "?"
+            self.join_str = "&"
+
+        if self.operator in ("+", "#"):
+            self.safe = URIVariable.reserved
+
+    def _query_expansion(
+        self,
+        name: str,
+        value: VariableValue,
+        explode: bool,
+        prefix: t.Optional[int],
+    ) -> t.Optional[str]:
+        """Expansion method for the '?' and '&' operators."""
+        if value is None:
+            return None
+
+        tuples, items = is_list_of_tuples(value)
+
+        safe = self.safe
+        if list_test(value) and not tuples:
+            if not value:
+                return None
+            value = t.cast(t.Sequence[ScalarVariableValue], value)
+            if explode:
+                return self.join_str.join(
+                    f"{name}={quote(v, safe)}" for v in value
+                )
+            else:
+                value = ",".join(quote(v, safe) for v in value)
+                return f"{name}={value}"
+
+        if dict_test(value) or tuples:
+            if not value:
+                return None
+            value = t.cast(t.Mapping[str, ScalarVariableValue], value)
+            items = items or sorted(value.items())
+            if explode:
+                return self.join_str.join(
+                    f"{quote(k, safe)}={quote(v, safe)}" for k, v in items
+                )
+            else:
+                value = ",".join(
+                    f"{quote(k, safe)},{quote(v, safe)}" for k, v in items
+                )
+                return f"{name}={value}"
+
+        if value:
+            value = t.cast(t.Text, value)
+            value = value[:prefix] if prefix else value
+            return f"{name}={quote(value, safe)}"
+        return name + "="
+
+    def _label_path_expansion(
+        self,
+        name: str,
+        value: VariableValue,
+        explode: bool,
+        prefix: t.Optional[int],
+    ) -> t.Optional[str]:
+        """Label and path expansion method.
+
+        Expands for operators: '/', '.'
+
+        """
+        join_str = self.join_str
+        safe = self.safe
+
+        if value is None or (
+            not isinstance(value, (str, int, float, complex))
+            and len(value) == 0
+        ):
+            return None
+
+        tuples, items = is_list_of_tuples(value)
+
+        if list_test(value) and not tuples:
+            if not explode:
+                join_str = ","
+
+            value = t.cast(t.Sequence[ScalarVariableValue], value)
+            fragments = [quote(v, safe) for v in value if v is not None]
+            return join_str.join(fragments) if fragments else None
+
+        if dict_test(value) or tuples:
+            value = t.cast(t.Mapping[str, ScalarVariableValue], value)
+            items = items or sorted(value.items())
+            format_str = "%s=%s"
+            if not explode:
+                format_str = "%s,%s"
+                join_str = ","
+
+            expanded = join_str.join(
+                format_str % (quote(k, safe), quote(v, safe))
+                for k, v in items
+                if v is not None
+            )
+            return expanded if expanded else None
+
+        value = t.cast(t.Text, value)
+        value = value[:prefix] if prefix else value
+        return quote(value, safe)
+
+    def _semi_path_expansion(
+        self,
+        name: str,
+        value: VariableValue,
+        explode: bool,
+        prefix: t.Optional[int],
+    ) -> t.Optional[str]:
+        """Expansion method for ';' operator."""
+        join_str = self.join_str
+        safe = self.safe
+
+        if value is None:
+            return None
+
+        if self.operator == "?":
+            join_str = "&"
+
+        tuples, items = is_list_of_tuples(value)
+
+        if list_test(value) and not tuples:
+            value = t.cast(t.Sequence[ScalarVariableValue], value)
+            if explode:
+                expanded = join_str.join(
+                    f"{name}={quote(v, safe)}" for v in value if v is not None
+                )
+                return expanded if expanded else None
+            else:
+                value = ",".join(quote(v, safe) for v in value)
+                return f"{name}={value}"
+
+        if dict_test(value) or tuples:
+            value = t.cast(t.Mapping[str, ScalarVariableValue], value)
+            items = items or sorted(value.items())
+
+            if explode:
+                return join_str.join(
+                    f"{quote(k, safe)}={quote(v, safe)}"
+                    for k, v in items
+                    if v is not None
+                )
+            else:
+                expanded = ",".join(
+                    f"{quote(k, safe)},{quote(v, safe)}"
+                    for k, v in items
+                    if v is not None
+                )
+                return f"{name}={expanded}"
+
+        value = t.cast(t.Text, value)
+        value = value[:prefix] if prefix else value
+        if value:
+            return f"{name}={quote(value, safe)}"
+
+        return name
+
+    def _string_expansion(
+        self,
+        name: str,
+        value: VariableValue,
+        explode: bool,
+        prefix: t.Optional[int],
+    ) -> t.Optional[str]:
+        if value is None:
+            return None
+
+        tuples, items = is_list_of_tuples(value)
+
+        if list_test(value) and not tuples:
+            value = t.cast(t.Sequence[ScalarVariableValue], value)
+            return ",".join(quote(v, self.safe) for v in value)
+
+        if dict_test(value) or tuples:
+            value = t.cast(t.Mapping[str, ScalarVariableValue], value)
+            items = items or sorted(value.items())
+            format_str = "%s=%s" if explode else "%s,%s"
+
+            return ",".join(
+                format_str % (quote(k, self.safe), quote(v, self.safe))
+                for k, v in items
+            )
+
+        value = t.cast(t.Text, value)
+        value = value[:prefix] if prefix else value
+        return quote(value, self.safe)
+
+    def expand(
+        self, var_dict: t.Optional[VariableValueDict] = None
+    ) -> t.Mapping[str, str]:
+        """Expand the variable in question.
+
+        Using ``var_dict`` and the previously parsed defaults, expand this
+        variable and subvariables.
+
+        :param dict var_dict: dictionary of key-value pairs to be used during
+            expansion
+        :returns: dict(variable=value)
+
+        Examples::
+
+            # (1)
+            v = URIVariable('/var')
+            expansion = v.expand({'var': 'value'})
+            print(expansion)
+            # => {'/var': '/value'}
+
+            # (2)
+            v = URIVariable('?var,hello,x,y')
+            expansion = v.expand({'var': 'value', 'hello': 'Hello World!',
+                                  'x': '1024', 'y': '768'})
+            print(expansion)
+            # => {'?var,hello,x,y':
+            #     '?var=value&hello=Hello%20World%21&x=1024&y=768'}
+
+        """
+        return_values = []
+        if var_dict is None:
+            return {self.original: self.original}
+
+        for name, opts in self.variables:
+            value = var_dict.get(name, None)
+            if not value and value != "" and name in self.defaults:
+                value = self.defaults[name]
+
+            if value is None:
+                continue
+
+            expanded = None
+            if self.operator in ("/", "."):
+                expansion = self._label_path_expansion
+            elif self.operator in ("?", "&"):
+                expansion = self._query_expansion
+            elif self.operator == ";":
+                expansion = self._semi_path_expansion
+            else:
+                expansion = self._string_expansion
+
+            expanded = expansion(name, value, opts["explode"], opts["prefix"])
+
+            if expanded is not None:
+                return_values.append(expanded)
+
+        value = ""
+        if return_values:
+            value = self.start + self.join_str.join(return_values)
+        return {self.original: value}
+
+
+def is_list_of_tuples(
+    value: t.Any,
+) -> t.Tuple[bool, t.Optional[t.Sequence[t.Tuple[str, ScalarVariableValue]]]]:
+    if (
+        not value
+        or not isinstance(value, (list, tuple))
+        or not all(isinstance(t, tuple) and len(t) == 2 for t in value)
+    ):
+        return False, None
+
+    return True, value
+
+
+def list_test(value: t.Any) -> bool:
+    return isinstance(value, (list, tuple))
+
+
+def dict_test(value: t.Any) -> bool:
+    return isinstance(value, (dict, collections.abc.MutableMapping))
+
+
+def _encode(value: t.AnyStr, encoding: str = "utf-8") -> bytes:
+    if isinstance(value, str):
+        return value.encode(encoding)
+    return value
+
+
+def quote(value: t.Any, safe: str) -> str:
+    if not isinstance(value, (str, bytes)):
+        value = str(value)
+    return urllib.parse.quote(_encode(value), safe)
+
+# From: https://github.com/ActiveState/code/blob/master/recipes/Python/576696_OrderedSet_with_Weakrefs/  # noqa
+import typing as t
+import weakref
+
+
+class Link:
+    """Representation of one item in a doubly-linked list."""
+
+    __slots__ = ("prev", "next", "key", "__weakref__")
+    prev: "Link"
+    next: "Link"
+    key: str
+
+
+class OrderedSet(t.MutableSet[str]):
+    """A set that remembers the order in which items were added."""
+
+    # Big-O running times for all methods are the same as for regular sets.
+    # The internal self.__map dictionary maps keys to links in a doubly linked
+    # list. The circular doubly linked list starts and ends with a sentinel
+    # element. The sentinel element never gets deleted (this simplifies the
+    # algorithm). The prev/next links are weakref proxies (to prevent circular
+    # references). Individual links are kept alive by the hard reference in
+    # self.__map. Those hard references disappear when a key is deleted from
+    # an OrderedSet.
+
+    def __init__(self, iterable: t.Optional[t.Iterable[str]] = None):
+        self.__root = root = Link()  # sentinel node for doubly linked list
+        root.prev = root.next = root
+        self.__map: t.MutableMapping[str, Link] = {}  # key --> link
+        if iterable is not None:
+            self |= iterable  # type: ignore
+
+    def __len__(self) -> int:
+        return len(self.__map)
+
+    def __contains__(self, key: object) -> bool:
+        return key in self.__map
+
+    def add(self, key: str) -> None:
+        # Store new key in a new link at the end of the linked list
+        if key not in self.__map:
+            self.__map[key] = link = Link()
+            root = self.__root
+            last = root.prev
+            link.prev, link.next, link.key = last, root, key
+            last.next = root.prev = weakref.proxy(link)
+
+    def discard(self, key: str) -> None:
+        # Remove an existing item using self.__map to find the link which is
+        # then removed by updating the links in the predecessor and successors.
+        if key in self.__map:
+            link = self.__map.pop(key)
+            link.prev.next = link.next
+            link.next.prev = link.prev
+
+    def __iter__(self) -> t.Generator[str, None, None]:
+        # Traverse the linked list in order.
+        root = self.__root
+        curr = root.next
+        while curr is not root:
+            yield curr.key
+            curr = curr.next
+
+    def __reversed__(self) -> t.Generator[str, None, None]:
+        # Traverse the linked list in reverse order.
+        root = self.__root
+        curr = root.prev
+        while curr is not root:
+            yield curr.key
+            curr = curr.prev
+
+    def pop(self, last: bool = True) -> str:
+        if not self:
+            raise KeyError("set is empty")
+        key = next(reversed(self)) if last else next(iter(self))
+        self.discard(key)
+        return key
+
+    def __repr__(self) -> str:
+        if not self:
+            return f"{self.__class__.__name__}()"
+        return f"{self.__class__.__name__}({list(self)!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, OrderedSet):
+            return len(self) == len(other) and list(self) == list(other)
+        other = t.cast(t.Iterable[str], other)
+        return not self.isdisjoint(other)
