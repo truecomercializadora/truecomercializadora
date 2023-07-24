@@ -3,6 +3,7 @@ Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo sistem
 """
 import io
 import pandas as pd
+import re
 
 from . import utils_datetime
 from . import utils_files
@@ -371,7 +372,7 @@ def intercambio_df(sistema):
 def pequenas_df(sistema):
     '''
     SE POSSÍVEL, USAR: 'pequenas_df_sem_mmgd'
-    
+
     Retorna um dataframe com o bloco pequenas do sistema. Tem como entrada a string do sistema.dat
     '''
     dict={0:"1",1:"1",2:"1",3:"1",4:"2",5:"2",6:"2",7:"2",8:"3",9:"3",10:"3",11:"3",12:"4",13:"4",14:"4",15:"4"}
