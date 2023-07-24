@@ -370,6 +370,8 @@ def intercambio_df(sistema):
 
 def pequenas_df(sistema):
     '''
+    SE POSSÍVEL, USAR: 'pequenas_df_sem_mmgd'
+    
     Retorna um dataframe com o bloco pequenas do sistema. Tem como entrada a string do sistema.dat
     '''
     dict={0:"1",1:"1",2:"1",3:"1",4:"2",5:"2",6:"2",7:"2",8:"3",9:"3",10:"3",11:"3",12:"4",13:"4",14:"4",15:"4"}
@@ -405,6 +407,83 @@ def pequenas_df(sistema):
     return df_final
 
 
+def pequenas_df_sem_mmgd(sistema):
+    '''
+    Retorna um dataframe com o bloco pequenas do sistema sem MMGD. Tem como entrada a string do sistema.dat
+    '''
+    padrao_nao_simuladas = r'GERACAO DE USINAS NAO SIMULADAS.*'
+    resultado_nao_simuladas = re.search(padrao_nao_simuladas, sistema, re.DOTALL)
+    arquivo_nao_simuladas = resultado_nao_simuladas.group(0).strip()
+    
+    padrao_tamanhos_meses = r'\n(\s*)(.*?JAN.)(\s.*?FEV.)(\s.*?MAR.)(\s.*?ABR.)(\s.*?MAI.)(\s.*?JUN.)(\s.*?JUL.)(\s.*?AGO.)(\s.*?SET.)(\s.*?OUT.)(\s.*?NOV.)(\s.*?DEZ.)\s'
+    resultado_tamanhos_meses = re.search(padrao_tamanhos_meses, arquivo_nao_simuladas)
+    tamanho_colunas = dict()
+    sobressalente = 0
+    for i in range(1, 14):
+        if i == 1:
+            # Espaço antes de Janeiro
+            sobressalente = len(resultado_tamanhos_meses.group(i)) - 4 # len anual
+            tamanho_colunas[i - 1] = 4 # len anual
+        elif i == 2:
+            # Janeiro
+            tamanho_colunas[i - 1] = sobressalente + len(resultado_tamanhos_meses.group(i))
+        else:
+            # Meses restantes
+            tamanho_colunas[i - 1] = len(resultado_tamanhos_meses.group(i))
+    
+    padrao_dados_nao_simuladas = r'(?:DEZ)(.*)(?:\s*999\s*)'
+    resultado_dados_nao_simuladas = re.search(padrao_dados_nao_simuladas, arquivo_nao_simuladas, re.DOTALL)
+    arquivo_dados_nao_simuladas = resultado_dados_nao_simuladas.group(1).strip()
+    intercambio = list()
+    flag_ignorar_mmgd = 0
+    for item in arquivo_dados_nao_simuladas.splitlines()[1:]: # [1:] -> eliminar o '.' do 'DEZ.'
+        lista_itens = list()
+        elementos = re.split(r'\s{3,}', item)
+        if elementos[0] == '': # cabeçalhos
+            lista_itens = elementos[1:] + [0 for i in range(11)]
+        else: # dados
+            soma_tamanho_anterior = 0
+            for tamanho in tamanho_colunas.values():
+                valor = item[soma_tamanho_anterior: soma_tamanho_anterior + tamanho].strip()
+                if valor == "":
+                    valor = 0
+                soma_tamanho_anterior += tamanho
+                lista_itens.append(valor)
+        for i in lista_itens:
+            try:
+                if 'MMGD' in i: # Não extrair os dados da MMGD
+                    flag_ignorar_mmgd = 6
+                    break
+            except: pass
+        if flag_ignorar_mmgd == 0:
+            intercambio.append(lista_itens)
+        else:
+            flag_ignorar_mmgd -= 1
+
+    dicio={0:"1",1:"1",2:"1",3:"1",4:"2",5:"2",6:"2",7:"2",8:"3",9:"3",10:"3",11:"3",12:"4",13:"4",14:"4",15:"4"}
+    df_intermediario=pd.DataFrame()
+    for i in range(16):
+        carga1={}
+        for item in intercambio[i*6+1:(i+1)*6]:
+            carga1[dicio[i],item[0]]=item[1:]
+            df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
+        df_intermediario=df_intermediario.append(df)
+    df_intermediario=df_intermediario.astype({i+1:float for i in range(12)})
+    df_intermediario=df_intermediario.astype({i+1:int for i in range(12)})
+    dicio={1:"SUDESTE",2:"SUL",3:"NORDESTE",4:"NORTE"}
+    inicio=int(list(df_intermediario.index)[0][1])
+    fim=int(list(df_intermediario.index)[-1][1])
+    df_final=pd.DataFrame()
+    for i in range(4):
+        for j in range(fim-inicio+1):
+            df_2=pd.DataFrame(df_intermediario[df_intermediario.index.isin( [(str(i+1), str(inicio+j))])].sum()).T
+            df_2["ANO"]=inicio+j
+            df_2["SUBSISTEMA"]=dicio[i+1]            
+            df_final=df_final.append(df_2)
+    df_final=df_final.set_index(["SUBSISTEMA","ANO"])
+    return df_final
+
+
 def tabela_diferencas(df1,df2):
     '''
     Retorna um dataframe com a diferença entre dois dataframes resultantes das funções 'bloco'_df, com o 'bloco' podendo ser 'pequenas','intercambio' ou 'carga'.
@@ -425,5 +504,3 @@ def tabela_diferencas(df1,df2):
     df_2=df2.loc[list(df_diff.loc[teste2].index)]
 
     return (df_diff.loc[teste2]).round().astype(int),df_1.round().astype(int),df_2.round().astype(int)
-
-
