@@ -161,12 +161,12 @@ def getPOTEFporSIS(dates,df_potef):
           
         
     return df_sum 
+
 def get_degrau(df):
     '''
 	Retorna um dataframe com o degrau acumulado de cada usina do parâmetro POTEF
 
 	'''
-
     usinas = list(set(df['numeroUsina']))
     usinas.sort(reverse=False)
     df_degrau = pd.DataFrame(columns=['numeroUsina','tipoModificacao','nomeUsina','mesInicio','anoInicio','mesFim','anoFim','novoValor','degrau'])
@@ -193,8 +193,9 @@ def get_degrau(df):
                     'degrau':int(potef_usina['novoValor'].iloc[i]-potef_usina['novoValor'].iloc[i-1]),
                 })
             df_degrau=df_degrau.append(dct,ignore_index=True)
-    
+    df_degrau = df_degrau.drop_duplicates()
     return df_degrau
+
 def unexpand_potef(df):
     '''
 	Retorna um dataframe do parâmetro POTEF do expt sem expansão até o final do horizonte do deck
