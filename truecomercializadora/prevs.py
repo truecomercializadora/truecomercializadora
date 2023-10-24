@@ -65,6 +65,11 @@ def _get_vazoes_artificiais_bmonte(
     
     # Inferindo os dados necessarios
     estagios_decomp = decomp.get_estagios(ano=ano, mes=mes)
+
+    if len(estagios_decomp)<6:
+        mesCorrecao=mes+1 if mes!=12 else 1
+        estagios_decomp.append(decomp.get_estagios(ano=ano, mes=mesCorrecao)[0])
+
     dias_mes_por_estagio = decomp.get_dias_do_mes_por_estagio(estagios_decomp)
     hidrograma_dict = {utils_datetime.get_br_abreviated_month_number(linha['mes']): linha[hidrograma_type] for linha in hidrograma_table}
     
