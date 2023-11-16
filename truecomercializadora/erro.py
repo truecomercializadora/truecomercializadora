@@ -3,7 +3,7 @@ from datetime import datetime,timedelta
 import urllib
 import os
 import sys
-import utils_ses
+from truecomercializadora import utils_ses
 
 def EnviarEmailERRO(informacoes=None,emails = ["tecnologia@truecomercializadora.com"],EnviarVariaveis = True, tiposVariaveis = [int,str,dict,float,list,bool,tuple,set]):
     ERRO = traceback.format_exc()
