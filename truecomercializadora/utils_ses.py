@@ -53,7 +53,7 @@ def send_email(sender, recipients_dict, content_dict, attachments = None):
   BODY_HTML = content_dict['body_html']
 
   # Create a new SES resource and specify a region.
-  client = boto3.client('ses',region_name=AWS_REGION)
+  client = boto3.client('sesv2',region_name=AWS_REGION)
 
   # Create a multipart/mixed parent container.
   msg = MIMEMultipart('mixed')
@@ -84,10 +84,10 @@ def send_email(sender, recipients_dict, content_dict, attachments = None):
       msg.attach(att)    
   
   try:
-    return client.send_raw_email(
-        Source=sender,
-        RawMessage={
-            'Data':msg.as_string(),
+    return client.send_email(
+        FromEmailAddress=sender,
+        Content={
+            'Raw':{'Data':msg.as_string()},
         },
     )
   except ClientError as e:
