@@ -10,12 +10,10 @@ setup(
     license='GNU AGPLv3',
     packages=['truecomercializadora'],
     install_requires=[
-        'gspread',
-        'oauth2client',
-        'numpy',
-        'pandas',
-        'google-auth-httplib2',
-        'google-auth-oauthlib',
+        'gspread==5.11.0',
+        'oauth2client==4.1.3',
+        'google-auth-httplib2==0.1.1',
+        'google-auth-oauthlib==0.4.6',
     ],
     classifiers=[
         'Development Status :: 0 - Beta',
