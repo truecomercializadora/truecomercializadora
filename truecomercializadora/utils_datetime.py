@@ -1,7 +1,13 @@
 import datetime
+from workalendar.america import Brazil
 
 from . import utils_types
 
+def obter_feriados_brasil(ano):
+    cal = Brazil()
+    feriados = cal.holidays(ano)
+    feriados_nacionais = [feriado[0] for feriado in feriados]
+    return feriados_nacionais
 
 def subtract_one_month(dt0):
     """

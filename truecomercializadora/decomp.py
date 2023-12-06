@@ -3,12 +3,10 @@ import datetime
 import os
 import zipfile
 
-from . import utils_datetime
-from . import utils_files
+from . import utils_datetime,utils_s3,utils_files
 
 from . import ccee
 from . import ons
-import boto3
 
 def get_estagios(ano: int, mes: int) -> list:
     """
@@ -70,6 +68,20 @@ def get_dias_do_mes_por_estagio(estagios_decomp):
         raise Exception("get_dias_do_mes_por_estagio returned a total of {} days where {}-{} has only {} days".format(sum(dias), ano, mes, calendar.monthrange(ano, mes)[1]))
 
     return dias
+
+def get_horas_por_patamar_v2(estagio_decomp,ano_deck,stage='prod'):
+    feriados = utils_datetime.obter_feriados_brasil(ano_deck)
+    patamares = eval(utils_s3.get_obj_from_s3(f'true-datalake-{stage}','consume/carga/info/Patamares.csv').decode())[ano_deck]
+    datas = utils_datetime.get_list_of_dates_between_days(estagio_decomp['inicio'],estagio_decomp['fim'])
+    total = (0,0,0)
+    for data in datas:
+        if data.weekday()==5 or data.weekday()==6 or data in feriados:
+            add=(patamares[data.month][1])
+        else:
+            add=(patamares[data.month][0])
+        total = tuple(x + y for x, y in zip(total, add))
+
+    return {'pesada': total[2], 'media': total[1], 'leve': total[0]}
 
 def get_horas_por_patamar(
     estagio_decomp: dict ,
@@ -228,7 +240,7 @@ def get_pld_sumario(sumario_str,ano_deck):
         })
     return D
 
-def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patamares_horarios,ano_deck):
+def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp,ano_deck):
     """
     Retorna um dicionario contendo os plds medios semanais de cada um dos submercados. A
       partir da str representando o sumario.rv# e ja considerando os valores de pld max e min
@@ -245,19 +257,11 @@ def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp, patama
     if type(estagios_decomp) != list:
         raise Exception("'get_pld_medio_semanal_from_sumario' should receive a list of 'estagios_decomp'. 'estagios_decomp' of type {} detected.".format(type(estagios_decomp)))
     
-    if type(patamares_horarios) != dict:
-        raise Exception("'get_pld_medio_semanal_from_sumario' should receive a dict of 'patamares_horarios'. 'patamares_horarios' of type {} detected.".format(type(patamares_horarios)))
 
     plds = get_pld_sumario(sumario_str,ano_deck)
     D = {"SE": [], 'S': [], 'NE': [], "N": []}
     for i,estagio in enumerate(estagios_decomp[rev:-1]):
-
-        # pld_sudeste = plds['SE']['medio'][i]
-        # pld_sul = plds['S']['medio'][i]
-        # pld_nordeste = plds['NE']['medio'][i]
-        # pld_norte = plds['N']['medio'][i]        
-
-        h_patamar = get_horas_por_patamar(estagio, patamares_horarios)
+        h_patamar = get_horas_por_patamar_v2(estagio, ano_deck)
         pld_sudeste = (plds['SE']['pesada'][i]*h_patamar['pesada'] + plds['SE']['media'][i]*h_patamar['media'] + plds['SE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
         pld_sul = (plds['S']['pesada'][i]*h_patamar['pesada'] + plds['S']['media'][i]*h_patamar['media'] + plds['S']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
         pld_nordeste = (plds['NE']['pesada'][i]*h_patamar['pesada'] + plds['NE']['media'][i]*h_patamar['media'] + plds['NE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
