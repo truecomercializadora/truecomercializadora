@@ -27,8 +27,8 @@ def _get_modif_line_type(cod):
     "PERDHIDR": ['valor'],
     "VAZMIN": ['valor'],
     "COEFEVAP": ['valor','mes'],
-    "COTAREA": ['valor'],
-    "VOLCOTA": ['valor'],
+    "COTAREA": ['valor1','valor2','valor3','valor4','valor5'],
+    "VOLCOTA": ['valor1','valor2','valor3','valor4','valor5'],
     "CFUGA": ['mes','ano','valor'],
     "VMAXT": ['mes', 'ano', 'valor', 'unidade'],
     "VMINT": ['mes', 'ano', 'valor', 'unidade'],
@@ -75,7 +75,11 @@ def transcribe_modif(modif_str):
         keys = _get_modif_line_type(p_chave)
         linha = {'idUsina': int(id_usina), 'pChave': p_chave}
         modificacoes = dict(zip(keys, values))
-        linha.update(modificacoes)
+        if p_chave.upper() == 'COTAREA' or p_chave.upper() == 'VOLCOTA':
+          novo_modificacoes = {'valor':'{valor1} {valor2} {valor3} {valor4} {valor5}'.format(valor1=modificacoes['valor1'],valor2=modificacoes['valor2'],valor3=modificacoes['valor3'],valor4=modificacoes['valor4'],valor5=modificacoes['valor5'])}
+          linha.update(novo_modificacoes)
+        else:
+          linha.update(modificacoes)
         lista.append(linha)
     return _reset_modif_list(lista)
 
