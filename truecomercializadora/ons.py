@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 
 from . import utils_datetime
 from . import utils_gsheets
@@ -14,6 +15,34 @@ def get_mlts():
         subsistema['subsistema']: {str(i+1): item[1] for i,item in enumerate(list(subsistema.items())[1:])}
         for subsistema in mlts_table
     }
+
+def get_semana(today,type='semana'):
+    """
+    # ========================================================================================== #
+    #  Retorna um dicionário com informações sobre a semana operativa desejada, mês e ano.       #
+    #  O type pode ser:                                                                          #
+    #  'semana': Retorna informações sobre a semana operativa atual da data informad             # 
+    #  'semanas': Retorna informações sobre todas as semanas operativas do mês da data informada # 
+    #  'semana anterior': Retorna informações sobre todas as semanas operativas do mês anterior  #
+    #   da data informada                                                                        # 
+    # ========================================================================================== #
+    """
+    for d in range(-1, 2):
+        delta_date = today+relativedelta(months=d)
+        semanas = get_semanas_operativas(delta_date.year,delta_date.month)
+        for semana in semanas:
+            inicio = semana['inicio']
+            fim = semana['fim']
+            if inicio <= today.date() <= fim:
+                if type == 'semana':
+                    return semana,delta_date.year,delta_date.month
+                elif type == 'semanas':
+                    return semanas,delta_date.year,delta_date.month
+                elif type == 'semana anterior':
+                    previous_month = semanas[0]['inicio'] + relativedelta(days=-1)
+                    return get_semanas_operativas(previous_month.year,previous_month.month),previous_month.year,previous_month.month
+                
+    return None
 
 def get_semanas_operativas(ano,mes):
     """
