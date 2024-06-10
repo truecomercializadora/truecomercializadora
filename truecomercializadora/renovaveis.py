@@ -4,6 +4,10 @@ Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo renova
 """
 
 def escrever_blocos(bloco_renovaveis):
+    """
+    Escreve o arquivo renovaveis.dat a partir dos blocos do df de cada um dos blocos do arquivo
+    
+    """
     def write_cabecalho_bloco_1():
         return """&XXXXXX;XXXXX ;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;XXXXXXXXXX ;XXX ;X;\n&      ;CODIGO;NOME: Usina, Barra e Tipo de Usina       ;PMAX       ;FCAP;C;\n&XXXXXX;XXXXX ;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX ;XXXXXXXXXX ;XXX ;X;\n"""
 
@@ -64,6 +68,10 @@ def escrever_blocos(bloco_renovaveis):
 
 
 def get_renovaveis_blocos(renovaveis_str: str,tipo_deck:str):
+    """
+    Retorna um dicionario em que os itens sao os diferentes blocos do renovaveis.dat
+
+    """
     bloco_1 = []
     bloco_2 = []
     bloco_geracao = []
