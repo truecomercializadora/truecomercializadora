@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='truecomercializadora',
-    version='0.4.8',
+    version='0.4.9',
     description='A comprehensive library to centralize the main functions used across applications and services',
     url='https://github.com/truecomercializadora/truecomercializadora.git',
     author='Ettore Aquino',
@@ -14,7 +14,8 @@ setup(
         'oauth2client==4.1.3',
         'google-auth-httplib2==0.1.1',
         'google-auth-oauthlib==0.4.6',
-        'workalendar==17.0.0'
+        'workalendar==17.0.0',
+        'pyTelegramBotAPI==4.20.0'
     ],
     classifiers=[
         'Development Status :: 0 - Beta',
