@@ -5,7 +5,7 @@ class BotTelegram:
 	def __init__(self,CHAVE="",ID=""):
 		self.CHAVE = '7201629989:AAGEPJcLDYocfayQYR3694TTNF00F1Q5fZI' if CHAVE=='' else CHAVE
 		self.bot = telebot.TeleBot(self.CHAVE)
-		self.GRUPO_ID = "-4230200303" if ID=='' else ID
+		self.GRUPO_ID = "-1002244454770" if ID=='' else ID
 
 	def sendFile(self,dados,msgArquivo="",nomeArquivo=""):
 		'''
