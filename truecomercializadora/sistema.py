@@ -247,10 +247,10 @@ def get_nao_simuladas_dict(nao_simuladas_str: str):
     file_lines = nao_simuladas_str.splitlines()
     
     submercados = {
-        'SE':file_lines[3:27],
-        'S':file_lines[27:51],
-        'NE':file_lines[51:75],
-        'N':file_lines[75:99]
+        'SE':file_lines[3:51],
+        'S':file_lines[51:99],
+        'NE':file_lines[99:147],
+        'N':file_lines[147:194]
     }
 
     # Escrevendo cada submercado em um dicionario
@@ -261,7 +261,12 @@ def get_nao_simuladas_dict(nao_simuladas_str: str):
             'PCH':submercados[submercado][1:6],
             'PCT':submercados[submercado][7:12],
             'EOL':submercados[submercado][13:18],
-            'UFV':submercados[submercado][19:24]
+            'UFV':submercados[submercado][19:24],
+            'PCH MMGD':submercados[submercado][25:30],
+            'PCT MMGD':submercados[submercado][31:36],
+            'EOL MMGD':submercados[submercado][37:42],
+            'UFV MMGD':submercados[submercado][43:49],
+
         }
         
         # Adicionando cada bloco de tipo de usina
@@ -289,6 +294,7 @@ def get_nao_simuladas_dict(nao_simuladas_str: str):
         nao_simuladas.update({submercado: D})
     
     return nao_simuladas
+
 
 def get_nao_simuladas_df(nao_simuladas_dict: dict) -> pd.DataFrame:
     '''
