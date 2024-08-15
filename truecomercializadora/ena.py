@@ -1,6 +1,6 @@
 import pandas as pd
 import io
-from . import decomp,utils_s3,utils_datetime
+from . import decomp,utils_s3,utils_datetime,prevs
 
 def bacias_index(): 
     return [
@@ -154,3 +154,38 @@ def build_bacia_table(df_bacia: pd.DataFrame, postos_table: list, vazoes_obj: di
         df_bacia = df_bacia.reindex(bacias_index_correto())
     return df_bacia
 
+def build_ena_dict_from_prevs(prevs_str: str, ano: int, mes: int, postos_table: list, hidrograma_bmonte_table: list,tipo_index:bool,bucket:str) -> list:
+    '''
+    Cria uma lista de tabelas (lista de dicionarios) de enas. Cada tabela representa um dataframe
+    convertido com o metodo to_dict('records')
+    '''
+    vazoes_obj = prevs.get_vazoes_obj_from_prevs(
+        prevs_str,
+        postos_table,
+        hidrograma_bmonte_table,
+        ano,
+        mes
+    )
+    print('Eliminando diferenca de postos')
+    postos_table = [posto for posto in postos_table if posto['idPosto'] in vazoes_obj.keys()]
+    postos_order = [posto['idPosto'] for posto in postos_table]
+    #ordenando vazoes como planilha postos
+    ordered_vazoes = {k: vazoes_obj[k] for k in postos_order if k in vazoes_obj.keys()}
+    print('Calculando enas')
+    for i, vazoes in enumerate(ordered_vazoes.items()):
+        ordered_vazoes[vazoes[0]] = [vazao*postos_table[i]['produtibilidade'] for vazao in vazoes[1]]
+    df = pd.DataFrame.from_dict(ordered_vazoes, orient='index')
+    df.rename(columns=lambda x: 'Sem{}'.format(x+1) if type(x) == int else x, inplace=True)
+    print('Gerando tabelas')
+    bacia_df = build_bacia_table(df.copy(), postos_table, vazoes_obj, ano, mes,tipo_index=tipo_index,bucket=bucket)
+    submercado_df = build_submercado_table(df.copy(), postos_table, vazoes_obj, ano, mes,bucket)
+    final_df = pd.concat([submercado_df, bacia_df])
+    final_df.reset_index(inplace=True)
+    blanck_line = pd.DataFrame({"index": "-", "Sem1": "-", "Sem2": "-", "Sem3": "-", "Sem4": "-", "Sem5": "-", "Sem6": "-", "Media Mes": "-", "% MLT": "-"}, index=[""])
+    indexes = [4, 22, 28, 32]
+    count = 0
+    for i in indexes:
+        final_df = pd.concat([final_df.iloc[:i+count], blanck_line, final_df.iloc[i+count:]])
+        count += 1
+    
+    return final_df.to_dict('records')
