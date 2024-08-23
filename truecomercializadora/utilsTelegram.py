@@ -7,7 +7,7 @@ class BotTelegram:
 		self.bot = telebot.TeleBot(self.CHAVE)
 		self.GRUPO_ID = "-1002244454770" if ID=='' else ID
 
-	def sendFile(self,dados,msgArquivo="",nomeArquivo=""):
+	def sendFile(self,dados,msgArquivo="",nomeArquivo="",reply=None, editMsg=None):
 		'''
 		Envia arquivos locais ou em memoria para o chat do telegram
 		dados: bytes or string - Caminho do arquivo ou Bytes do arquivo que se deseja enviar.
@@ -18,7 +18,13 @@ class BotTelegram:
 			if nomeArquivo=="":
 				nomeArquivo = dados.rsplit("/",1)[-1]
 			dados = open(dados,'rb').read()
-		return self.bot.send_document(self.GRUPO_ID,dados,caption=msgArquivo,visible_file_name=nomeArquivo)
+		if editMsg!=None:
+			file_obj = BytesIO(dados)
+			file_obj.name = nomeArquivo	
+			media = telebot.types.InputMediaDocument(media=file_obj, caption=msgArquivo)
+			return self.bot.edit_message_media(media=media, chat_id=self.GRUPO_ID, message_id=editMsg)
+		return self.bot.send_document(self.GRUPO_ID,dados,caption=msgArquivo,visible_file_name=nomeArquivo,reply_to_message_id=reply)
+	
 	def getID(self):
 		'''Pega o ID do grupo/chat para enviar as mensagens'''
 		print("DIGITE '/id' NA CONVERSA COM O BOT NO TELEGRAM QUE SE DESEJA OBTER O ID")
@@ -39,11 +45,13 @@ class BotTelegram:
 			self.bot.stop_bot()
 		self.bot.polling()      
 
-	def sendMessage(self,msg):
+	def sendMessage(self,msg,reply=None, editMsg=None):
 		'''Mandar msg para o grupo do telegram'''
-		return self.bot.send_message(chat_id=self.GRUPO_ID,text=msg)
+		if editMsg!=None:
+			return self.bot.edit_message_text(text = msg, chat_id=self.GRUPO_ID, message_id=editMsg)
+		return self.bot.send_message(chat_id=self.GRUPO_ID,text=msg,reply_to_message_id=reply)
 	
-	def sendDF(self,df,nome,LarguraColunas = 2.8,AlturaLinhas = 0.8):
+	def sendDF(self,df,nome,LarguraColunas = 2.8,AlturaLinhas = 0.8,reply=None):
 		'''
 		***Necessário importar o matplotlib==3.5.1
 		Envia diretamente um df do pandas para o chat do telegram no formato jpg
@@ -52,7 +60,7 @@ class BotTelegram:
 		LarguraColunas: flaot - Largura da coluna do dataframe na imagem
 		AlturaLinhas: flaot - Altura da linha do dataframe na imagem
 		'''
-		return self.sendFile(dados=dfToImage(df,LarguraColunas=LarguraColunas,AlturaLinhas=AlturaLinhas),msgArquivo=nome,nomeArquivo=f'{nome.replace("/","").replace(" ","")}.jpg')
+		return self.sendFile(dados=dfToImage(df,LarguraColunas=LarguraColunas,AlturaLinhas=AlturaLinhas),msgArquivo=nome,nomeArquivo=f'{nome.replace("/","").replace(" ","")}.jpg',reply=reply)
 
 def dfToImage(df,LarguraColunas = 2.8,AlturaLinhas = 0.8):
     import matplotlib.pyplot as plt
@@ -70,7 +78,11 @@ def dfToImage(df,LarguraColunas = 2.8,AlturaLinhas = 0.8):
 
     for i, linha in enumerate(df.values):
         for j, valor in enumerate(linha):
-            cell = tabela.add_cell(i + df.columns.nlevels, j, width=0.2, height=0.1, text=valor, loc='center', facecolor='white')
+            if "*" in valor:
+                cor = 'yellow'
+            else:
+                cor = 'white'
+            cell = tabela.add_cell(i + df.columns.nlevels, j, width=0.2, height=0.1, text=valor, loc='center', facecolor=cor)
             cell.set_fontsize(12)
             cell.set_text_props(color='black', weight='bold', fontsize=8)
 
