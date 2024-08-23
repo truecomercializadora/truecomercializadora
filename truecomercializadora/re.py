@@ -35,7 +35,7 @@ def transcribe_re_value(re_str):
                 mes_fim = line.split()[3]
                 ano_fim = line.split()[4]
                 id_p = line.split()[5]
-                valor_restricao = int(round(float(line.split()[6])))
+                valor_restricao = (round(float(line.split()[6]),2))
                 linha2 = {'idRestricao':line_tr['idRestricao'],
                 'usinasRestricao:':line_tr['usinasRestricao'],
                 'mesInicio':mes_inicio,
