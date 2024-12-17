@@ -272,32 +272,35 @@ def get_intercambio_dict(intercambio_str: str) -> dict:
     idx = 0
     D = {}
     for i, row in enumerate(intercambio_str.splitlines()):
-        patamar = switch_patamar.get(idx%3)
-
-        # Inicializando o dicionário dos intercambios:
+        
         if i%16 == 0:
             intercambio = '->'.join(row.strip().split())
             D.update({intercambio: {}})
+            ano_anterior = 0
             continue
+
+        patamar = switch_patamar.get(idx%3)
 
         # Atualizando o dicionario de intercambios para cada um dos anos
         if row[:7].strip() != '':
-            ano = int(row[:7].strip())
+            ano_atual = int(row[:7].strip())
 
-            # O dicionario incorpora um dict comprehension para permitir a iteracao
-            #  por cada um dos meses, e posteriormente permitir o update de cada
-            #  valor de patamar.
-            D[intercambio].update({ano:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
-
+        if ano_atual != ano_anterior:
+            # zeramos o dicionario para aquele ano quando percebemos que o ano mudou.
+            D[intercambio].update({ano_atual:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
 
         values = [float(value) for value in row[7:].split()]
         # Iterando pelos meses e atualizando o dicionario final
+        
         for mes in range(1,13):
             mes_abr = utils_datetime.get_br_abreviated_month(mes)
-            D[intercambio][ano][mes_abr].update({patamar: float(values[mes-1])})
+            D[intercambio][ano_atual][mes_abr].update({patamar: float(values[mes-1])})
+
 
         idx += 1
-    
+        ano_anterior = ano_atual
+
+        
     return D
 
 def get_intercambio_df(intercambio_dict: dict) -> pd.DataFrame:
