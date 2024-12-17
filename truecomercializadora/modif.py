@@ -35,9 +35,12 @@ def _get_modif_line_type(cod):
     "NUMBAS": ['valor'],
     "VMINP": ['mes', 'ano', 'valor', 'unidade'],
     "VAZMINT": ['mes', 'ano', 'valor'],
-    "CMONT": ['mes', 'ano', 'valor']
+    "CMONT": ['mes', 'ano', 'valor'],
+    "TURBMAXT":['mes','ano','valor'],
+    "TURBMINT": ['mes','ano','valor'],
     }
     return switcher.get(cod, 'Codigo Invalido')
+
 
 
 def _reset_modif_list(listaAlteracoes):
