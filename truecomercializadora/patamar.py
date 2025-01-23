@@ -366,9 +366,7 @@ def get_nao_simuladas_dict(nao_simuladas_str: str) -> dict:
     if type(nao_simuladas_str) != str:
         raise Exception("'get_usinas_nao_simuladas_dict' can only receive a string."
                         "{} is not a valid input type".format(type(nao_simuladas_str)))
-    # Check se o bloco possui as linhas correspondentes ao horizonte total
-    if len(nao_simuladas_str.splitlines()) != 256:
-        raise Exception("usinas_nao_simuladas_str nao parece representar o bloco de nao simuladas do arquivo patamar.dat. Verifique")
+   
     
     # Definindo nomes para os patamares
     switch_patamar = {0: 'pesado', 1: 'medio', 2: 'leve'}
