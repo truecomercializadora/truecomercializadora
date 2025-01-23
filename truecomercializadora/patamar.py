@@ -373,44 +373,49 @@ def get_nao_simuladas_dict(nao_simuladas_str: str) -> dict:
     # Definindo nomes para os patamares
     switch_patamar = {0: 'pesado', 1: 'medio', 2: 'leve'}
     switch_submercado = {1: "SE", 2: "S", 3: "NE", 4: "N"}
-    switch_tipo = {1: "PCH", 2: "PCT", 3: "EOL", 4: "UFV"}
+    switch_tipo = {1: "PCH", 2: "PCT", 3: "EOL", 4: "UFV",5: "PCH MMGD",6:"PCT MMGD",7:"EOL MMGD",8:"UFV MMGD"}
 
     idx = 0
     
     # Inicializando objeto
     D = {
-        'SE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
-        'S': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
-        'NE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}},
-        'N': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {}}
+        'SE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {},"PCH MMGD":{},"PCT MMGD":{},"EOL MMGD":{},"UFV MMGD":{}},
+        'S': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {},"PCH MMGD":{},"PCT MMGD":{},"EOL MMGD":{},"UFV MMGD":{}},
+        'NE': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {},"PCH MMGD":{},"PCT MMGD":{},"EOL MMGD":{},"UFV MMGD":{}},
+        'N': {"PCH": {}, "PCT": {}, "EOL": {}, "UFV": {},"PCH MMGD":{},"PCT MMGD":{},"EOL MMGD":{},"UFV MMGD":{}}
     }
     for i, row in enumerate(nao_simuladas_str.splitlines()):
-        patamar = switch_patamar.get(idx%3)
-
+        
         # Capturando as referencias do bloco:
-        if i%16 == 0:
+        if i%16 == 0: 
+            if row.strip() == '9999':continue
             submercado = switch_submercado.get(int(row.strip().split()[0]))
             tipo_usina = switch_tipo.get(int(row.strip().split()[1]))
+            ano_anterior = 0
             continue
 
+        patamar = switch_patamar.get(idx%3)
         # Atualizando o dicionario de intercambios para cada um dos anos
         if row[:7].strip() != '':
-            ano = int(row[:7].strip())
+            ano_atual = int(row[:7].strip())
 
             # O dicionario incorpora um dict comprehension para permitir a iteracao
             #  por cada um dos meses, e posteriormente permitir o update de cada
             #  valor de patamar.
 
-            D[submercado][tipo_usina].update({ano:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
+            if ano_atual != ano_anterior:
+                # zeramos o dicionario para aquele ano quando percebemos que o ano mudou.
+                D[submercado][tipo_usina].update({ano_atual:{utils_datetime.get_br_abreviated_month(mes): {} for mes in range(1,13)}})
 
 
         values = [float(value) for value in row[7:].split()]
     #     # Iterando pelos meses e atualizando o dicionario final
         for mes in range(1,13):
             mes_abr = utils_datetime.get_br_abreviated_month(mes)
-            D[submercado][tipo_usina][ano][mes_abr].update({patamar: float(values[mes-1])})
+            D[submercado][tipo_usina][ano_atual][mes_abr].update({patamar: float(values[mes-1])})
 
         idx += 1
+        ano_anterior = ano_atual
     
     return D
 

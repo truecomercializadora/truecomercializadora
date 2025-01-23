@@ -250,7 +250,7 @@ def get_nao_simuladas_dict(nao_simuladas_str: str):
         'SE':file_lines[3:51],
         'S':file_lines[51:99],
         'NE':file_lines[99:147],
-        'N':file_lines[147:194]
+        'N':file_lines[147:195]
     }
 
     # Escrevendo cada submercado em um dicionario
