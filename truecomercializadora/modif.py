@@ -10,7 +10,6 @@ import os
 """
 Modulo desenhado para conter as classes e funcoes relacionadas ao arquivo modif.dat
 """
-
 def _get_modif_line_type(cod):
     '''
     Retorna a lista de colunas referente ao codigo de entrada
@@ -42,7 +41,6 @@ def _get_modif_line_type(cod):
     return switcher.get(cod, 'Codigo Invalido')
 
 
-
 def _reset_modif_list(listaAlteracoes):
     '''
     Reseta colunas de listaAlteracoes, adicionando colunas faltantes
@@ -60,7 +58,7 @@ def _reset_modif_list(listaAlteracoes):
       if 'valor' not in alteracao.keys():
         alteracao.update({'valor': ''})
       lista.append(alteracao)
-    df = pd.DataFrame(lista, columns = ['idUsina', 'pChave', 'mes', 'ano', 'valor', 'unidade', 'nConjunto']).set_index('idUsina')
+    df = pd.DataFrame(lista, columns = ['idUsina','nomeUsina', 'pChave', 'mes', 'ano', 'valor', 'unidade', 'nConjunto']).set_index('idUsina')
     return json.loads(df.reset_index().to_json(orient='records'))
 
 def transcribe_modif(modif_str):
@@ -71,12 +69,16 @@ def transcribe_modif(modif_str):
     for line in modif_str.splitlines():
         if 'P.CHAVE' in line or 'XXX' in line: continue
         if 'USINA' in line:
-            id_usina = line.split()[1]
+            id_usina = line.split(maxsplit=2)[1]
+            if len(line.split(maxsplit=2)) > 2:
+              nome_usina = line.split(maxsplit=2)[2].strip()
+            else:
+              nome_usina = ''
             continue
         p_chave = line.split()[0]
         values = line.split()[1:]
         keys = _get_modif_line_type(p_chave)
-        linha = {'idUsina': int(id_usina), 'pChave': p_chave}
+        linha = {'idUsina': int(id_usina),'nomeUsina':nome_usina, 'pChave': p_chave}
         modificacoes = dict(zip(keys, values))
         if p_chave.upper() == 'COTAREA' or p_chave.upper() == 'VOLCOTA':
           novo_modificacoes = {'valor':'{valor1} {valor2} {valor3} {valor4} {valor5}'.format(valor1=modificacoes['valor1'],valor2=modificacoes['valor2'],valor3=modificacoes['valor3'],valor4=modificacoes['valor4'],valor5=modificacoes['valor5'])}
@@ -85,7 +87,6 @@ def transcribe_modif(modif_str):
           linha.update(modificacoes)
         lista.append(linha)
     return _reset_modif_list(lista)
-
 
 def get_modif_df(modif_lines):
     '''
