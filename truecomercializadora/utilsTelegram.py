@@ -50,6 +50,10 @@ class BotTelegram:
 		if editMsg!=None:
 			return self.bot.edit_message_text(text = msg, chat_id=self.GRUPO_ID, message_id=editMsg)
 		return self.bot.send_message(chat_id=self.GRUPO_ID,text=msg,reply_to_message_id=reply)
+
+	def deleteMessage(self,message_id):
+			'''Apagar msg no grupo do telegram'''
+			return self.bot.delete_message(chat_id=self.GRUPO_ID, message_id=message_id)
 	
 	def sendDF(self,df,nome,LarguraColunas = 2.8,AlturaLinhas = 0.8,reply=None):
 		'''
