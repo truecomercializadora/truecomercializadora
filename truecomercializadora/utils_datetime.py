@@ -1,12 +1,17 @@
 import datetime
-from workalendar.america import Brazil
+from workalendar.america import BrazilSaoPauloCity
 
 from . import utils_types
 
 def obter_feriados_brasil(ano):
-    cal = Brazil()
+    """
+    # ============================================================================================ #
+    #    Retorna apenas feriados considerados pelo ONS                                             #
+    # ============================================================================================ #
+    """
+    cal = BrazilSaoPauloCity()
     feriados = cal.holidays(ano)
-    feriados_nacionais = [feriado[0] for feriado in feriados]
+    feriados_nacionais = [feriado[0] for feriado in feriados if feriado[1] != "Anniversary of the city of São Paulo" and feriado[1] != "Constitutional Revolution of 1932"]
     return feriados_nacionais
 
 def subtract_one_month(dt0):
