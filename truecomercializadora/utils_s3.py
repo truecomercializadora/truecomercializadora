@@ -11,7 +11,8 @@ async def async_get_obj_from_s3(client,bucket_name, key_name):
     # from an asynchronous request to it.                                                          #
     # ============================================================================================ #
     """
-    return await client.get_object(Bucket=bucket_name, Key=key_name)['Body'].read()
+    response = await client.get_object(Bucket=bucket_name, Key=key_name)
+    return await response['Body'].read()
 
 async def async_list_s3_files(client, bucket_name, prefix):
     paginator = client.get_paginator('list_objects_v2')
