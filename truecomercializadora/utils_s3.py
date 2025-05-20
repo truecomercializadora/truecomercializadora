@@ -3,6 +3,26 @@ from botocore.exceptions import ClientError
 import io
 import logging
 
+
+async def async_get_obj_from_s3(client,bucket_name, key_name):
+    """
+    # ============================================================================================ #
+    #  Returns an object from s3 based on its bucket and key name, provided the client has access  #
+    # from an asynchronous request to it.                                                          #
+    # ============================================================================================ #
+    """
+    return await client.get_object(Bucket=bucket_name, Key=key_name)['Body'].read()
+
+async def async_list_s3_files(client, bucket_name, prefix):
+    paginator = client.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+    files = []
+    async for page in page_iterator:
+        for content in page.get('Contents', []):
+            files.append(content['Key'])
+    return files
+
+
 def _get_s3_client():
     """
     # ============================================================================================ #
