@@ -345,7 +345,7 @@ def carga_df(sistema):
         for item in carga[i*7+1:7*i+7]:
             carga1[dict[i],item[0]]=item[1:]
             df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
-        df_final=df_final.append(df)
+        df_final = pd.concat([df_final,df])
     df_final=df_final.astype({i+1:float for i in range(12)})
     df_final=df_final.astype({i+1:int for i in range(12)})
     return(df_final)
@@ -370,7 +370,7 @@ def intercambio_df(sistema):
         for item in intercambio[i*6+1:(i+1)*6]:
             carga1[dict[i],item[0]]=item[1:]
             df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
-        df_final=df_final.append(df)
+        df_final = pd.concat([df_final,df])
     df_final=df_final.astype({i+1:float for i in range(12)})
     df_final=df_final.astype({i+1:int for i in range(12)})
     return df_final
@@ -397,7 +397,7 @@ def pequenas_df(sistema):
         for item in intercambio[i*6+1:(i+1)*6]:
             carga1[dict[i],item[0]]=item[1:]
             df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
-        df_intermediario=df_intermediario.append(df)
+        df_intermediario = pd.concat([df_intermediario,df])
     df_intermediario=df_intermediario.astype({i+1:float for i in range(12)})
     df_intermediario=df_intermediario.astype({i+1:int for i in range(12)})
     dict={1:"SUDESTE",2:"SUL",3:"NORDESTE",4:"NORTE"}
@@ -409,7 +409,7 @@ def pequenas_df(sistema):
             df_2=pd.DataFrame(df_intermediario[df_intermediario.index.isin( [(str(i+1), str(inicio+j))])].sum()).T
             df_2["ANO"]=inicio+j
             df_2["SUBSISTEMA"]=dict[i+1]
-            df_final=df_final.append(df_2)
+            df_final = pd.concat([df_final,df_2])
     df_final=df_final.set_index(["SUBSISTEMA","ANO"])
     return df_final
 
@@ -474,7 +474,7 @@ def pequenas_df_sem_mmgd(sistema):
         for item in intercambio[i*6+1:(i+1)*6]:
             carga1[dicio[i],item[0]]=item[1:]
             df=pd.DataFrame(carga1,index=[i+1 for i in range(12)]).T
-        df_intermediario=df_intermediario.append(df)
+        df_intermediario = pd.concat([df_intermediario,df])
     df_intermediario=df_intermediario.astype({i+1:float for i in range(12)})
     df_intermediario=df_intermediario.astype({i+1:int for i in range(12)})
     dicio={1:"SUDESTE",2:"SUL",3:"NORDESTE",4:"NORTE"}
@@ -486,7 +486,7 @@ def pequenas_df_sem_mmgd(sistema):
             df_2=pd.DataFrame(df_intermediario[df_intermediario.index.isin( [(str(i+1), str(inicio+j))])].sum()).T
             df_2["ANO"]=inicio+j
             df_2["SUBSISTEMA"]=dicio[i+1]            
-            df_final=df_final.append(df_2)
+            df_final = pd.concat([df_final,df_2])
     df_final=df_final.set_index(["SUBSISTEMA","ANO"])
     return df_final
 
