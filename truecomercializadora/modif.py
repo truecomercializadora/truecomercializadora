@@ -163,27 +163,27 @@ def getVmintComp(vmint_B,vmint_A):
         comparasion_df = row_B_new.compare(row_A, keep_equal=False)
         if(not(comparasion_df.empty)):
             if(df_B_diff.empty == True):    
-                df_B_diff = df_B_diff.append(row_B_new)
+                df_B_diff = pd.concat([df_B_diff,row_B_new])
             else:
                 if not usina in (list(df_B_diff.index)):
-                    df_B_diff = df_B_diff.append(row_B_new)
+                    df_B_diff = pd.concat([df_B_diff,row_B_new])
                 else:
                     if any(df_B_diff['ano']==ano):
                         if not any(df_B_diff['mes']==mes):
-                            df_B_diff = df_B_diff.append(row_B_new)
+                            df_B_diff = pd.concat([df_B_diff,row_B_new])
                     else:
-                        df_B_diff = df_B_diff.append(row_B_new)
+                        df_B_diff = pd.concat([df_B_diff,row_B_new])
             if(df_A_diff.empty == True):    
-                df_A_diff = df_A_diff.append(row_A)
+                df_A_diff = pd.concat([df_A_diff,row_A])
             else:
                 if not usina in (list(df_A_diff.index)):
-                    df_A_diff = df_A_diff.append(row_A)
+                    df_A_diff = pd.concat([df_A_diff,row_A])
                 else:
                     if any(df_A_diff['ano']==ano):
                         if not any(df_A_diff['mes']==mes):
-                            df_A_diff = df_A_diff.append(row_A)
+                            df_A_diff = pd.concat([df_A_diff,row_A])
                     else:
-                        df_A_diff = df_A_diff.append(row_A)
+                        df_A_diff = pd.concat([df_A_diff,row_A])
 
     for row in vmint_B.itertuples():
         usina = row[1]
@@ -217,27 +217,27 @@ def getVmintComp(vmint_B,vmint_A):
         comparasion_df = row_A_new.compare(row_B, keep_equal=False)
         if(not(comparasion_df.empty)):
             if(df_B_diff.empty == True):    
-                df_B_diff = df_B_diff.append(row_B)
+                df_B_diff = pd.concat([df_B_diff,row_B])
             else:
                 if not usina in (list(df_B_diff.index)):
-                    df_B_diff = df_B_diff.append(row_B)
+                    df_B_diff = pd.concat([df_B_diff,row_B])
                 else:
                     if any(df_B_diff['ano']==ano):
                         if not any(df_B_diff['mes']==mes):
-                            df_B_diff = df_B_diff.append(row_B)
+                            df_B_diff = pd.concat([df_B_diff,row_B])
                     else:
-                        df_B_diff = df_B_diff.append(row_B)
+                        df_B_diff = pd.concat([df_B_diff,row_B])
             if(df_A_diff.empty == True):    
-                df_A_diff = df_A_diff.append(row_A_new)
+                df_A_diff = pd.concat([df_A_diff,row_A_new])
             else:
                 if not usina in (list(df_A_diff.index)):
-                    df_A_diff = df_A_diff.append(row_A_new)
+                    df_A_diff = pd.concat([df_A_diff,row_A_new])
                 else:
                     if any(df_A_diff['ano']==ano):
                         if not any(df_A_diff['mes']==mes):
-                            df_A_diff = df_A_diff.append(row_A_new)
+                            df_A_diff = pd.concat([df_A_diff,row_A_new])
                     else:
-                        df_A_diff = df_A_diff.append(row_A_new)
+                        df_A_diff = pd.concat([df_A_diff,row_A_new])
             
     df_A_diff.reset_index(inplace=True)
     df_B_diff.reset_index(inplace=True)
@@ -264,7 +264,7 @@ def expanded_vazmin_modif(df_vazmin,anos,meses):
         df_expanded_vazmin['ano'] = anos
         df_expanded_vazmin['valor'] = valor
 
-        df_total_expanded = df_total_expanded.append(df_expanded_vazmin)
+        df_total_expanded = pd.concat([df_total_expanded,df_expanded_vazmin])
     return df_total_expanded
 
 
@@ -296,7 +296,7 @@ def expand_vazmint_modif(df_vazmint,datas):
                         'valor': t['valor']
                     }
                     dct_filtered.append(new_dict)
-        df_expandido= df_expandido.append(pd.DataFrame.from_dict(dct_filtered))
+        df_expandido = pd.concat([df_expandido,pd.DataFrame.from_dict(dct_filtered)])
     df_expandido.sort_values(by= ['idUsina','mes','ano'],axis=0,ascending=True,inplace=True)
     return df_expandido
 

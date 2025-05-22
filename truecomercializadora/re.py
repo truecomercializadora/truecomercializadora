@@ -170,27 +170,27 @@ def comparaRE(df_A,df_B):
         comparasion_df = row_B_new.compare(filtered_df_A, keep_equal=False)
         if(not(comparasion_df.empty)):
             if(df_B_diff.empty == True):    
-                df_B_diff = df_B_diff.append(row_B_new)
+                df_B_diff = pd.concat([df_B_diff,row_B_new])
             else:
                 if not [usinas] in (list(df_B_diff.index)):
-                    df_B_diff = df_B_diff.append(row_B_new)
+                    df_B_diff = pd.concat([df_B_diff,row_B_new])
                 else:
                     if any(df_B_diff['anoInicio']==anoInicio):
                         if not any(df_B_diff['mesInicio']==mesInicio):
-                            df_B_diff = df_B_diff.append(row_B_new)
+                            df_B_diff = pd.concat([df_B_diff,row_B_new])
                     else:
-                        df_B_diff = df_B_diff.append(row_B_new)
+                        df_B_diff = pd.concat([df_B_diff,row_B_new])
             if(df_A_diff.empty == True):    
-                df_A_diff = df_A_diff.append(filtered_df_A)
+                df_A_diff = pd.concat([df_A_diff,filtered_df_A])
             else:
                 if not [usinas] in (list(df_A_diff.index)):
-                    df_A_diff = df_A_diff.append(filtered_df_A)
+                    df_A_diff = pd.concat([df_A_diff,filtered_df_A])
                 else:
                     if any(df_A_diff['anoInicio']==anoInicio):
                         if not any(df_A_diff['mesInicio']==mesInicio):
-                            df_A_diff = df_A_diff.append(filtered_df_A)
+                            df_A_diff = pd.concat([df_A_diff,filtered_df_A])
                     else:
-                        df_A_diff = df_A_diff.append(filtered_df_A)
+                        df_A_diff = pd.concat([df_A_diff,filtered_df_A])
         
     for row in df_B.itertuples():
         usinas = list(map(str, row[1]))
@@ -235,27 +235,27 @@ def comparaRE(df_A,df_B):
         comparasion_df = row_A_new.compare(filtered_df_B, keep_equal=False)
         if(not(comparasion_df.empty)):
             if(df_B_diff.empty == True):
-                df_B_diff = df_B_diff.append(filtered_df_B)
+                df_B_diff = pd.concat([df_B_diff,filtered_df_B])
             else:
                 if not [usinas] in (list(df_B_diff.index)):
-                    df_B_diff = df_B_diff.append(filtered_df_B)
+                    df_B_diff = pd.concat([df_B_diff,filtered_df_B])
                 else:
                     if any(df_B_diff['anoInicio']==anoInicio):
                         if not any(df_B_diff['mesInicio']==mesInicio):
-                            df_B_diff = df_B_diff.append(filtered_df_B)     
+                            df_B_diff = pd.concat([df_B_diff,filtered_df_B])     
                     else:
-                        df_B_diff = df_B_diff.append(filtered_df_B)  
+                        df_B_diff = pd.concat([df_B_diff,filtered_df_B])  
             if(df_A_diff.empty == True):    
-                df_A_diff = df_A_diff.append(row_A_new)
+                df_A_diff = pd.concat([df_A_diff,row_A_new])
             else:
                 if not [usinas] in (list(df_A_diff.index)):
-                    df_A_diff = df_A_diff.append(row_A_new)
+                    df_A_diff = pd.concat([df_A_diff,row_A_new])
                 else:
                     if any(df_A_diff['anoInicio']==anoInicio):
                         if not any(df_A_diff['mesInicio']==mesInicio):
-                            df_A_diff = df_A_diff.append(row_A_new)
+                            df_A_diff = pd.concat([df_A_diff,row_A_new])
                     else:
-                        df_A_diff = df_A_diff.append(row_A_new)
+                        df_A_diff = pd.concat([df_A_diff,row_A_new])
     
 
 

@@ -155,7 +155,7 @@ def tabela_diferencas_limites(df1,df2):
                     'limP3':limP3,
                 })
                 
-                df_diferenca=df_diferenca.append(dct,ignore_index=True)
+                df_diferenca = pd.concat([df_diferenca,pd.DataFrame(dct,index=[0])])
 
     agrupamentos2 = sorted(list(set(df2['agrupamento'])))
     for agrupamento in agrupamentos2:
@@ -186,7 +186,7 @@ def tabela_diferencas_limites(df1,df2):
                         'limP3':-limP3,
                         })
 
-                    df_diferenca=df_diferenca.append(dct,ignore_index=True)
+                    df_diferenca = pd.concat([df_diferenca,pd.DataFrame(dct,index=[0])])
 
     df_diferenca = df_diferenca.loc[(df_diferenca['limP1']!=0) & (df_diferenca['limP2']!=0) & (df_diferenca['limP2']!=0)]
 
@@ -223,6 +223,7 @@ def tabela_diferencas(df1,df2):
   for item in teste2:
     df2_dif.append(item)
     df1_dif.append(item)
+    
   
   df1_new = df1.subtract(df2) # ons - true
   df1_new = df1_new[(df1_new != 0).all(1)]
