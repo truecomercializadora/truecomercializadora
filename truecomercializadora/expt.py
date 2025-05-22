@@ -157,9 +157,8 @@ def getPOTEFporSIS(dates,df_potef):
         'data':f'{int(month)}/{int(year)}',
         'valor':int(sum)
         }
-        df_sum = df_sum.append(dct_sum,ignore_index=True)
-          
-        
+        df_sum = pd.concat([df_sum,pd.DataFrame(dct_sum,index=[0])])
+    df_sum = df_sum.reset_index(drop=True)
     return df_sum 
 
 def get_degrau(df):
@@ -192,7 +191,8 @@ def get_degrau(df):
                 dct.update({
                     'degrau':int(potef_usina['novoValor'].iloc[i]-potef_usina['novoValor'].iloc[i-1]),
                 })
-            df_degrau=df_degrau.append(dct,ignore_index=True)
+            df_degrau = pd.concat([df_degrau,pd.DataFrame(dct,index=[0])])
+    df_degrau = df_degrau.reset_index(drop=True)
     df_degrau = df_degrau.drop_duplicates()
     return df_degrau
 
@@ -230,9 +230,8 @@ def unexpand_potef(df):
                 'anoFim':anoFim,
                 'novoValor':int(value)
             })
-            df_unexpanded=df_unexpanded.append(dct,ignore_index=True)
-
-    return df_unexpanded
+            df_unexpanded = pd.concat([df_unexpanded,pd.DataFrame(dct,index=[0])])
+    return df_unexpanded.reset_index(drop=True)
 def getFilesExpt(expt_A,expt_B,year):
     '''
 	Retorna as dataframes formatadas de expt_A e expt_B com elementos inteiros
