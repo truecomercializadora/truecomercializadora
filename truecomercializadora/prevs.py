@@ -245,8 +245,7 @@ def _get_vazoes_artificiais(
         ano=mes_prevs,
         mes=mes_prevs
     )
-    df_artificiais[292] = df_base[292]
-    df_artificiais[288] = df_base[288]
+    df_artificiais[292] = df_base[292] 
     for posto in postos_artificiais:
         id_posto = posto['idPosto']
         calc_posto_artificial(id_posto,df_base,df_artificiais,dict_regras,dict_deps,'')
