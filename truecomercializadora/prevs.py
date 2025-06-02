@@ -3,8 +3,13 @@
 '''
 
 
+from collections import defaultdict
+import re
+
+import numpy as np
 from . import decomp
 from . import utils_datetime
+from . import utils_s3
 
 def _get_prevs_obj(prevs_str: str) -> dict:
     """
@@ -446,3 +451,68 @@ def get_vazoes_obj_from_prevs(
     
     # Concatenando os objetos:
     return {**prevs_obj, **postos_artf_obj}
+
+def get_regras_prevs(LAKE):
+    return utils_s3.get_obj_from_s3(LAKE,'consume/ena/info/regras_prevs_v3.dat').decode('latin-1')
+
+def extract_vaz(expression,keyword):
+    chave = r"VAZ\((.*?)\)" if keyword == 'VAZ' else r"SMAP\((.*?)\)"
+    numbers = []
+    for match in re.finditer(r"VAZ\((.*?)\)", expression):
+        number = match.group(1)
+        if len(number.split(",")) == 2:
+            number = number.split(",")[0]
+        numbers.append(int(number))
+    return set(numbers)
+   
+def extrai_postos_regra(dict_regras):
+    dict_deps_smap = {i: extract_vaz(''.join(v.values()),'SMAP') for i, v in dict_regras.items()}
+    dict_deps_vaz = {i: extract_vaz(''.join(v.values()),'VAZ') for i, v in dict_regras.items()}
+
+    dict_deps = {}
+    for key in dict_deps_vaz:
+        dict_deps[key] = dict_deps_vaz[key].union(dict_deps_smap[key])
+    
+    return dict_deps
+
+def parse_regras(regras):
+    rows = [r for r in regras.splitlines() if r.strip() and not r.strip().startswith('#')]
+    col_specs = [match.span() for match in re.finditer(' X+', rows[1])]
+    last_row = next((i for i, r in enumerate(rows) if r.strip().startswith('9999')), len(rows))
+    d = defaultdict(dict)
+    for row in rows[2:last_row]:
+        row, *comentarios = row.split('#')
+        id_posto, mes = [int(row[s:e]) for s, e in col_specs[:2]]
+        formula = row[col_specs[-1][0]:col_specs[-1][1]].strip().upper().replace(';', ',')
+        d[id_posto][mes] = formula.upper().replace(';', ',')
+    return dict(d)
+
+def calc_posto_artificial(id_posto,df_base,df_artificiais,dict_regras,dict_deps,mes):
+    if id_posto in df_base.columns or id_posto in df_artificiais.columns:
+        return  
+
+    if id_posto in dict_deps:
+        for id_posto_requerido in dict_deps[id_posto]:
+            calc_posto_artificial(id_posto_requerido,df_base,df_artificiais,dict_regras,dict_deps,mes)
+
+    if id_posto in df_base.columns:
+        return  
+
+    if id_posto in dict_regras:
+        scp = {
+            'VAZ': lambda j, s=0: df_base[j].shift(-s).fillna(0),
+            'SE': lambda cond, val_true, val_false: cond * val_true + (1 - cond) * val_false,
+            'MIN': np.minimum,
+            'MAX': np.maximum,
+        }
+        expr = dict_regras[id_posto]
+        if 0 in expr:
+            df_artificiais[id_posto] = eval(expr[0], {}, scp)
+        elif id_posto == 292:
+            df_artificiais[id_posto] = {m: eval(dict_regras[id_posto][m], {}, scp) for m in dict_regras[id_posto]}[mes]['natural']
+        else:return 
+        df_base[id_posto] = df_artificiais[id_posto] 
+        
+    else:
+        print(f"Regra não definida para o posto: {id_posto}")
+        return 
