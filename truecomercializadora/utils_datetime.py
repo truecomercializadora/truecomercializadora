@@ -14,6 +14,21 @@ def obter_feriados_brasil(ano):
     feriados_nacionais = [feriado[0] for feriado in feriados if feriado[1] != "Anniversary of the city of São Paulo" and feriado[1] != "Constitutional Revolution of 1932"]
     return feriados_nacionais
 
+def eh_dia_util(data: datetime.date):
+    """
+    # ============================================================================================ #
+    #    Retorna True se for dia útil, caso for final de semana ou feriado retorna false           #
+    # ============================================================================================ #
+    """
+    if type(data)==datetime.datetime:
+        data = data.date()
+    feriados_ons = obter_feriados_brasil(data.year)
+    diaUtil = True
+    if data.weekday() == 5 or data.weekday() == 6 or data in feriados_ons:
+        diaUtil = False
+        
+    return diaUtil
+
 def subtract_one_month(dt0):
     """
     # ============================================================================================ #
