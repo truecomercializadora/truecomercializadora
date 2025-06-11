@@ -242,7 +242,7 @@ def _get_vazoes_artificiais(
         vazoes_prevs_bmonte=prevs_obj[288],
         hidrograma_table=hidrograma_bmonte_table,
         hidrograma_type=hidrograma,
-        ano=mes_prevs,
+        ano=ano_prevs,
         mes=mes_prevs
     )
     df_artificiais[292] = df_base[292] 
