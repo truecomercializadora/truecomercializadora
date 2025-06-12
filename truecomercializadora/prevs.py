@@ -131,61 +131,7 @@ def _get_postos_artificiais_from_postos_table(postos_table:list) -> list:
         if type(posto) != dict:
             raise Exception("'get_postos_artificiais_from_postos_table' can only receive a list of dict for postos_table"
                             "{} is not a valid input".format(postos_table[0]))
-    
-    lista_chaves = [
-        'idPosto',
-        'tipo',
-        'nome',
-        'bacia',
-        'submercado',
-        'resEquivalente',
-        'produtibilidade',
-        'vazSemana1',
-        'vazSemana2',
-        'idPostoRegredido',
-        'idPostoJusante',
-        'tempoViagem',
-        'mltJan',
-        'mltFev',
-        'mltMar',
-        'mltAbr',
-        'mltMai',
-        'mltJun',
-        'mltJul',
-        'mltAgo',
-        'mltSet',
-        'mltOut',
-        'mltNov',
-        'mltDez',
-        'A0Jan',
-        'A0Fev',
-        'A0Mar',
-        'A0Abr',
-        'A0Mai',
-        'A0Jun',
-        'A0Jul',
-        'A0Ago',
-        'A0Set',
-        'A0Out',
-        'A0Nov',
-        'A0Dez',
-        'A1Jan',
-        'A1Fev',
-        'A1Mar',
-        'A1Abr',
-        'A1Mai',
-        'A1Jun',
-        'A1Jul',
-        'A1Ago',
-        'A1Set',
-        'A1Out',
-        'A1Nov',
-        'A1Dez']
-    
-    if list(postos_table[0]) != lista_chaves:
-        raise Exception('Tabela de informacoes dos postos nao parece estar coerente. '
-                        'Verifique seu conteudo ou se ela foi alterada recentemente')
-    
+
     return list(filter(lambda x: x['tipo'] == 'artificial', postos_table))
 
 def add_regras_to_regras_prevs(dict_regras):
