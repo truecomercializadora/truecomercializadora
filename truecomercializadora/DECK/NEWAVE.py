@@ -5,8 +5,8 @@ from dateutil.relativedelta import relativedelta
 from zipfile import ZipFile,ZIP_DEFLATED
 from io import BytesIO
 from truecomercializadora.DECK.utils import UTILS
-from DECK.NW import agrint,c_adic,clast,confhd,conft,curva,cvar,dger,dsvagua,expt,ghmin,hidr,manutt,modif,patamar,penalid,postos,ree,sistema,term,vazoes,vazpast,volref_saz,restricao_eletrica,volumes_referencia,adterm
-from DECK.DC import volume_sse,volume_uhe
+from truecomercializadora.DECK.NW import agrint,c_adic,clast,confhd,conft,curva,cvar,dger,dsvagua,expt,ghmin,hidr,manutt,modif,patamar,penalid,postos,ree,sistema,term,vazoes,vazpast,volref_saz,restricao_eletrica,volumes_referencia,adterm
+from truecomercializadora.DECK.DC import volume_sse,volume_uhe
 ARQUIVOS_MAPEADOS = {"agrint":agrint.AGRINT, "c_adic":c_adic.C_ADIC, "cadic":c_adic.C_ADIC, "clast":clast.CLAST, "confhd":confhd.CONFHD, "conft":conft.CONFT, "curva":curva.CURVA, "cvar":cvar.CVAR, "dger":dger.DGER, "dsvagua":dsvagua.DSVAGUA, "expt":expt.EXPT, "ghmin":ghmin.GHMIN, "hidr":hidr.HIDR, "manutt":manutt.MANUTT, "modif":modif.MODIF, "patamar":patamar.PATAMAR, "penalid":penalid.PENALID, "postos":postos.POSTOS, "ree":ree.REE, "sistema":sistema.SISTEMA, "term":term.TERM, "vazoes":vazoes.VAZOES, "vazpast":vazpast.VAZPAST, "volref_saz":volref_saz.VOLREF_SAZ, "restricao-eletrica":restricao_eletrica.RESTRICAOELETRICA, "volumes-referencia":volumes_referencia.VOLUMESREFERENCIA, 'volume_uhe':volume_uhe.VOLUME_UHE, "volume_sse":volume_sse.VOLUME_SSE, "adterm":adterm.ADTERM}
 
 class NEWAVE(UTILS):

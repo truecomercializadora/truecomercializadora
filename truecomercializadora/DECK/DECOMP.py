@@ -1,7 +1,7 @@
 import os
-from DECK.DC import prevs,regras, mlt, relato, volume_uhe, volume_sse, dadgnl, relgnl, inviab_unic
-from DECK.DC.dadger import dadger
-from DECK.NW import hidr, vazoes,postos,polinjus
+from truecomercializadora.DECK.DC import prevs,regras, mlt, relato, volume_uhe, volume_sse, dadgnl, relgnl, inviab_unic
+from truecomercializadora.DECK.DC.dadger import dadger
+from truecomercializadora.DECK.NW import hidr, vazoes,postos,polinjus
 from datetime import datetime,timedelta
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO

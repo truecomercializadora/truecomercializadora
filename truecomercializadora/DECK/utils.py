@@ -1,7 +1,7 @@
 import calendar
 import struct
 from datetime import datetime,timedelta
-from DECK.DC.dadger import ac,rhe,rhq,rhv,hecm #NAO APAGAR. É USADO NO EVAL
+from truecomercializadora.DECK.DC.dadger import ac,rhe,rhq,rhv,hecm #NAO APAGAR. É USADO NO EVAL
 
 from workalendar.america import BrazilSaoPauloCity
 from functools import lru_cache
