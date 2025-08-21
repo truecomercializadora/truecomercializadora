@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='truecomercializadora',
@@ -8,7 +8,7 @@ setup(
     author='Ettore Aquino',
     author_email='ettore.aquino@truecomercializadora.com',
     license='GNU AGPLv3',
-    packages=find_packages(),
+    packages=["truecomercializadora","truecomercializadora.DECK","truecomercializadora.DECK.NW","truecomercializadora.DECK.DC","truecomercializadora.DECK.DC.dadger"],
     install_requires=[
         'gspread==5.11.0',
         'oauth2client==4.1.3',
