@@ -1,4 +1,4 @@
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 from copy import deepcopy
 lastDados = {}
 from DECK.DC.dadger import ac, rhq, rhe, rhv, hecm

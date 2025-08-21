@@ -1,4 +1,4 @@
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 
 class penalid_block(UTILS):
     def __init__(self):

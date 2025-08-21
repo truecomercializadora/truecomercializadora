@@ -1,4 +1,4 @@
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 
 
 class confhd_block(UTILS):

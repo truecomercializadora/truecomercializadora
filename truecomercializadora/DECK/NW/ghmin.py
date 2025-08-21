@@ -1,4 +1,4 @@
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 
 class ghmin_block(UTILS):
     def __init__(self):

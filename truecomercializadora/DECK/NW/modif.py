@@ -1,4 +1,4 @@
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 from datetime import datetime
         
 class modif_block(UTILS):

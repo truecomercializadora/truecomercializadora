@@ -5,7 +5,7 @@ from DECK.NW import hidr, vazoes,postos,polinjus
 from datetime import datetime,timedelta
 from zipfile import ZipFile, ZIP_DEFLATED
 from io import BytesIO
-from DECK.utils import UTILS
+from truecomercializadora.DECK.utils import UTILS
 from dateutil.relativedelta import relativedelta
 ARQUIVOS_MAPEADOS = {'dadger':dadger.DADGER,'vazoes':vazoes.VAZOES, 'postos':postos.POSTOS, 'polinjus':polinjus.POLINJUS, 'prevs':prevs.PREVS,'regras':regras.REGRAS, 'hidr':hidr.HIDR, 'mlt':mlt.MLT, 'relato':relato.RELATO, 'volume_uhe':volume_uhe.VOLUME_UHE, "volume_sse":volume_sse.VOLUME_SSE, 'dadgnl':dadgnl.DADGNL, 'outgnl':dadgnl.DADGNL, 'relgnl':relgnl.RELGNL, "inviab_unic":inviab_unic.INVIAB_UNIC}
 
