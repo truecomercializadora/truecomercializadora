@@ -28,19 +28,26 @@ OPERATORS = {
 def match_query(item, query):
     for key, condition in query.items():
         try:
-            if type(condition)==tuple:
-                func = OPERATORS[condition[0]]
-                valor = condition[1]
-            else:
-                func = OPERATORS['==']
-                valor = condition
-
-            if isinstance(item.get(key), str) and valor in ['começa', 'contem']:
-                if not func(item.get(key, ''), valor):
+            # Caso seja uma lista de condições → OR entre elas
+            if isinstance(condition, list):
+                if not any(
+                    OPERATORS[op](item.get(key, ""), val)
+                    for op, val in condition
+                ):
                     return False
-            elif not func(item.get(key, 0), valor):  # Para os outros tipos (numéricos, etc)
-                return False
-        except: return False
+
+            # Caso seja uma tupla (operador, valor)
+            elif isinstance(condition, tuple):
+                op, val = condition
+                if not OPERATORS[op](item.get(key, ""), val):
+                    return False
+
+            # Caso seja valor simples → assume "=="
+            else:
+                if not OPERATORS['=='](item.get(key, ""), condition):
+                    return False
+        except:
+            return False
     return True
 
 
@@ -89,7 +96,7 @@ class UTILS:
         EX: {"Usina":(">=":3)} #Pega as usinas com valor maior ou igual a 3.
         As QUERYS possiveis são: ("==", "!=", "<", ">", "<=", ">=", "começa", "contem")
         Pode-se usar {"Usina":3} para a QUERY "=="
-        
+        Pode usar mais de uma query por chave passando uma lista, ex: {"Usina":[("==","Usina1"),("==","Usina2")]} para pegar as usinas Usina1 e Usina2.
         '''
         return [item for item in self.valores if match_query(item, query)]
 
