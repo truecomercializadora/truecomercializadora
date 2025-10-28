@@ -37,4 +37,4 @@ def enviar_modelo_preco(key_name : str, bucket_s3 :str, modo_execucao : int, tit
         "USUARIO":"Automático",
     }
     response = lambda_function_US.invoke(FunctionName=f'true-modelos-preco-{STAGE}-enviarZipsDecks', Payload=json.dumps(payload))['Payload'].read().decode()
-    return json.loads(response)[0]
+    return json.loads(response)
