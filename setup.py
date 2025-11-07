@@ -8,7 +8,7 @@ setup(
     author='Ettore Aquino',
     author_email='ettore.aquino@truecomercializadora.com',
     license='GNU AGPLv3',
-    packages=["truecomercializadora","truecomercializadora.DECK","truecomercializadora.DECK.NW","truecomercializadora.DECK.DC","truecomercializadora.DECK.DC.dadger"],
+    packages=["truecomercializadora","truecomercializadora.PROSPEC","truecomercializadora.DECK","truecomercializadora.DECK.NW","truecomercializadora.DECK.DC","truecomercializadora.DECK.DC.dadger"],
     install_requires=[
         'gspread==5.11.0',
         'oauth2client==4.1.3',
