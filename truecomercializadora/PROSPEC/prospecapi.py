@@ -95,7 +95,7 @@ class ProspecAPI():
         # Tenta ler as configurações do arquivo prospecapi.cfg
         yes_strings = ['true', '1', 't', 'yes', 'y', 'on', 'ligado', 'sim', 's']
 
-        config_file = 'prospecapi.cfg'
+        config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'prospecapi.cfg')
         if os.path.isfile(config_file):
             print('Lendo configurações do arquivo prospecapi.cfg')
             try:
