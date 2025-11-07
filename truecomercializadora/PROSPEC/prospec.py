@@ -1,6 +1,6 @@
 import json
 import os
-import prospecapi
+from truecomercializadora.PROSPEC import prospecapi
 from functools import wraps
 
 api = None
