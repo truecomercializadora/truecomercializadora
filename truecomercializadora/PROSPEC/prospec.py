@@ -98,7 +98,7 @@ def reaproveitarCortesVolume(idEstudo: int, idCortes: int | None, idVolume: int 
         deck_id_volume = get_deck_original(idVolume, "DECOMP")
         if deck_id_original['anoOperativo'] > deck_id_volume['anoOperativo'] or \
         deck_id_original['mesOperativo'] > deck_id_volume['mesOperativo'] or \
-        (deck_id_original['mesOperativo'] == deck_id_volume['mesOperativo'] and deck_id_original['Revision'] > deck_id_volume['revisao']):
+        (deck_id_original['mesOperativo'] == deck_id_volume['mesOperativo'] and deck_id_original['revisao'] > deck_id_volume['revisao']):
             previous_stage = True
         else: previous_stage = False
         
