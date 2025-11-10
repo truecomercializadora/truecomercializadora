@@ -458,24 +458,24 @@ def executaNewaveDecomp(idEstudo: int, idDeckInicial: int | None, idServidor: in
         
         print(configuracaoDecks)
 
-        response = api.post(endpoint='/api/Execucoes/NewaveDecomp',json={
-        "idEstudo": idEstudo,
-        "idServidor": idServidor,
-        "idDeckInicial": idDeckInicial,
-        "modoExecucao": modoExecucao,
-        "tipoInstancia": tipoInstancia,
-        "tratamentosDecomp": tratamentosDecomp,
-        "opcaoCicloDeVidaServidor": opcaoCicloDeVidaServidor,
-        "tratamentoEmCasoDeQuedaSpot": tratamentoEmCasoDeQuedaSpot,
-        "configuracaoDecks": configuracaoDecks
-        })
+    response = api.post(endpoint='/api/Execucoes/NewaveDecomp',json={
+    "idEstudo": idEstudo,
+    "idServidor": idServidor,
+    "idDeckInicial": idDeckInicial,
+    "modoExecucao": modoExecucao,
+    "tipoInstancia": tipoInstancia,
+    "tratamentosDecomp": tratamentosDecomp,
+    "opcaoCicloDeVidaServidor": opcaoCicloDeVidaServidor,
+    "tratamentoEmCasoDeQuedaSpot": tratamentoEmCasoDeQuedaSpot,
+    "configuracaoDecks": configuracaoDecks
+    })
 
-        print(response)
-        
-        if response['status_code'] == 200:
-            print("Estudo executado com sucesso")
-        else:
-            print("Erro ao executar o estudo Newave/Decomp:", json.loads(response['response']))
+    print(response)
+    
+    if response['status_code'] == 200:
+        print("Estudo executado com sucesso")
+    else:
+        print("Erro ao executar o estudo Newave/Decomp:", json.loads(response['response']))
 
     return response
 
