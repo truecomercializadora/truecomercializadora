@@ -456,7 +456,7 @@ def executaNewaveDecomp(idEstudo: int, idDeckInicial: int | None, idServidor: in
                                 "tratamentosDecomp": tratamentosDecomp_deck
                                 })
         
-        print(configuracaoDecks)
+    print(configuracaoDecks)
 
     response = api.post(endpoint='/api/Execucoes/NewaveDecomp',json={
     "idEstudo": idEstudo,
