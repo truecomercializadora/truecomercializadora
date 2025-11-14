@@ -259,11 +259,11 @@ class ProspecAPI():
                 except:
                     error_msg = response.text if response.text else f'Status code {response.status_code}'
 
-                print(f'Erro ao obter token (status {response.status_code}): {error_msg}', force_print=True)
+                self._print(f'Erro ao obter token (status {response.status_code}): {error_msg}', force_print=True)
                 return False
 
         except Exception as e:
-            print(f'Exceção ao obter token: {str(e)}', force_print=True)
+            self._print(f'Exceção ao obter token: {str(e)}', force_print=True)
             return False
 
     def is_token_valid(self):
