@@ -320,9 +320,13 @@ class ProspecAPI():
 
         if self.autenticar_com_token:
             # Garantir que o token é válido antes da primeira tentativa
-            if not self.ensure_token():
-                raise Exception("Não foi possível obter token válido")
-
+            tentativa = 0
+            while(not self.ensure_token()):
+                print("Não foi possível obter token válido, tentando novamente")
+                tentativa +=1
+                if tentativa == 5:
+                    raise Exception("Não foi possível obter token válido")
+                
             # Preparar headers
             headers = request_kwargs.get('headers', {})
             if headers is None:

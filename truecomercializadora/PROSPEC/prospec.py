@@ -5,6 +5,15 @@ from functools import wraps
 
 api = None
 
+def safe_json_loads(texto):
+    if not isinstance(texto, str) or not texto.strip():
+        return texto
+    
+    try:
+        return json.loads(texto)
+    except json.JSONDecodeError:
+        return texto
+
 def configurar_credenciais(username, password):
     global api
     api = prospecapi.ProspecAPI(username=username, password=password)
@@ -28,7 +37,7 @@ def upload_zip_prospec(caminho_zip):
     retorno  = api.post("/api/Repositorio/UploadArquivos", files=files_list_folder)
     
     if retorno['status_code'] != 201:
-        print("Erro ao fazer upload para prospec", json.loads(retorno['response']))
+        print("Erro ao fazer upload para prospec", safe_json_loads(retorno['response']))
         return retorno
     
     response = retorno['response']
@@ -66,7 +75,7 @@ def deletar_estudo(ids_estudo):
     if response['status_code'] == 204:
         print("Estudo deletado com sucesso", ids_estudo)
     else:
-        print(f"Erro ao deletar estudos {ids_estudo}:", json.loads(response['response']))
+        print(f"Erro ao deletar estudos {ids_estudo}:", safe_json_loads(response['response']))
     return response
 
 @requer_api_configurada
@@ -88,7 +97,7 @@ def reaproveitarCortesVolume(idEstudo: int, idCortes: int | None, idVolume: int 
         if reponse_cortes['status_code'] == 200:
             print(f"Cortes {idCortes} associado com sucesso ao estudo {idEstudo}")
         else:
-            print(f"Erro ao associar cortes {idCortes} ao estudo {idEstudo}:", json.loads(reponse_cortes['response']))
+            print(f"Erro ao associar cortes {idCortes} ao estudo {idEstudo}:", safe_json_loads(reponse_cortes['response']))
             response = reponse_cortes
         print(reponse_cortes)
 
@@ -113,7 +122,7 @@ def reaproveitarCortesVolume(idEstudo: int, idCortes: int | None, idVolume: int 
         if reponse_volume['status_code'] == 200:
             print(f"Volume {idVolume} associado com sucesso ao estudo {idEstudo}, previous_stage == {previous_stage}")
         else:
-            print(f"Erro ao associar volume {idVolume} ao estudo {idEstudo}:", json.loads(reponse_volume['response']))
+            print(f"Erro ao associar volume {idVolume} ao estudo {idEstudo}:", safe_json_loads(reponse_volume['response']))
             response = reponse_volume
         print(reponse_volume)
 
@@ -169,7 +178,7 @@ def getInfoEstudos(IdEstudo: int | None = None, Titulo: str | None = None, Tags:
     print(response)
     
     if response['status_code'] != 200:
-        print("Erro ao obter informação do(s) estudo(s):", json.loads(response['response']))
+        print("Erro ao obter informação do(s) estudo(s):", safe_json_loads(response['response']))
 
     return response
 
@@ -229,7 +238,7 @@ def geracaoDessem(titulo: str, arquivosDeEntrada:dict, anoInicial: int, mesInici
     if response['status_code'] == 201:
         print("Estudo gerado com sucesso")
     else:
-        print("Erro ao gerar o estudo Dessem:", json.loads(response['response']))
+        print("Erro ao gerar o estudo Dessem:", safe_json_loads(response['response']))
 
     return response
 
@@ -307,7 +316,7 @@ def executaDessem(idEstudo: int, idDeckInicial: int | None, idServidor: int, tip
     if response['status_code'] == 200:
         print("Estudo executado com sucesso")
     else:
-        print("Erro ao executar o estudo Dessem:", json.loads(response['response']))
+        print("Erro ao executar o estudo Dessem:", safe_json_loads(response['response']))
 
     return response
 
@@ -364,7 +373,7 @@ def geracaoDecomp(titulo: str, arquivosDeEntrada:dict, anoInicial: int, mesInici
     if response['status_code'] == 201:
         print("Estudo gerado com sucesso")
     else:
-        print("Erro ao gerar o estudo Decomp:", json.loads(response['response']))
+        print("Erro ao gerar o estudo Decomp:", safe_json_loads(response['response']))
             
     return response
 
@@ -475,7 +484,7 @@ def executaNewaveDecomp(idEstudo: int, idDeckInicial: int | None, idServidor: in
     if response['status_code'] == 200:
         print("Estudo executado com sucesso")
     else:
-        print("Erro ao executar o estudo Newave/Decomp:", json.loads(response['response']))
+        print("Erro ao executar o estudo Newave/Decomp:", safe_json_loads(response['response']))
 
     return response
 
@@ -544,7 +553,7 @@ def GeracaoNewaveDecomp(titulo: str, arquivosDeEntrada:dict, anoInicial: int, me
         print("Estudo gerado com sucesso")
         print('ID ESTUDO CRIADO: ', response['response']['id'])
     else:
-        print("Erro ao gerar o estudo Newave/Decomp:", json.loads(response['response']))
+        print("Erro ao gerar o estudo Newave/Decomp:", safe_json_loads(response['response']))
         
     return response
 
@@ -555,7 +564,6 @@ def PararExecucaoEstudo(idEstudo: int):
     if response['status_code'] == '202':
         print(f"Estudo {idEstudo} abortado com sucesso")
     else:
-        print(f"Erro ao parar estudo {idEstudo}")
-        print(json.loads(response['response']))
+        print(f"Erro ao parar estudo {idEstudo}", safe_json_loads(response['response']))
         
     return response
