@@ -10,22 +10,24 @@ import os
 import re
 import json
 import requests
+import logging
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from dateutil.relativedelta import relativedelta
 from urllib.parse import urlparse, parse_qs, unquote
 
-__VERSION__ = '1.1'
+__VERSION__ = '1.1.3'
 
 class ProspecAPI():
-    def __init__(self, username=None, password=None,
+    def __init__(self, username=None, password=None, empresa=None,
                  proxy_url=None, proxy_user=None, proxy_pass=None,
-                 logs=True, bypass_ssl=False, autenticar_com_token=False):
-
-        # Se não forem fornecidos username e password, tenta ler do arquivo credentials
+                 logs=True, verbose=False, bypass_ssl=False, autenticar_com_token=False):
+        
+        # credentials
         if (username is None or password is None) and os.path.isfile('credentials'):
             with open('credentials', 'r') as cred_file:
                 print('Carregando usuário e senha do arquivo credentials')
+                
                 for line in cred_file.read().splitlines():
                     if '=' not in line:
                         continue
@@ -45,7 +47,7 @@ class ProspecAPI():
             print('É necessário informar credenciais (via argumentos ou arquivo credentials)')
             raise
 
-        # Se não forem fornecidos informações de proxy, tenta ler do arquivo credentials_proxy
+        # credentials_proxy
         proxy_file = 'credentials_proxy'
         if (proxy_url is None or proxy_user is None or proxy_pass is None) and os.path.isfile(proxy_file):
             with open(proxy_file, 'r') as f:
@@ -67,12 +69,11 @@ class ProspecAPI():
         self.proxy_user = proxy_user
         self.proxy_pass = proxy_pass
 
-        # Dicionário de proxies para o requests
+        # Dicionário de proxy
         if self.proxy_url:
-            # Limpa proxy_url
             if not re.match(r'^https?://', self.proxy_url):
                 self.proxy_url = 'http://' + self.proxy_url
-            # Adiciona credenciais se existirem
+            
             if self.proxy_user and self.proxy_pass:
                 creds = f"{self.proxy_user}:{self.proxy_pass}@"
                 self.proxy_url = re.sub(r'^(https?://)', r'\1' + creds, self.proxy_url)
@@ -83,6 +84,7 @@ class ProspecAPI():
 
         # Defaults
         self.logs = logs
+        self.verbose = verbose
         self.bypass_ssl = bypass_ssl
         self.autenticar_com_token = autenticar_com_token
 
@@ -90,9 +92,9 @@ class ProspecAPI():
         self.access_token = None
         self.token_expires_at = None
         self.token_type = None
-        self.token_endpoint = '/auth/token'
+        self.url_token = 'https://<empresa>.api.suite.energy/tenant/api/auth/token'
 
-        # Tenta ler as configurações do arquivo prospecapi.cfg
+        # prospecapi.cfg
         yes_strings = ['true', '1', 't', 'yes', 'y', 'on', 'ligado', 'sim', 's']
 
         config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'prospecapi.cfg')
@@ -101,52 +103,119 @@ class ProspecAPI():
             try:
                 with open(config_file, 'r') as file:
                     for line in file:
+                        line = line.strip()
+                        if not line or line.startswith('#'):
+                            continue
                         if '=' not in line:
                             continue
 
-                        key, value = line.lower().strip().split('=', 1)
-                        if key == 'url_jsonapi':
+                        key, value = line.split('=', 1)
+                        key = key.strip().lower()
+                        value = value.strip()
+
+                        if '#' in value:
+                            value = value.split('#')[0].strip()
+
+                        if key in ('empresa', 'nome_empresa'):
+                            empresa = value
+                        elif key == 'url_jsonapi':
                             self.url_jsonapi = value
                         elif key == 'url_base':
                             self.url_base = value
-                        elif key == 'token_endpoint':
-                            self.token_endpoint = value
+                        elif key == 'url_token':
+                            self.url_token = value
                         elif key == 'logs':
                             self.logs = value.lower() in yes_strings
+                        elif key == 'verbose':
+                            self.verbose = value.lower() in yes_strings
                         elif key == 'bypass_ssl':
                             self.bypass_ssl = value.lower() in yes_strings
                         elif key == 'autenticar_com_token':
                             self.autenticar_com_token = value.lower() in yes_strings
+
+                if not hasattr(self, 'url_base') or not self.url_base.startswith(('http://', 'https://')):
+                    print('Erro: url_base deve ser configurado com uma URL completa (http:// ou https://)')
+                    raise ValueError('url_base é obrigatório e deve ser uma URL absoluta')
+
+                defaults = {'url_jsonapi': '/openapi/v1.json',
+                            'url_token': '/auth/token'}
+                for attr, default_value in defaults.items():
+                    if not hasattr(self, attr):
+                        setattr(self, attr, default_value)
+
+                base_url = self.url_base.rstrip('/')
+                for attr in ['url_jsonapi', 'url_token']:
+                    if not getattr(self, attr).startswith(('http://', 'https://')):
+                        setattr(self, attr, base_url + getattr(self, attr))
+
+                if empresa:
+                    for attr in ['url_base', 'url_jsonapi', 'url_token']:
+                        if hasattr(self, attr):
+                            setattr(self, attr, getattr(self, attr).replace('<empresa>', empresa).replace('<nome_empresa>', empresa))
+
             except Exception as e:
                 print(f'Não foi possível ler arquivo prospecapi.cfg {e.args}')
         else:
-            print('Não foi possível encontrar o arquivo prospecapi.cfg, utilizando valores padrão')
+            print('Erro: Não foi possível encontrar o arquivo prospecapi.cfg')
+            raise FileNotFoundError('O arquivo prospecapi.cfg é obrigatório para inicializar a API')
 
-        # Configura a autenticação
+        # Autenticação HTTPBasicAuth
         self.auth = None
         if self.username and self.password:
             self.auth = requests.auth.HTTPBasicAuth(self.username, self.password)
+
+        # Configura logging
+        self._setup_logging()
 
         # Inicializa funções dinâmicas de endpoints
         try:
             self._initialize_endpoints(self.list_endpoints())
         except Exception as e:
-            print('[Aviso]: Não foi possível inicializar funções dinâmicas. As requisições ainda podem ser feitas utilizando os métodos tradicionais.')
-            if self.logs:
+            if verbose:
+                print('[Aviso]: Não foi possível inicializar funções dinâmicas. As requisições ainda podem ser feitas utilizando os métodos tradicionais.')
                 print(f'Exception: {e.args}')
 
-    # Ligar/desligar logs
-    def logs_on(self):
-        self.logs = True
+    def _setup_logging(self):
+        date_str = datetime.now().strftime("%Y%m%d")
+        log_format = logging.Formatter('[%(asctime)s] %(message)s', 
+                                       datefmt='%d/%m/%Y %H:%M:%S')
 
-    def logs_off(self):
-        self.logs = False
+        # Logger para REQUESTS
+        self.requests_logger = logging.getLogger('prospecapi.requests')
+        self.requests_logger.setLevel(logging.INFO)
+        self.requests_logger.handlers = []
 
-    def _timestamp(self):
-        return f'[{datetime.now().strftime("%d/%m/%Y %H:%M:%S")}]'
+        if self.logs:
+            requests_handler = logging.FileHandler(f'prospecapi_requests_{date_str}.log', 
+                                                   encoding='utf-8')
+            requests_handler.setFormatter(log_format)
+            self.requests_logger.addHandler(requests_handler)
+            self.requests_logger.propagate = False
 
-    def _log_filename(self):
-        return f'prospecapi_{datetime.now().strftime("%Y%m%d")}.log'
+        # Logger para VERBOSE
+        self.verbose_logger = logging.getLogger('prospecapi.verbose')
+        self.verbose_logger.setLevel(logging.INFO)
+        self.verbose_logger.handlers = []
+
+        if self.verbose:
+            # # Handler para arquivo prospecapi_verbose_<data>.log
+            # verbose_handler = logging.FileHandler(f'prospecapi_verbose_{date_str}.log', 
+            #                                       encoding='utf-8')
+            # verbose_handler.setFormatter(log_format)
+            # self.verbose_logger.addHandler(verbose_handler)
+
+            # Handler para console (stdout)
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(log_format)
+            self.verbose_logger.addHandler(console_handler)
+
+            self.verbose_logger.propagate = False
+
+    def _print(self, message, force_print=False):
+        if self.verbose:
+            self.verbose_logger.info(message)
+        elif force_print:
+            print(message)
 
     # Métodos de gerenciamento de Bearer Token
     def get_access_token(self):
@@ -155,10 +224,9 @@ class ProspecAPI():
 
         :return: True se sucesso, False caso contrário
         '''
-        if self.logs:
-            print(f'{self._timestamp()} Solicitando novo access token...')
-
-        url = self.url_base + self.token_endpoint
+        print('Solicitando novo access token...')
+        
+        url = self.url_token
 
         payload = {
             "grant_type": "client_credentials",
@@ -181,8 +249,7 @@ class ProspecAPI():
                 # Calcula quando o token expira (com margem de segurança de 10s)
                 self.token_expires_at = datetime.now() + timedelta(seconds=expires_in - 10)
 
-                if self.logs:
-                    print(f'{self._timestamp()} Token obtido com sucesso! Expira em {expires_in}s')
+                print(f'Token obtido com sucesso! Expira em {expires_in}s')
 
                 return True
             else:
@@ -190,15 +257,13 @@ class ProspecAPI():
                     error_data = response.json()
                     error_msg = error_data.get('error_description', 'Unknown error')
                 except:
-                    error_msg = f'Status code {response.status_code}'
+                    error_msg = response.text if response.text else f'Status code {response.status_code}'
 
-                if self.logs:
-                    print(f'{self._timestamp()} Erro ao obter token: {error_msg}')
+                print(f'Erro ao obter token (status {response.status_code}): {error_msg}', force_print=True)
                 return False
 
         except Exception as e:
-            if self.logs:
-                print(f'{self._timestamp()} Exceção ao obter token: {str(e)}')
+            print(f'Exceção ao obter token: {str(e)}', force_print=True)
             return False
 
     def is_token_valid(self):
@@ -216,8 +281,8 @@ class ProspecAPI():
         # Verifica se o token ainda não expirou
         is_valid = datetime.now() < self.token_expires_at
 
-        if not is_valid and self.logs:
-            print(f'{self._timestamp()} Token expirado, será renovado')
+        if not is_valid:
+            print('Token expirado, será renovado')
 
         return is_valid
 
@@ -272,8 +337,7 @@ class ProspecAPI():
 
             # Se receber 401, tentar renovar token e refazer requisição
             if response.status_code == 401:
-                if self.logs:
-                    print(f'{self._timestamp()} Recebido 401 - Token pode ter expirado no servidor, renovando...')
+                self._print('Recebido 401 - Token pode ter expirado no servidor, renovando...')
 
                 # Forçar renovação do token
                 self.access_token = None  # Invalidar token atual
@@ -282,14 +346,12 @@ class ProspecAPI():
                     # Atualizar header com novo token
                     headers['Authorization'] = f'Bearer {self.access_token}'
 
-                    if self.logs:
-                        print(f'{self._timestamp()} Tentando novamente com novo token...')
+                    self._print('Tentando novamente com novo token...')
 
                     # Segunda tentativa com novo token
                     response = getattr(requests, method)(endpoint, **request_kwargs)
                 else:
-                    if self.logs:
-                        print(f'{self._timestamp()} Falha ao renovar token')
+                    self._print('Falha ao renovar token')
         else:
             # Modo autenticação básica (HTTPBasicAuth)
             request_kwargs['auth'] = self.auth
@@ -460,7 +522,9 @@ class ProspecAPI():
     # Listagens de endpoints
     def list_endpoints(self, verbose=False):
         '''Listar todos os endpoints do SWAGGER'''
-        resposta = requests.get(self.url_jsonapi, auth=self.auth)
+        resposta = requests.get(self.url_jsonapi, auth=self.auth,
+                               proxies=self.proxies,
+                               verify=not self.bypass_ssl)
         endpoints = {}
 
         if resposta.status_code == 200:
@@ -532,7 +596,7 @@ class ProspecAPI():
                                                             'requestBody': request_body}
 
         else:
-            print(f'Não foi possível acessar a URL: {self.url_jsonapi} ({resposta.status_code})')
+            self._print(f'Não foi possível acessar a URL: {self.url_jsonapi} ({resposta.status_code})', force_print=True)
 
         return endpoints
 
@@ -542,7 +606,7 @@ class ProspecAPI():
             with open(path, 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print(f'Não foi possível ler o arquivo JSON {path} {e.args}')
+            self._print(f'Não foi possível ler o arquivo JSON {path} {e.args}', force_print=True)
 
     # Requests
     def get(self, endpoint, params=None, headers=None, stream=False):
@@ -692,28 +756,31 @@ class ProspecAPI():
             result = {'endpoint': endpoint, 'status_code': response.status_code,
                       'response': response}
 
-        # Registrar logs
-        if self.logs:
+        # Registrar logs de requests
+        if self.logs or self.verbose:
             try:
-                log_filename = self._log_filename()
-                log_entry = f'{self._timestamp()} {http_method.upper()} para endpoint {endpoint} - Status code {result["status_code"]}\n'
+                # Construir mensagem de log
+                log_message = f'{http_method.upper()} para endpoint {endpoint} - Status code {result["status_code"]}'
 
                 if response.request.body:
                     body_string = response.request.body.decode("utf-8")
                     if 'filename' in body_string:
                         filenames = re.findall(r'filename="([^"]+)"', body_string)
-                        log_entry += f'{self._timestamp()} Arquivos enviados: {", ".join(filenames)}\n'
+                        log_message += f' | Arquivos enviados: {", ".join(filenames)}'
                     else:
-                        log_entry += f'{self._timestamp()} Request Body: {body_string}\n'
+                        log_message += f' | Request Body: {body_string}'
 
                 if 'file' in result['response']:
-                    log_entry += f'{self._timestamp()} Response: {result["response"]["file"][0]}\n\n'
+                    log_message += f' | Response: {result["response"]["file"][0]}'
                 else:
-                    log_entry += f'{self._timestamp()} Response: {result["response"]}\n\n'
-                with open(log_filename, 'a') as log_file:
-                    log_file.write(log_entry)
+                    log_message += f' | Response: {result["response"]}'
+
+                # Logar
+                self.requests_logger.info(log_message)
+                if self.verbose:
+                    self.verbose_logger.info(log_message)
             except Exception as e:
-                print(f'Não foi possível registrar logs {e.args}')
+                self._print(f'Não foi possível registrar logs {e.args}', force_print=True)
 
         return result
 
@@ -743,11 +810,11 @@ class ProspecAPI():
                     os.makedirs(directory, exist_ok=True)
                 with open(file_path, 'wb') as file:
                     file.write(contents)
-                print(f"Resposta salva em: {file_path}")
+                self._print(f"Resposta salva em: {file_path}")
             else:
                 raise ValueError("A resposta fornecida não está em formato de bytes.")
         except Exception as e:
-            print(f'Não foi possível salvar arquivo {e.args}')
+            self._print(f'Não foi possível salvar arquivo {e.args}', force_print=True)
 
     def download_url(self, url, file_path=''):
         '''
@@ -787,7 +854,9 @@ class ProspecAPI():
         chunk_size = 1024 * 1024 * 50  # 50 MB
 
         try:
-            response = requests.get(url, stream=True)
+            response = requests.get(url, stream=True,
+                                   proxies=self.proxies,
+                                   verify=not self.bypass_ssl)
             response.raise_for_status()  # Levanta uma exceção para erros HTTP
 
             # Salva o conteúdo no arquivo especificado
@@ -795,9 +864,9 @@ class ProspecAPI():
                 for chunk in response.iter_content(chunk_size=chunk_size):
                     if chunk:
                         file.write(chunk)
-            print(f"Resposta salva em: {file_path}")
+            self._print(f"Resposta salva em: {file_path}")
         except requests.exceptions.RequestException as e:
-            print(f"Erro ao baixar o conteúdo: {e}")
+            self._print(f"Erro ao baixar o conteúdo: {e}", force_print=True)
 
     def prepare_file_list(self, file_list):
         try:
@@ -807,7 +876,7 @@ class ProspecAPI():
 
             return [("files", (os.path.basename(p), open(p, "rb"), "application/octet-stream")) for p in file_list]
         except Exception as e:
-            print(f'Não foi possível preparar lista de arquivos {file_list} {e.args}')
+            self._print(f'Não foi possível preparar lista de arquivos {file_list} {e.args}', force_print=True)
 
     def prepare_month_list(self, mes_inicial, ano_inicial, quantidade_meses,
                            meses_estagio_mensal=[],
@@ -874,7 +943,7 @@ class ProspecAPI():
             if deck['nome'] == nome_deck:
                 return deck['id']
 
-        print(f'Não foi possível encontrar o deck com nome "{nome_deck}" no estudo com ID {id_estudo}')
+        self._print(f'Não foi possível encontrar o deck com nome "{nome_deck}" no estudo com ID {id_estudo}', force_print=True)
         return None
 
 
