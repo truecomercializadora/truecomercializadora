@@ -489,6 +489,59 @@ def executaNewaveDecomp(idEstudo: int, idDeckInicial: int | None, idServidor: in
     return response
 
 @requer_api_configurada
+def GeracaoNewave(titulo: str, arquivosDeEntrada:dict, anoInicial: int, mesInicial: int, quantidadeDeMeses: int, descricao: str | None = None, tags: list | None = None, versaoNewave: str | None = None) -> dict:
+    """
+    titulo: título desejado para o estudo criado
+
+    descricao: descrição do estudo criado
+
+    tags: marcadores desejados para o estudo criado
+
+    mesInicial: mês de início do estudo
+
+    anoInicial: ano de início do estudo
+
+    arquivosDeEntrada:
+
+    arquivosEnviados: código gerado para os arquivos usados como base
+    idsDecks: número de identificação do deck existente que será usado como base
+    quantidadeDeMeses: número de meses de duração do estudo
+
+    versaoNewave: versão do NEWAVE usada no estudo
+    O retorno informa o ID do estudo e possíveis alertas:
+
+    {
+    "id": 0,
+    "alertas": [
+    "string"
+    ]
+    }
+    """
+    
+    print("GeracaoNewave")
+    
+    response = api.post(endpoint='/api/Geracoes/Newave',json={
+                "titulo": titulo,
+                "descricao": descricao,
+                "tags":tags,
+                "mesInicial": mesInicial,
+                "anoInicial": anoInicial,
+                "arquivosDeEntrada": arquivosDeEntrada,
+                "quantidadeDeMeses": quantidadeDeMeses,
+                "versaoNewave": versaoNewave 
+    })
+    
+    print(response)
+    
+    if response['status_code'] == 201:
+        print("Estudo gerado com sucesso")
+        print('ID ESTUDO CRIADO: ', response['response']['id'])
+    else:
+        print("Erro ao gerar o estudo Newave:", json.loads(response['response']))
+        
+    return response
+
+@requer_api_configurada
 def GeracaoNewaveDecomp(titulo: str, arquivosDeEntrada:dict, anoInicial: int, mesInicial: int, revisaoInicial: int, quantidadeDeMeses: int, configuracoesMeses: list, descricao: str | None = None, tags: list | None = None, versaoNewave: str | None = None, versaoDecomp: str | None = None, versaoGevazp: str | None = None) -> dict:
     """
     titulo: título desejado para o estudo criado
