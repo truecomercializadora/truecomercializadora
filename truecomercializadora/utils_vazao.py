@@ -383,10 +383,10 @@ def calculaEnaPorREE(files):
     
     return dfEnaREE.round(2)
 
-def edit_payload(files):
+def edit_payload(files,key='acomph_novo'):
     lista_payload = []
     dfEnaREE = calculaEnaPorREE(files)
-    for dado in files['ana_novo']['enas']:
+    for dado in files['acomph_novo']['enas']:
         dct_submercado = {}
         dct_bacia={}
         dct_posto={}
