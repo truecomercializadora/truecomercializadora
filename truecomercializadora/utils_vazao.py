@@ -167,7 +167,7 @@ def build_vazoes_completo(vazoes, postos_artificiais, data, fonte=None,LAKE='tru
   df_vazoes_incr = pd.DataFrame(vazoes).loc[['incremental']]
 
 
-  hidrograma_beloMonte = get_hidrograma()
+  hidrograma_beloMonte = get_hidrograma(LAKE)
 
   arquivo_regras = prevs.get_regras_prevs(LAKE)
   arquivo_regras = arquivo_regras.replace('SMAP','VAZ')
