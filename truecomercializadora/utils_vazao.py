@@ -352,10 +352,10 @@ def get_dicionario_enas(acomph, postos_document, postos_artificiais):
     'vazoes': dict_vazoes
     }
 
-def calculaEnaPorREE(files):
+def calculaEnaPorREE(files,key_arquivo):
     dfPostos = pd.DataFrame(files['postos_document']).T.reset_index()
     dfPostos = dfPostos.rename(columns={'index': 'idPosto'})[['idPosto', 'resEquivalente', 'tipo', 'nome', 'bacia', 'submercado', 'produtibilidade']]
-    dfVazao = pd.DataFrame(files['ana_novo']['vazoes']['natural'])
+    dfVazao = pd.DataFrame(files[key_arquivo]['vazoes']['natural'])
     dfVazao = dfVazao.set_index("data").T.reset_index().rename(columns={'index': 'idPosto'})
     dfInfoVazao = dfPostos.merge(dfVazao, on='idPosto')
 
@@ -383,10 +383,10 @@ def calculaEnaPorREE(files):
     
     return dfEnaREE.round(2)
 
-def edit_payload(files,key='acomph_novo'):
+def edit_payload(files,key_arquivo='acomph_novo'):
     lista_payload = []
     dfEnaREE = calculaEnaPorREE(files)
-    for dado in files['acomph_novo']['enas']:
+    for dado in files[key_arquivo]['enas']:
         dct_submercado = {}
         dct_bacia={}
         dct_posto={}
