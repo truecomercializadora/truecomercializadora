@@ -415,17 +415,17 @@ def edit_payload(files):
     return lista_payload
 
 ############################################################## FUNCOES PARA LEITURA DO IPDO ##################################################################
-def get_dataframe_hidrologicos(excel_io):
+def get_dataframe_hidrologicos_ipdo(excel_io):
   df = pd.read_excel(excel_io, sheet_name = 'IPDO', usecols=range(10,24), skiprows=58, nrows= 13).fillna('')
   df.columns = range(df.shape[1])
   df = df.drop([1,3,8,10,12], axis='columns')
   df.columns=list(range(9))
   return df
 
-def get_dict_dados_hidrologicos(LAKE,key_name):    
+def get_dict_dados_hidrologicos_ipdo(LAKE,key_name):    
     s3_file = io.BytesIO(utils_s3.get_obj_from_s3(LAKE, key_name))
     
-    df = get_dataframe_hidrologicos(s3_file)
+    df = get_dataframe_hidrologicos_ipdo(s3_file)
     SE = list(df.loc[5].to_numpy())[1:] + list(df.loc[12].to_numpy())[1:3]
     S = list(df.loc[4].to_numpy())[1:] + list(df.loc[11].to_numpy())[1:3]
     NE = list(df.loc[3].to_numpy())[1:] + list(df.loc[10].to_numpy())[1:3]
