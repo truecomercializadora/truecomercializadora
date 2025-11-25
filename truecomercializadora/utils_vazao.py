@@ -385,7 +385,7 @@ def calculaEnaPorREE(files,key_arquivo):
 
 def edit_payload(files,key_arquivo='acomph_novo'):
     lista_payload = []
-    dfEnaREE = calculaEnaPorREE(files)
+    dfEnaREE = calculaEnaPorREE(files,key_arquivo)
     for dado in files[key_arquivo]['enas']:
         dct_submercado = {}
         dct_bacia={}
