@@ -50,9 +50,24 @@ class NEWAVE(UTILS):
         self.dataDeck = datetime(ANO,MES,1)
         self.MaxDataDeck = self.dataDeck+relativedelta(years=4)+relativedelta(month=12)
 
-    def save(self,pasta=""):
-        if type(self.caminho)==str or pasta!="":
-
+    def save(self,pasta="",forceBytes = False):
+        if forceBytes:
+            buffer = BytesIO()
+            with ZipFile(buffer, 'w', ZIP_DEFLATED) as zip_out:
+                for file in self.ARQUIVOS.keys():
+                    try:
+                        if self.ARQUIVOS[file].ERROS:
+                            print(f"IGNORANDO ARQUIVO '{file}' POIS TEM ERROS:")
+                            print("     "+"\n     ".join(self.ERROS[file]['MSG']))
+                            print("     "+"\n     ".join(self.ERROS[file]['DETALHES']))
+                            continue
+                        zip_out.writestr(self.nomesOriginais[file], self.ARQUIVOS[file].save())
+                    except:
+                        print(f"ERRO AO SALVAR ARQUIVO: {file}")
+            buffer.seek(0)
+            return buffer.getvalue()
+        
+        elif type(self.caminho)==str or pasta!="":
             for file in self.ARQUIVOS.keys():
                 try:
                     if self.ARQUIVOS[file].ERROS:
@@ -99,6 +114,7 @@ class NEWAVE(UTILS):
             return buffer.getvalue()
         
         elif type(self.caminho)==ZipFile:
+            buffer = BytesIO()
             zip_out = ZipFile(buffer, 'w', ZIP_DEFLATED)
             for file_name in self.caminho.namelist():
                 try:
@@ -180,3 +196,18 @@ class NEWAVE(UTILS):
             gtmax.append(self.getDadosTermicas(usina,data))
             data += relativedelta(months=1)
         return gtmax
+
+
+    @property
+    def usina_sem_reservatorio(self):
+        usinas2 = []
+        for usina in [x['Cod'] for x in self.ARQUIVOS['hidr'].blocos['hidr'].valores if x['Posto']!=0]:
+            HIDR = self.ARQUIVOS['hidr'].blocos['hidr'].query({"Cod":usina})[0]
+            TIPO = HIDR['Reg']
+            VOLMIN = self.ARQUIVOS['modif'].blocos['modif'].query({"Usina":usina,"Tipo":"VOLMIN"})
+            VOLMAX = self.ARQUIVOS['modif'].blocos['modif'].query({"Usina":usina,"Tipo":"VOLMAX"})
+            VOLMIN  = VOLMIN[-1]['Valor'] if self.hasValue(VOLMIN) else HIDR['Vol.min.(hm3)']
+            VOLMAX  = VOLMAX[-1]['Valor'] if self.hasValue(VOLMAX) else HIDR['Vol.Máx.(hm3)']
+            if TIPO=="D" or VOLMIN==VOLMAX:
+                usinas2.append(usina)
+        return usinas2

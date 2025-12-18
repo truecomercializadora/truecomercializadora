@@ -61,6 +61,7 @@ class GL(UTILS):
                     (66 , 67,"Z2"    , "Dia inicio"),
                     (68 , 69,"Z2"    , "Mes inicio"),
                     (70 , 73,"Z4"    , "Ano inicio"),
+                    (None  , None ,lambda x:self._to_datetime(x["Ano inicio"],x["Mes inicio"],x['Dia inicio'])  , "SEMANA"),
                     ]
         self.valores = []
 

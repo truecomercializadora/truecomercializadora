@@ -1,7 +1,7 @@
 from truecomercializadora.DECK.utils import UTILS
 from copy import deepcopy
 lastDados = {}
-from truecomercializadora.DECK.DC.dadger import ac, rhq, rhe, rhv, hecm
+from truecomercializadora.DECK.DC.dadger import ac, rhq, rhe, rhv, hecm, VaVuVl
 
 class HE_CM(UTILS):
     def __init__(self):
@@ -10,6 +10,12 @@ class HE_CM(UTILS):
         self.valores = []
 
 class HV_LV_CV_block(UTILS):
+    def __init__(self):
+        self.cabecalho = ""
+        self.campos = [( 1 , 2 ,"A2"  , "Id")]
+        self.valores = []
+
+class VA_VU_VL_block(UTILS):
     def __init__(self):
         self.cabecalho = ""
         self.campos = [( 1 , 2 ,"A2"  , "Id")]
@@ -149,6 +155,34 @@ class CT_block(UTILS):
                 ( 70 ,74,"F5.1" ,"Ger Min Pat3" ),
                 ( 75 ,79,"F5.1" ,"Capacidade Pat3" ),
                 ( 80 ,89,"F10.2","CVU Pat3" )
+                ]
+        self.valores = []
+
+class FP_block(UTILS):
+    def __init__(self):
+        self.cabecalho = ""
+        self.campos = [
+                ( 1 , 2 ,"A2"   ,"Id" ),
+                ( 5 , 7 ,"I3"   ,"Usina" ),
+                ( 10 ,12,"I3*"   ,"Iper" ),
+                ( 15 ,15,"I1*"  ,"Qtp" ),
+                ( 17 ,20,"I4*"   ,"QNpt" ),
+                ( 22 ,26,"F5.1*" ,"QMin" ),
+                ( 28 ,32,"F5.1*" ,"QMax" ),
+                ( 35 ,35,"I1*"  ,"Vtp" ),
+                ( 37 ,40,"I4*"   ,"VNpt" ),
+                ( 42 ,46,"F5.1*" ,"VMin" ),
+                ( 48 ,52,"F5.1*" ,"VMax" ),
+                ( 55 ,59,"F5.1*"  ,"GHmin" ),
+                ( 61 ,65,"F5.1*"   ,"GHmax" ),
+                ( 67 ,69,"F3.1*" ,"Tol" ),
+                ( 72 ,72,"I1*" ,"FlgD" ),
+                ( 77 ,77,"I1*" ,"tp" ),
+                ( 79 ,83,"F5.1*" ,"NptIni" ),
+                ( 85 ,89,"F5.1*" ,"NptAd" ),
+                ( 91 ,92,"A2" ,"NI" ),
+                ( 96 ,96,"A1" ,"Verif" ),
+
                 ]
         self.valores = []
 
@@ -508,6 +542,16 @@ class CX_block(UTILS):
                 ]
         self.valores = []
 
+class VA_block(UTILS):
+    def __init__(self):
+        self.cabecalho = ""
+        self.campos = [
+                ( 1 , 2 ,"A2"  , "Id"),
+                ( 5 , 9 ,"I4"  , "UsiNW"),
+                ( 10 , 14 ,"I4", "UsinaDC"  ),
+                ]
+        self.valores = []
+
 
 class NaoMapeado_block(UTILS):
     def __init__(self):
@@ -520,7 +564,7 @@ class DADGER(UTILS):
         super().__init__()  # Chama o __init__ da classe base
         self.blocos = {}
         self.caminho = caminho
-        self.blocosMapeados = {'AC':AC_block(),"CT":CT_block(), "UH":UH_block(), "MP":MP_block(), "FD":FD_block(), "TI":TI_block(),'HQ LQ CQ':HQ_CQ_block() ,'RE LU FU FI FT':RE_LU_FU_FT_FI_FE_block(),'HV LV CV':HV_LV_CV_block(),'HE CM':HE_CM(),'VL VU':NaoMapeado_block(),'DP':DP_block(),'CD':CD_block(),'EA':EA_block(), 'ES':ES_block(), 'EZ':EZ_block(), "FC":FC_block(), "IA":IA_block(), "IT":IT_block(),'ME':ME_block(),'MT':MT_block(), "PQ":PQ_block(), "QI":QI_block(),'RI':RI_block(), "RQ":RQ_block(), "SB":SB_block(), "TE":TE_block(), "UE":UE_block(), "VE":VE_block(), "VI":VI_block(), 'CX':CX_block()}
+        self.blocosMapeados = {'AC':AC_block(),"CT":CT_block(), "UH":UH_block(), "MP":MP_block(), "FD":FD_block(), "TI":TI_block(),'HQ LQ CQ':HQ_CQ_block() ,'RE LU FU FI FT':RE_LU_FU_FT_FI_FE_block(),'HV LV CV':HV_LV_CV_block(),'HE CM':HE_CM(),'VA VU VL':VA_VU_VL_block(),'DP':DP_block(),'CD':CD_block(),'EA':EA_block(), 'ES':ES_block(), 'EZ':EZ_block(), "FC":FC_block(), "IA":IA_block(), "IT":IT_block(),'ME':ME_block(),'MT':MT_block(), "PQ":PQ_block(), "QI":QI_block(),'RI':RI_block(), "RQ":RQ_block(), "SB":SB_block(), "TE":TE_block(), "UE":UE_block(), "VE":VE_block(), "VI":VI_block(), 'CX':CX_block(), "FP":FP_block()}
         self.rodape = []
         self.nome = "DADGER"
         self.ERROS = []
@@ -573,6 +617,12 @@ class DADGER(UTILS):
                         if blocos!=None:
                             dados = super()._interpretarLinha(blocos,row)
                             dados['_customBlock'] = f"rhv.{cod}"
+                    
+                    elif cod=="VA" or cod=="VU" or cod=="VL":
+                        blocos, tipo = VaVuVl.getBlocosMnemonico(cod)
+                        if blocos!=None:
+                            dados = super()._interpretarLinha(blocos,row)
+                            dados['_customBlock'] = f"VaVuVl.{cod}"
 
                     elif cod=="HE" or cod=="CM":
                         blocos, tipo = hecm.getBlocosMnemonico(cod)
