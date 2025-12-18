@@ -1,7 +1,7 @@
 import calendar
 import struct
 from datetime import datetime,timedelta
-from truecomercializadora.DECK.DC.dadger import ac,rhe,rhq,rhv,hecm #NAO APAGAR. É USADO NO EVAL
+from truecomercializadora.DECK.DC.dadger import ac,rhe,rhq,rhv,hecm,VaVuVl #NAO APAGAR. É USADO NO EVAL
 
 from workalendar.america import BrazilSaoPauloCity
 from functools import lru_cache
@@ -13,7 +13,7 @@ import hashlib
 import pickle
 
 OPERATORS = {
-    '==': lambda x, y: x == y,
+    '==': lambda x, y: x == y if not isinstance(x,str) else x.strip()==y.strip(),
     '!=': lambda x, y: x != y,
     '<': lambda x, y: x < y,
     '>': lambda x, y: x > y,
@@ -23,7 +23,6 @@ OPERATORS = {
     'termina': lambda x, y: x.endswith(y),
     'contem': lambda x, y: y in x,
 }
-
 
 def match_query(item, query):
     for key, condition in query.items():
@@ -50,7 +49,6 @@ def match_query(item, query):
             return False
     return True
 
-
 @lru_cache(maxsize=None)
 def _obter_feriados_brasil(ano):
     """Obtém feriados do Brasil excluindo alguns específicos."""
@@ -75,6 +73,12 @@ def _carregar_horas_patamares():
     return ast.literal_eval(response)
 
 class UTILS:
+    @property
+    def pd(self):
+        try:
+            import pandas as pd
+            return pd.DataFrame(self.valores)
+        except Exception as e: print(e)
     def gerarHash(self) -> str:
         valores = [self.blocos[x].valores for x in self.blocos]
         return hashlib.md5(pickle.dumps(valores)).hexdigest()
@@ -94,9 +98,9 @@ class UTILS:
     def query(self,query = {}):
         '''REALIZA QUERY NOS ITENS DO ARQUIVO ESCOLHIDO. A QUERY DEVE TER O FORMATO {"CHAVE":("QUERY","VALOR")}
         EX: {"Usina":(">=":3)} #Pega as usinas com valor maior ou igual a 3.
-        As QUERYS possiveis são: ("==", "!=", "<", ">", "<=", ">=", "começa", "contem")
+        As QUERYS possiveis são: ("==", "!=", "<", ">", "<=", ">=", "começa", "contem", "termina")
         Pode-se usar {"Usina":3} para a QUERY "=="
-        Pode usar mais de uma query por chave passando uma lista, ex: {"Usina":[("==","Usina1"),("==","Usina2")]} para pegar as usinas Usina1 e Usina2.
+        
         '''
         return [item for item in self.valores if match_query(item, query)]
 
@@ -168,9 +172,9 @@ class UTILS:
 
 
             except:
-                if "*" in tipo and linha[inicio-1:fim].strip()=="":
+                if "*" in tipo and linha[inicio-1:fim].strip()=="": #Um asterisco pode ser o campo em branco
                     linhaDados[chave] = linha[inicio-1:fim]
-                elif "**" in tipo:
+                elif "**" in tipo: #Dois asteriscos podem ser o campo pode ser qualquer valor
                         linhaDados[chave] = linha[inicio-1:fim]
                 else:
                     linhaDados[chave] = "ERRO"
@@ -521,18 +525,22 @@ class UTILS:
             self.create_semanal()
 
         def getDiasMes(self):
-            """RETORNA OS DIAS DENTRO DO MES PARA CADA SEMANA"""
+            """RETORNA OS DIAS DENTRO DO MES PARA CADA SEMANA e o TOTAL DE DIAS DO MES"""
             DIAS = {}
             for semana in self.SemanasOperativas: #CONSTROI GERACAO DO MES 1
                 if semana['Inicio'].month == self.Mes or semana['Fim'].month == self.Mes:
-                    if semana['Inicio'].month<self.Mes:
+                    dataSemanaInic = semana['Inicio']+relativedelta(day=1)
+                    dataSemanaFim = semana['Fim']+relativedelta(day=1)
+                    dataRef = datetime(self.Ano,self.Mes,1)
+                    if dataSemanaInic<dataRef:
                         dias = semana['Fim'].day
-                    elif semana['Fim'].month>self.Mes:
+                    elif dataSemanaFim>dataRef:
                         dias = ((semana['Inicio']+relativedelta(months=1)+relativedelta(day=1)) - semana['Inicio']).days
                     else:
                         dias = 7
                     DIAS[semana['Inicio']] = dias
-            return DIAS
+            TOTAL_DIAS = (dataRef+relativedelta(months=1)-relativedelta(days=1)).day
+            return DIAS,TOTAL_DIAS
         
         def get_horas_patamares(self, ini: datetime, fim: datetime):
             """Calcula a soma das horas de patamares entre duas datas."""
