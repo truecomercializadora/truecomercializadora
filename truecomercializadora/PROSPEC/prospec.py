@@ -614,7 +614,7 @@ def GeracaoNewaveDecomp(titulo: str, arquivosDeEntrada:dict, anoInicial: int, me
 def PararExecucaoEstudo(idEstudo: int):
     response = api.post(f'/api/Execucoes/Parar/{idEstudo}')
     
-    if response['status_code'] == '202':
+    if response['status_code'] == 202:
         print(f"Estudo {idEstudo} abortado com sucesso")
     else:
         print(f"Erro ao parar estudo {idEstudo}", safe_json_loads(response['response']))

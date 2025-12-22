@@ -1,8 +1,10 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+import pandas as pd
 
 from . import utils_datetime
 from . import utils_gsheets
+from . import utils_s3
 
 def get_mlts():
     """
@@ -104,3 +106,29 @@ def get_semanas_operativas(ano,mes):
             semana_operativa = None
     return lista
 
+def get_horas_patamares(datas, verbose=False):
+    """ Recebe uma lista de datas (datetime.datetime ou datetime.date) e retorna um DataFrame com os pesos de cada patamar (Pesado, Medio, Leve) para cada data."""
+    patamares_bytes = utils_s3.get_obj_from_s3('true-datalake-prod', "consume/carga/info/Patamares.csv")
+    dctPatamares = eval(patamares_bytes)
+    
+    #check para converter datas datetime.date em datetime.datetime
+    datas = [datetime.datetime.combine(d, datetime.datetime.min.time()) if isinstance(d, datetime.date) and not isinstance(d, datetime.datetime) else d for d in datas]
+    
+    anos = list(set([x.year for x in datas]))
+    feriados_lista = []
+    for ano in anos:
+        feriados_lista += utils_datetime.obter_feriados_brasil(ano)
+        
+    dct_aux = {}
+    for data in datas:
+        _, ano, mes = get_semana(data)
+        if data.date() in feriados_lista or data.weekday() == 5 or data.weekday() == 6: #se é feriado, sabado ou domingo, tem que ser do tipo datetime.date
+            leve, medio, pesado = dctPatamares[ano][mes][1]
+            if verbose:
+                print('Feriado ou final de semana:', data.date())
+        else:
+            leve, medio, pesado = dctPatamares[ano][mes][0]
+        
+        dct_aux.update({data: {"Pesado": pesado, "Medio": medio, "Leve": leve}})
+    dfPesosPatamar = pd.DataFrame(dct_aux).T
+    return dfPesosPatamar
