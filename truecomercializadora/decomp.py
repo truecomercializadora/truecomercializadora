@@ -69,8 +69,14 @@ def get_dias_do_mes_por_estagio(estagios_decomp):
 
     return dias
 
-def get_horas_por_patamar_v2(estagio_decomp,patamares,ano_deck):
-    feriados = utils_datetime.obter_feriados_brasil(ano_deck)
+def get_horas_por_patamar_v2(estagio_decomp,patamares):
+    datas = utils_datetime.get_list_of_dates_between_days(estagio_decomp['inicio'],estagio_decomp['fim'])
+    anos = list(set([x.year for x in datas]))
+    
+    feriados = []
+    for ano in anos:
+        feriados += utils_datetime.obter_feriados_brasil(ano)
+        
     datas = utils_datetime.get_list_of_dates_between_days(estagio_decomp['inicio'],estagio_decomp['fim'])
     total = (0,0,0)
     for data in datas:
@@ -260,7 +266,7 @@ def get_pld_medio_semanal_from_sumario(sumario_str, rev, estagios_decomp,patamar
     plds = get_pld_sumario(sumario_str,ano_deck)
     D = {"SE": [], 'S': [], 'NE': [], "N": []}
     for i,estagio in enumerate(estagios_decomp[rev:-1]):
-        h_patamar = get_horas_por_patamar_v2(estagio,patamares,ano_deck)
+        h_patamar = get_horas_por_patamar_v2(estagio,patamares)
         pld_sudeste = (plds['SE']['pesada'][i]*h_patamar['pesada'] + plds['SE']['media'][i]*h_patamar['media'] + plds['SE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
         pld_sul = (plds['S']['pesada'][i]*h_patamar['pesada'] + plds['S']['media'][i]*h_patamar['media'] + plds['S']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
         pld_nordeste = (plds['NE']['pesada'][i]*h_patamar['pesada'] + plds['NE']['media'][i]*h_patamar['media'] + plds['NE']['leve'][i]*h_patamar['leve'])/sum(h_patamar.values())
