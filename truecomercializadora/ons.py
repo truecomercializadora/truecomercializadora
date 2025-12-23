@@ -121,13 +121,17 @@ def get_horas_patamares(datas, verbose=False):
         
     dct_aux = {}
     for data in datas:
-        _, ano, mes = get_semana(data)
+        if len(anos) > 1:
+            _, ano, mes = get_semana(data)
+        else:
+            ano = anos[0]
+
         if data.date() in feriados_lista or data.weekday() == 5 or data.weekday() == 6: #se é feriado, sabado ou domingo, tem que ser do tipo datetime.date
-            leve, medio, pesado = dctPatamares[ano][mes][1]
+            leve, medio, pesado = dctPatamares[ano][data.month][1]
             if verbose:
                 print('Feriado ou final de semana:', data.date())
         else:
-            leve, medio, pesado = dctPatamares[ano][mes][0]
+            leve, medio, pesado = dctPatamares[ano][data.month][0]
         
         dct_aux.update({data: {"Pesado": pesado, "Medio": medio, "Leve": leve}})
     dfPesosPatamar = pd.DataFrame(dct_aux).T
